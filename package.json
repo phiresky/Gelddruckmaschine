@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@types/node": "^8.0.22",
+    "@types/request-promise-native": "^1.0.6",
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4",
+    "ts-node": "^3.3.0",
+    "typescript": "^2.5.0-dev.20170815"
+  }
+}
