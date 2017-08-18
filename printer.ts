@@ -121,8 +121,13 @@ function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 	return 0.1;
 }
 export async function printMoney() {
-	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
-		const profitMargin = getProfitMargin(krakenPrice_EUR, order.price);
+    debug("waiting for new offers on bitcoin.de");
+    onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
+        if (krakenPrice_EUR === 'unknown') {
+            debug("kraken price is unknown, ignoring bitcoin.de offer");
+            return;
+        }
+        const profitMargin = getProfitMargin(krakenPrice_EUR, order.price);
 		debug("found new trade");
 		if (profitMargin >= config.minProfit) {
 			debug(`new trade has profit margin of ${(profitMargin * 100).toFixed(2)}%`);
