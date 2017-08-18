@@ -27,19 +27,27 @@ const config = {
      */
 	minProfit: 0.01,
 	/**
-	 * 
+	 * Kraken fee (btc -> eur)
 	 */
-	kraken
+	krakenFee: 0.002,
+	/**
+	 * Bitcoin.de fee (eur <-> btc)
+	 */
+	btcdeFee: 0.004
 };
 async function sleep(delay_ms: number) {
-    return new Promise(resolve => setTimeout(resolve, delay_ms));
+	return new Promise(resolve => setTimeout(resolve, delay_ms));
 }
 let krakenPrice = NaN;
 async function updateKrakenPrice() {
 	krakenPrice = 123;
 }
 
-function getProfitMargin(krakenPrice: number, btcdePrice: number)
+function getProfitMargin(krakenPrice: number, btcdePrice: number) {
+	const krakenPriceWithFees = krakenPrice * (1 - config.krakenFee); // sell --> get less €
+	const btcdePriceWithFees = btcdePrice * (1 - config.btcdeFee); // buy --> have to pay more €
+	return krakenPriceWithFees - btcdePriceWithFees;
+}
 
 async function krakenLoop() {
 	while (true) {
@@ -48,7 +56,7 @@ async function krakenLoop() {
 	}
 }
 async function doTrade(order: Websocket_API.add_order) {
-    
+
 }
 export async function printMoney() {
 	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
@@ -57,17 +65,17 @@ export async function printMoney() {
 		if (profitMargin >= config.minProfit) {
 			debug(`new trade has profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 			await updateKrakenPrice();
-            const accurateProfitMargin = getProfitMargin(currentKrakenPrice, order.price);
-            if(accurateProfitMargin >= config.minProfit) {
-                debug(`trade has accurate profit margin of ${(profitMargin * 100).toFixed(2)}%`);
-                doTrade(order);
-                return;
+			const accurateProfitMargin = getProfitMargin(currentKrakenPrice, order.price);
+			if (accurateProfitMargin >= config.minProfit) {
+				debug(`trade has accurate profit margin of ${(profitMargin * 100).toFixed(2)}%`);
+				doTrade(order);
+				return;
 
-            } else {
-                debug(`opportunity disappeared`);
-                return;
-            }
-            
+			} else {
+				debug(`opportunity disappeared`);
+				return;
+			}
+
 		} else {
 			debug("new trade not worthy");
 		}
