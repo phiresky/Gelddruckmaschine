@@ -65,20 +65,22 @@ async function krakenLoop() {
 	}
 }
 async function doTrade(order: Websocket_API.add_order, amount: number) {
+    debug(`executing bitcoin.de trade ${order.order_id} (buying ${amount} BTC for ${order.price} EUR / BTC`);
 	await api.Trades.executeTrade(bitcoinde, {
 		order_id: order.order_id,
 		type: "buy", //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
 		amount
 	});
 	const actualAmount_BTC = amount * (1 - config.btcdeSellFee);
-
+    debug(`assuming we got ${actualAmount_BTC} BTC from bitcoin.de trade. executing kraken sale.`);
 	await kraken.addOrder({
 		pair: "XXBTZEUR",
 		type: "sell",
 		ordertype: "market",
 		volume: actualAmount_BTC,
 		oflags: "viqc"
-	});
+    });
+    debug(`success`);
 }
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 	return 0.1;
