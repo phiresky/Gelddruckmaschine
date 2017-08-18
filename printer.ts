@@ -5,6 +5,7 @@ import * as _debug from "debug";
 import keyconfig from "./config";
 import { BitcoindeClient } from "./bitcoin-de";
 import { KrakenClient } from "./kraken";
+import { literal } from "./util";
 
 const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
 const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
@@ -55,12 +56,20 @@ async function krakenLoop() {
 		await sleep(30000);
 	}
 }
-async function doTrade(order: Websocket_API.add_order) {
-	api.Trades.executeTrade(bitcoinde, {
+async function doTrade(order: Websocket_API.add_order, amount: number) {
+	await api.Trades.executeTrade(bitcoinde, {
 		order_id: order.order_id,
-		type: { sell: "buy", buy: "sell" }[order.order_type],
-		amount: order
-	});
+		type: { sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
+		amount
+    });
+    const actualAmount_BTC = amount * config.TODO;
+
+    await kraken.addOrder({
+        pair: "XXBTZEUR",
+        type: "sell",
+        ordertype: "market",
+        volume: 
+    });
 }
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 	return 0.1;
