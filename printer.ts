@@ -1,6 +1,13 @@
 import { Websocket_API } from "./generated";
-import * as _debug from "debug";
+import * as api from "./generated";
 
+import * as _debug from "debug";
+import keyconfig from "./config";
+import { BitcoindeClient } from "./bitcoin-de";
+import { KrakenClient } from "./kraken";
+
+const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
+const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
 const debug = _debug("printer");
 
 const config = {
@@ -34,7 +41,7 @@ async function krakenLoop() {
 	}
 }
 async function doTrade(order: Websocket_API.add_order) {
-
+    
 }
 export async function printMoney() {
 	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
