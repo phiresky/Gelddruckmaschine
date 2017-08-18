@@ -52,7 +52,7 @@ interface GetSpreadResult {
 	'XXBTZEUR': SpreadResult[]
 }
 
-let krakenPrice : number | 'unknown' = 'unknown';
+let krakenPrice_EUR : number | 'unknown' = 'unknown';
 async function updateKrakenPrice() {
 	try {
 		const result : GetSpreadResult = await kraken.getSpread({
@@ -60,13 +60,14 @@ async function updateKrakenPrice() {
 		});
 		const formattedResult = result.XXBTZEUR.map(([timestamp, bid, ask]) => ({
 			time: new Date(timestamp*1000),
-			price_EUR: parseFloat(ask)
+			price_EUR: parseFloat(bid) // TODO Should be ask?
 		} as MarketPrice));
-		if (formattedResult.length === 0) throw Error('Empty GetSpreadResult!')
-		const price = formattedResult[formattedResult.length - 1];
-		debug(`Fetched new Kraken price: ${price} EUR`);
+		if (formattedResult.length === 0) throw Error('Empty GetSpreadResult!');
+		krakenPrice_EUR = formattedResult[formattedResult.length - 1].price_EUR;
+		const lastTime = formattedResult[formattedResult.length - 1].time;
+		debug(`Fetched new Kraken price: ${krakenPrice_EUR} EUR (from ${lastTime})`);
 	} catch (error) {
-		krakenPrice = 'unknown'
+		krakenPrice_EUR = 'unknown'
 		console.warn(`Could not fetch new Kraken prices - setting NaN. Error: ${error}`);
 	}
 	
@@ -112,12 +113,12 @@ function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 }
 export async function printMoney() {
 	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
-		const profitMargin = getProfitMargin(krakenPrice, order.price);
+		const profitMargin = getProfitMargin(krakenPrice_EUR, order.price);
 		debug("found new trade");
 		if (profitMargin >= config.minProfit) {
 			debug(`new trade has profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 			await updateKrakenPrice();
-			const accurateProfitMargin = getProfitMargin(krakenPrice, order.price);
+			const accurateProfitMargin = getProfitMargin(krakenPrice_EUR, order.price);
 			if (accurateProfitMargin >= config.minProfit) {
 				debug(`trade has accurate profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 				let amount = await getMaxBTCTradeAmount("bitcoin.de to kraken");
@@ -149,5 +150,4 @@ async function run() {
 	}
 }
 
-//run();
-updateKrakenPrice();
+run();
