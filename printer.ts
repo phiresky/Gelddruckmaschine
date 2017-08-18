@@ -25,7 +25,11 @@ const config = {
      * 
      * Example: if minProfit is 0.01, then you make 10€ profit for a trade with 1000€ value
      */
-	minProfit: 0.01
+	minProfit: 0.01,
+	/**
+	 * 
+	 */
+	kraken
 };
 async function sleep(delay_ms: number) {
     return new Promise(resolve => setTimeout(resolve, delay_ms));
@@ -34,6 +38,9 @@ let krakenPrice = NaN;
 async function updateKrakenPrice() {
 	krakenPrice = 123;
 }
+
+function getProfitMargin(krakenPrice: number, btcdePrice: number)
+
 async function krakenLoop() {
 	while (true) {
 		await updateKrakenPrice();
