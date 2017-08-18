@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "printer": "ts-node --fast ./printer"
+  },
   "dependencies": {
     "@types/debug": "^0.0.30",
     "@types/node": "^8.0.22",

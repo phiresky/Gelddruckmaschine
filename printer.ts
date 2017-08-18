@@ -92,7 +92,6 @@ export async function printMoney() {
 			const accurateProfitMargin = getProfitMargin(currentKrakenPrice, order.price);
 			if (accurateProfitMargin >= config.minProfit) {
 				debug(`trade has accurate profit margin of ${(profitMargin * 100).toFixed(2)}%`);
-				doTrade(order);
 				let amount = await getMaxBTCTradeAmount("bitcoin.de to kraken");
 				if (amount < order.min_amount) {
 					debug(`trade needs minimum of ${order.min_amount}, but only have ${amount} available`);
@@ -100,7 +99,7 @@ export async function printMoney() {
 				} else if (amount > order.amount) {
 					debug(`reduced trade amount from max of ${amount} to ${order.amount}`);
 					amount = order.amount;
-					doTrade(order);
+					doTrade(order, amount);
 				}
 				return;
 			} else {
