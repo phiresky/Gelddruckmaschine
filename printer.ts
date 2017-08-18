@@ -56,7 +56,14 @@ async function krakenLoop() {
 	}
 }
 async function doTrade(order: Websocket_API.add_order) {
-
+	api.Trades.executeTrade(bitcoinde, {
+		order_id: order.order_id,
+		type: { sell: "buy", buy: "sell" }[order.order_type],
+		amount: order
+	});
+}
+function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
+	return 0.1;
 }
 export async function printMoney() {
 	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
@@ -69,13 +76,20 @@ export async function printMoney() {
 			if (accurateProfitMargin >= config.minProfit) {
 				debug(`trade has accurate profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 				doTrade(order);
+				let amount = await getMaxBTCTradeAmount("bitcoin.de to kraken");
+				if (amount < order.min_amount) {
+					debug(`trade needs minimum of ${order.min_amount}, but only have ${amount} available`);
+					return;
+				} else if (amount > order.amount) {
+					debug(`reduced trade amount from max of ${amount} to ${order.amount}`);
+					amount = order.amount;
+					doTrade(order);
+				}
 				return;
-
 			} else {
 				debug(`opportunity disappeared`);
 				return;
 			}
-
 		} else {
 			debug("new trade not worthy");
 		}
