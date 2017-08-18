@@ -6,6 +6,7 @@ import keyconfig from "./config";
 import { BitcoindeClient } from "./bitcoin-de";
 import { KrakenClient } from "./kraken";
 import { literal } from "./util";
+import { onBitcoindeOrderCreated } from "./bitcoin-de-ws";
 
 const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
 const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
@@ -50,7 +51,6 @@ async function updateKrakenPrice() {
 	krakenPrice = 123;
 }
 
-
 function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: number) {
 	// 1BTC * (Price/BTC - 0,4% * Price) / (1 - 0.08 %) BTC
 	const krakenPriceWithFees_EURperBTC = krakenPrice_EURperBTC * (1 - config.krakenFee); // sell --> get less €
@@ -67,16 +67,17 @@ async function krakenLoop() {
 async function doTrade(order: Websocket_API.add_order, amount: number) {
 	await api.Trades.executeTrade(bitcoinde, {
 		order_id: order.order_id,
-		type: { sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
+		type: "buy", //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
 		amount
 	});
-	const actualAmount_BTC = amount * config.TODO;
+	const actualAmount_BTC = amount * (1 - config.btcdeSellFee);
 
 	await kraken.addOrder({
 		pair: "XXBTZEUR",
 		type: "sell",
 		ordertype: "market",
-		volume: 1
+		volume: actualAmount_BTC,
+		oflags: "viqc"
 	});
 }
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
@@ -84,12 +85,12 @@ function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 }
 export async function printMoney() {
 	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
-		const profitMargin = getProfitMargin(currentKrakenPrice, order.price);
+		const profitMargin = getProfitMargin(krakenPrice, order.price);
 		debug("found new trade");
 		if (profitMargin >= config.minProfit) {
 			debug(`new trade has profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 			await updateKrakenPrice();
-			const accurateProfitMargin = getProfitMargin(currentKrakenPrice, order.price);
+			const accurateProfitMargin = getProfitMargin(krakenPrice, order.price);
 			if (accurateProfitMargin >= config.minProfit) {
 				debug(`trade has accurate profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 				let amount = await getMaxBTCTradeAmount("bitcoin.de to kraken");
