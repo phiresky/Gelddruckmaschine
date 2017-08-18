@@ -69,15 +69,15 @@ async function doTrade(order: Websocket_API.add_order, amount: number) {
 		order_id: order.order_id,
 		type: { sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
 		amount
-    });
-    const actualAmount_BTC = amount * config.TODO;
+	});
+	const actualAmount_BTC = amount * config.TODO;
 
-    await kraken.addOrder({
-        pair: "XXBTZEUR",
-        type: "sell",
-        ordertype: "market",
-        volume: 
-    });
+	await kraken.addOrder({
+		pair: "XXBTZEUR",
+		type: "sell",
+		ordertype: "market",
+		volume: 1
+	});
 }
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 	return 0.1;
