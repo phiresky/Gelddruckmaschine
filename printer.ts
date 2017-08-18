@@ -41,7 +41,11 @@ const config = {
 	 * Bitcoin.de fee (eur -> btc)
 	 * you receive 0,8% less bitcoins than ordered
 	 */
-	btcdeSellFee: 0.008
+	btcdeSellFee: 0.008,
+	/**
+	 * Maximum allowed age of Kraken prices in seconds
+	 */
+	maxPriceAge_SECS: 60
 };
 type SpreadResult = [number, string, string];
 interface MarketPrice {
@@ -63,12 +67,17 @@ async function updateKrakenPrice() {
 			price_EUR: parseFloat(bid) // TODO Should be ask?
 		} as MarketPrice));
 		if (formattedResult.length === 0) throw Error('Empty GetSpreadResult!');
-		krakenPrice_EUR = formattedResult[formattedResult.length - 1].price_EUR;
+		
 		const lastTime = formattedResult[formattedResult.length - 1].time;
+		const timediff_SECS = ((new Date()).getTime() - lastTime.getTime()) / 1000;
+		if (timediff_SECS > config.maxPriceAge_SECS) {
+			throw Error(`Last Kraken price is more than ${config.maxPriceAge_SECS} seconds old.`);
+		}
+		krakenPrice_EUR = formattedResult[formattedResult.length - 1].price_EUR;
 		debug(`Fetched new Kraken price: ${krakenPrice_EUR} EUR (from ${lastTime})`);
 	} catch (error) {
 		krakenPrice_EUR = 'unknown'
-		console.warn(`Could not fetch new Kraken prices - setting NaN. Error: ${error}`);
+		console.warn(`Could not fetch new Kraken prices - setting 'unknown'. Error: ${error}`);
 	}
 	
 }
