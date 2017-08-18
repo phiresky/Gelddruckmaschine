@@ -49,37 +49,39 @@ const config = {
 };
 type SpreadResult = [number, string, string];
 interface MarketPrice {
-	time: Date,
-	price_EUR: number
+	time: Date;
+	price_EUR: number;
 }
 interface GetSpreadResult {
-	'XXBTZEUR': SpreadResult[]
+	"XXBTZEUR": SpreadResult[];
 }
 
-let krakenPrice_EUR : number | 'unknown' = 'unknown';
+let krakenPrice_EUR: number | "unknown" = "unknown";
 async function updateKrakenPrice() {
 	try {
-		const result : GetSpreadResult = await kraken.getSpread({
+		const result: GetSpreadResult = await kraken.getSpread({
 			pair: "XXBTZEUR"
 		});
-		const formattedResult = result.XXBTZEUR.map(([timestamp, bid, ask]) => ({
-			time: new Date(timestamp*1000),
-			price_EUR: parseFloat(bid) // TODO Should be ask?
-		} as MarketPrice));
-		if (formattedResult.length === 0) throw Error('Empty GetSpreadResult!');
-		
+		const formattedResult = result.XXBTZEUR.map(
+			([timestamp, bid, ask]) =>
+				({
+					time: new Date(timestamp * 1000),
+					price_EUR: parseFloat(bid) // TODO Should be ask?
+				} as MarketPrice)
+		);
+		if (formattedResult.length === 0) throw Error("Empty GetSpreadResult!");
+
 		const lastTime = formattedResult[formattedResult.length - 1].time;
-		const timediff_SECS = ((new Date()).getTime() - lastTime.getTime()) / 1000;
+		const timediff_SECS = (new Date().getTime() - lastTime.getTime()) / 1000;
 		if (timediff_SECS > config.maxPriceAge_SECS) {
 			throw Error(`Last Kraken price is more than ${config.maxPriceAge_SECS} seconds old.`);
 		}
 		krakenPrice_EUR = formattedResult[formattedResult.length - 1].price_EUR;
 		debug(`Fetched new Kraken price: ${krakenPrice_EUR} EUR (from ${lastTime})`);
 	} catch (error) {
-		krakenPrice_EUR = 'unknown'
+		krakenPrice_EUR = "unknown";
 		console.warn(`Could not fetch new Kraken prices - setting 'unknown'. Error: ${error}`);
 	}
-	
 }
 
 async function sleep(delay_ms: number) {
@@ -87,9 +89,10 @@ async function sleep(delay_ms: number) {
 }
 
 function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: number) {
-	// 1BTC * (Price/BTC - 0,4% * Price) / (1 - 0.08 %) BTC
+	// 1BTC * (Price/BTC - 0,4% * Price) / (1 - 0,8 %) BTC
 	const krakenPriceWithFees_EURperBTC = krakenPrice_EURperBTC * (1 - config.krakenFee); // sell --> get less €
 	const btcdePriceWithFees_EURperBTC = btcdePrice_EURperBTC * (1 - config.btcdeBuyFee) / (1 - config.btcdeSellFee); // buy --> have to pay more €
+	debug({ krakenPrice_EURperBTC, btcdePrice_EURperBTC, btcdePriceWithFees_EURperBTC, krakenPriceWithFees_EURperBTC });
 	return (krakenPriceWithFees_EURperBTC - btcdePriceWithFees_EURperBTC) / btcdePriceWithFees_EURperBTC;
 }
 
@@ -100,39 +103,42 @@ async function krakenLoop() {
 	}
 }
 async function doTrade(order: Websocket_API.add_order, amount: number) {
-    debug(`executing bitcoin.de trade ${order.order_id} (buying ${amount} BTC for ${order.price} EUR / BTC`);
+	debug(`executing bitcoin.de trade ${order.order_id} (buying ${amount} BTC for ${order.price} EUR / BTC`);
 	await api.Trades.executeTrade(bitcoinde, {
 		order_id: order.order_id,
 		type: "buy", //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
 		amount
 	});
 	const actualAmount_BTC = amount * (1 - config.btcdeSellFee);
-    debug(`assuming we got ${actualAmount_BTC} BTC from bitcoin.de trade. executing kraken sale.`);
+	debug(`assuming we got ${actualAmount_BTC} BTC from bitcoin.de trade. executing kraken sale.`);
 	await kraken.addOrder({
 		pair: "XXBTZEUR",
 		type: "sell",
 		ordertype: "market",
 		volume: actualAmount_BTC,
 		oflags: "viqc"
-    });
-    debug(`success`);
+	});
+	debug(`success`);
 }
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 	return 0.1;
 }
 export async function printMoney() {
-    debug("waiting for new offers on bitcoin.de");
-    onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
-        if (krakenPrice_EUR === 'unknown') {
-            debug("kraken price is unknown, ignoring bitcoin.de offer");
-            return;
-        }
-        const profitMargin = getProfitMargin(krakenPrice_EUR, order.price);
+	debug("waiting for new offers on bitcoin.de");
+	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
+		if (krakenPrice_EUR === "unknown") {
+			debug("kraken price is unknown, ignoring bitcoin.de offer");
+			return;
+		}
+		console.log(`found ${order.order_type} for ${order.amount} BTC / ${order.price} EUR`);
+		const orderPrice_EURperBTC = order.price / order.amount;
+		debug(``);
+		const profitMargin = getProfitMargin(krakenPrice_EUR, orderPrice_EURperBTC);
 		debug("found new trade");
 		if (profitMargin >= config.minProfit) {
 			debug(`new trade has profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 			await updateKrakenPrice();
-			const accurateProfitMargin = getProfitMargin(krakenPrice_EUR, order.price);
+			const accurateProfitMargin = getProfitMargin(krakenPrice_EUR, orderPrice_EURperBTC);
 			if (accurateProfitMargin >= config.minProfit) {
 				debug(`trade has accurate profit margin of ${(profitMargin * 100).toFixed(2)}%`);
 				let amount = await getMaxBTCTradeAmount("bitcoin.de to kraken");
