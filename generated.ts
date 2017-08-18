@@ -1326,7 +1326,7 @@ export namespace Sonstiges {
              *
              * Erfolgreich abgeschlossene Trades
              */
-				trades: Trade_Informationen;
+				trades: Trade_Informationen[];
 			}
 
 			/**

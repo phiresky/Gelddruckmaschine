@@ -78,7 +78,10 @@ async function updateKrakenPrice() {
 		}
 		krakenPrice_EUR = formattedResult[formattedResult.length - 1].price_EUR;
 		debug(`Fetched new Kraken price: ${krakenPrice_EUR} EUR (from ${lastTime})`);
-	} catch (error) {
+    } catch (error) {
+        if (error.statusCode) {
+            error = `Status Code: ${error.statusCode}`;
+        }
 		krakenPrice_EUR = "unknown";
 		console.warn(`Could not fetch new Kraken prices - setting 'unknown'. Error: ${error}`);
 	}
@@ -92,7 +95,7 @@ function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: nu
 	// 1BTC * (Price/BTC - 0,4% * Price) / (1 - 0,8 %) BTC
 	const krakenPriceWithFees_EURperBTC = krakenPrice_EURperBTC * (1 - config.krakenFee); // sell --> get less €
 	const btcdePriceWithFees_EURperBTC = btcdePrice_EURperBTC * (1 - config.btcdeBuyFee) / (1 - config.btcdeSellFee); // buy --> have to pay more €
-	debug({ krakenPrice_EURperBTC, btcdePrice_EURperBTC, btcdePriceWithFees_EURperBTC, krakenPriceWithFees_EURperBTC });
+	// debug({ krakenPrice_EURperBTC, btcdePrice_EURperBTC, btcdePriceWithFees_EURperBTC, krakenPriceWithFees_EURperBTC });
 	return (krakenPriceWithFees_EURperBTC - btcdePriceWithFees_EURperBTC) / btcdePriceWithFees_EURperBTC;
 }
 
@@ -120,23 +123,26 @@ async function doTrade(order: Websocket_API.add_order, amount: number) {
 	});
 	debug(`success`);
 }
+
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 	return 0.1;
 }
 export async function printMoney() {
 	debug("waiting for new offers on bitcoin.de");
-	onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
+    onBitcoindeOrderCreated(async (order: Websocket_API.add_order) => {
+        if (order.trading_pair !== 'btceur') return;
+		if (order.order_type === "buy") return;
 		if (krakenPrice_EUR === "unknown") {
 			debug("kraken price is unknown, ignoring bitcoin.de offer");
 			return;
 		}
-		console.log(`found ${order.order_type} for ${order.amount} BTC / ${order.price} EUR`);
-		const orderPrice_EURperBTC = order.price / order.amount;
+		debug(`found ${order.order_type} for ${order.amount} BTC / ${order.price} EUR`);
+		const orderPrice_EURperBTC = order.price;
 		debug(``);
 		const profitMargin = getProfitMargin(krakenPrice_EUR, orderPrice_EURperBTC);
-		debug("found new trade");
-		if (profitMargin >= config.minProfit) {
-			debug(`new trade has profit margin of ${(profitMargin * 100).toFixed(2)}%`);
+		debug(`found new trade with profit margin of ${(profitMargin * 100).toFixed(2)}%`);
+        if (profitMargin >= config.minProfit) {
+            debug(`this might work, updating kraken price`);
 			await updateKrakenPrice();
 			const accurateProfitMargin = getProfitMargin(krakenPrice_EUR, orderPrice_EURperBTC);
 			if (accurateProfitMargin >= config.minProfit) {

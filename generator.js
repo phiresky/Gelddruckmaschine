@@ -7,7 +7,7 @@ var myMappings = {
 	"Sonstiges.showOrderbookCompact.Response.Orders.asks": "Sonstiges.showOrderbookCompact.Response.Asks[]",
 	"Orders.showOrderbook.Response.Success_200.orders": "Orders.showOrderbook.Response.Orders[]",
 	"Sonstiges.showPublicTradeHistory.Response.Success_200.trades":
-		"Sonstiges.showPublicTradeHistory.Response.Trade_Informationen"
+		"Sonstiges.showPublicTradeHistory.Response.Trade_Informationen[]"
 };
 var myRefs = {
 	// "bankenländer": ,
