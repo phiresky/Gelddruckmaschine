@@ -32,9 +32,15 @@ const config = {
 	 */
 	krakenFee: 0.002,
 	/**
-	 * Bitcoin.de fee (eur <-> btc)
+	 * Bitcoin.de fee (eur -> btc)
+	 * you pay 0,4% less in euros for your bitcoins
 	 */
-	btcdeFee: 0.004
+	btcdeBuyFee: 0.004,
+	/**
+	 * Bitcoin.de fee (eur -> btc)
+	 * you receive 0,8% less bitcoins than ordered
+	 */
+	btcdeSellFee: 0.008
 };
 async function sleep(delay_ms: number) {
 	return new Promise(resolve => setTimeout(resolve, delay_ms));
@@ -44,10 +50,12 @@ async function updateKrakenPrice() {
 	krakenPrice = 123;
 }
 
-function getProfitMargin(krakenPrice: number, btcdePrice: number) {
-	const krakenPriceWithFees = krakenPrice * (1 - config.krakenFee); // sell --> get less €
-	const btcdePriceWithFees = btcdePrice * (1 - config.btcdeFee); // buy --> have to pay more €
-	return krakenPriceWithFees - btcdePriceWithFees;
+
+function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: number) {
+	// 1BTC * (Price/BTC - 0,4% * Price) / (1 - 0.08 %) BTC
+	const krakenPriceWithFees_EURperBTC = krakenPrice_EURperBTC * (1 - config.krakenFee); // sell --> get less €
+	const btcdePriceWithFees_EURperBTC = btcdePrice_EURperBTC * (1 - config.btcdeBuyFee) / (1 - config.btcdeSellFee); // buy --> have to pay more €
+	return (krakenPriceWithFees_EURperBTC - btcdePriceWithFees_EURperBTC) / btcdePriceWithFees_EURperBTC;
 }
 
 async function krakenLoop() {
