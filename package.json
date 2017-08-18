@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@types/debug": "^0.0.30",
     "@types/node": "^8.0.22",
     "@types/request-promise-native": "^1.0.6",
     "@types/socket.io-client": "^1.4.29",
