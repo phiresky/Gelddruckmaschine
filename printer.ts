@@ -43,12 +43,37 @@ const config = {
 	 */
 	btcdeSellFee: 0.008
 };
+type SpreadResult = [number, string, string];
+interface MarketPrice {
+	time: Date,
+	price_EUR: number
+}
+interface GetSpreadResult {
+	'XXBTZEUR': SpreadResult[]
+}
+
+let krakenPrice : number | 'unknown' = 'unknown';
+async function updateKrakenPrice() {
+	try {
+		const result : GetSpreadResult = await kraken.getSpread({
+			pair: "XXBTZEUR"
+		});
+		const formattedResult = result.XXBTZEUR.map(([timestamp, bid, ask]) => ({
+			time: new Date(timestamp*1000),
+			price_EUR: parseFloat(ask)
+		} as MarketPrice));
+		if (formattedResult.length === 0) throw Error('Empty GetSpreadResult!')
+		const price = formattedResult[formattedResult.length - 1];
+		debug(`Fetched new Kraken price: ${price} EUR`);
+	} catch (error) {
+		krakenPrice = 'unknown'
+		console.warn(`Could not fetch new Kraken prices - setting NaN. Error: ${error}`);
+	}
+	
+}
+
 async function sleep(delay_ms: number) {
 	return new Promise(resolve => setTimeout(resolve, delay_ms));
-}
-let krakenPrice = NaN;
-async function updateKrakenPrice() {
-	krakenPrice = 123;
 }
 
 function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: number) {
@@ -124,4 +149,5 @@ async function run() {
 	}
 }
 
-run();
+//run();
+updateKrakenPrice();
