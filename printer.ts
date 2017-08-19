@@ -98,24 +98,30 @@ function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: nu
 	// debug({ krakenPrice_EURperBTC, btcdePrice_EURperBTC, btcdePriceWithFees_EURperBTC, krakenPriceWithFees_EURperBTC });
 	return (krakenPriceWithFees_EURperBTC - btcdePriceWithFees_EURperBTC) / btcdePriceWithFees_EURperBTC;
 }
-
+type KrakenAddOrderResponse = {
+    descr: {
+        order: KrakenOrderDescription,
+    },
+    txid: string[]
+}
 async function doTrade(order: BitcoindeOrder, amount: number) {
 	debug(`executing bitcoin.de trade ${order.order_id} (buying ${amount} BTC for ${order.price} EUR / BTC`);
 	await api.Trades.executeTrade(bitcoinde, {
 		order_id: order.order_id,
 		type: "buy", //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
 		amount
-	});
+    });
+    debug(`bitcoin buy success!`);
 	const actualAmount_BTC = amount * (1 - config.btcdeSellFee);
 	debug(`assuming we got ${actualAmount_BTC} BTC from bitcoin.de trade. executing kraken sale.`);
-	await kraken.addOrder({
+	const res: KrakenAddOrderResponse = await kraken.addOrder({
 		pair: "XXBTZEUR",
 		type: "sell",
 		ordertype: "market",
 		volume: actualAmount_BTC,
 		oflags: "viqc"
 	});
-	debug(`success`);
+	debug(`kraken order create success!!`, res);
 }
 
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
