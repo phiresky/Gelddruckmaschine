@@ -30,18 +30,57 @@ export abstract class MarketClient<tradingCurrency, baseCurrency> {
      * and how much the *receivedVolume* in *tradingCurrency* really is.
      * This function simulates a trade and thus takes all fees into account.
      */
-    abstract getTradeAmountsForBuyVolume(buyVolume: tradingCurrency): { price: baseCurrency, receivedVolume: tradingCurrency };
-    
-    // TODO Think if it makes sense that you could later on have sold a different volume than you wanted to sell
-    /**
+	abstract getTradeAmountsForBuyVolume(
+		buyVolume: tradingCurrency
+	): { price: baseCurrency; receivedVolume: tradingCurrency };
+
+	// TODO Think if it makes sense that you could later on have sold a different volume than you wanted to sell
+	/**
      * Returns the refund in *baseCurrency* you get when selling a certain *sellVolume*.
      * This function simulates a trade and thus takes all fees into account.
      */
-    abstract getRefundForSellVolume(sellVolume: tradingCurrency): baseCurrency;
+	abstract getRefundForSellVolume(sellVolume: tradingCurrency): baseCurrency;
+
+	/**
+     * Returns the cheapest offer currently open where you can buy
+     * *tradingCurrency* for *baseCurrency*.
+     */
+	abstract getCheapestOfferToBuy(): TradeOffer<tradingCurrency, baseCurrency>;
+	/**
+     * Returns the cheapest offer currently open where you can buy
+     * *tradingCurrency* for *baseCurrency* that you can fulfil
+     * with able to spend *volume* in the *baseCurrency*. 
+     */
+	abstract getCheapestOfferToBuy(volume: baseCurrency): TradeOffer<tradingCurrency, baseCurrency>;
+	/**
+     * Returns the highest open offer where you can sell
+     * *tradingCurrency* and get *baseCurrency* instead.
+     */
+	abstract getHighestOfferToSell(): TradeOffer<tradingCurrency, baseCurrency>;
+	/**
+     * Returns the highest open offer where you can sell
+     * up to *volume* of *tradingCurrency* and get
+     * *baseCurrency* back instead.
+     */
+	abstract getHighestOfferToSell(volume: tradingCurrency): TradeOffer<tradingCurrency, baseCurrency>;
 }
 
+export interface TradeOffer<tradingCurrency, baseCurrency> {
+	amount_min: tradingCurrency;
+	amount_max: tradingCurrency;
+	price: baseCurrency; // per entity of tradingCurrency
+	time: Date;
+}
 
 // Cranck shit for currencies: number.EUR or 1.28.BTC
 // TODO find better place to move this to
-Object.defineProperty(Number.prototype, 'EUR', { get() { return this } });
-Object.defineProperty(Number.prototype, 'BTC', { get() { return this } });
+Object.defineProperty(Number.prototype, "EUR", {
+	get() {
+		return this;
+	}
+});
+Object.defineProperty(Number.prototype, "BTC", {
+	get() {
+		return this;
+	}
+});
