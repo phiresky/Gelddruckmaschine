@@ -5,11 +5,13 @@
   },
   "dependencies": {
     "@types/debug": "^0.0.30",
+    "@types/mz": "^0.0.31",
     "@types/node": "^8.0.22",
     "@types/request-promise-native": "^1.0.6",
     "@types/socket.io-client": "^1.4.29",
     "debug": "^3.0.0",
     "fs": "^0.0.1-security",
+    "mz": "^2.6.0",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4",
     "socket.io-client": "0.9.*",

@@ -1,6 +1,7 @@
 import { Websocket_API } from "./generated";
 import * as api from "./generated";
 import * as fs from "./files";
+import * as mzfs from "mz/fs";
 
 import * as _debug from "debug";
 import keyconfig from "./config";
@@ -69,7 +70,7 @@ async function getKrakenTrades() {
 	const krakenTradeList: Trade[] = [];
 
 	// Check if there is already a cached version
-	if (await fs.existsAsync(krakenTradesFile)) {
+	if (await mzfs.exists(krakenTradesFile)) {
 		const krakenTradesFileObject = await fs.readFileToObjectAsync<krakenTradesFile>(krakenTradesFile);
 		last_ns = krakenTradesFileObject.last; // only fetch new trades
 		krakenTradeList.push(...krakenTradesFileObject.tradeList);
