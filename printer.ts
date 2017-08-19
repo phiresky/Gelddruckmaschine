@@ -7,6 +7,7 @@ import { BitcoindeClient } from "./bitcoin-de";
 import { KrakenClient } from "./kraken";
 import { literal } from "./util";
 import { onBitcoindeOrderCreated } from "./bitcoin-de-ws";
+import { sleep } from "./util";
 
 const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
 const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
@@ -85,10 +86,6 @@ async function updateKrakenPrice() {
 		krakenPrice_EUR = "unknown";
 		console.warn(`Could not fetch new Kraken prices - setting 'unknown'. Error: ${error}`);
 	}
-}
-
-async function sleep(delay_ms: number) {
-	return new Promise(resolve => setTimeout(resolve, delay_ms));
 }
 
 function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: number) {
