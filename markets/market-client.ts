@@ -31,12 +31,13 @@ export abstract class MarketClient<tradingCurrency, baseCurrency> {
      * This function simulates a trade and thus takes all fees into account.
      */
     abstract getTradeAmountsForBuyVolume(buyVolume: tradingCurrency): { price: baseCurrency, receivedVolume: tradingCurrency };
+    
+    // TODO Think if it makes sense that you could later on have sold a different volume than you wanted to sell
     /**
-     * Returns the *price* for a certain *buyVolume* you have to pay
-     * and how much the *receivedVolume* in *tradingCurrency* really is.
+     * Returns the refund in *baseCurrency* you get when selling a certain *sellVolume*.
      * This function simulates a trade and thus takes all fees into account.
      */
-    abstract getTradeAmountsForSellVolume(sellVolume: tradingCurrency): { refund: baseCurrency, soldVolume: tradingCurrency };
+    abstract getRefundForSellVolume(sellVolume: tradingCurrency): baseCurrency;
 }
 
 
