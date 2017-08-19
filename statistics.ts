@@ -1,13 +1,12 @@
 import { Websocket_API } from "./generated";
 import * as api from "./generated";
-import * as fs from "./files";
-import * as mzfs from "mz/fs";
+import * as fs from "mz/fs";
 
 import * as _debug from "debug";
 import keyconfig from "./config";
 import { BitcoindeClient } from "./bitcoin-de";
 import { KrakenClient } from "./kraken";
-import { literal, sleep } from "./util";
+import { literal, sleep, readFileToObjectAsync, writeObjectToFileAsync } from "./util";
 
 const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
 const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
@@ -71,8 +70,8 @@ async function getKrakenTrades() {
 	const krakenTradeList: Trade[] = [];
 
 	// Check if there is already a cached version
-	if (await mzfs.exists(krakenTradesFile)) {
-		const krakenTradesFileObject = await fs.readFileToObjectAsync<krakenTradesFile>(krakenTradesFile);
+	if (await fs.exists(krakenTradesFile)) {
+		const krakenTradesFileObject = await readFileToObjectAsync<krakenTradesFile>(krakenTradesFile);
 		last_ns = krakenTradesFileObject.last; // only fetch new trades
 		krakenTradeList.push(...krakenTradesFileObject.tradeList);
 		debug(`Found existing kraken file and imported ${krakenTradeList.length} trades.`);
@@ -85,7 +84,7 @@ async function getKrakenTrades() {
 	debug("Last trade: " + krakenTradeList[krakenTradeList.length - 1]);
 
 	// write trades to file so we only need to get them once.
-	fs.writeObjectToFileAsync(krakenTradesFile, {
+	writeObjectToFileAsync(krakenTradesFile, {
 		last: lastTimeFetched,
 		tradeList: krakenTradeList
 	});
