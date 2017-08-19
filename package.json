@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "printer": "ts-node --fast ./printer"
+    "printer": "ts-node --fast ./printer",
+    "stats": "ts-node --fast ./statistics"
   },
   "dependencies": {
     "@types/debug": "^0.0.30",
