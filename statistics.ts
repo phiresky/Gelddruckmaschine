@@ -32,12 +32,13 @@ async function getKrakenTrades() {
     let date_ns = String(date.getTime() * 1e6);
 	const tradeList = [] as Trade[];
 	do {
-		const startTime = Date.now();
+		//const startTime = Date.now();
 		debug(`Fetch trades since: ${date}`);
-		const { XXBTZEUR: result, last }: KrakenResult<KrakenTradeResult> = await kraken.getTrades({
-			pair: "XXBTZEUR",
-			since: date_ns
-		});
+		const { XXBTZEUR: result, last }: KrakenResult<KrakenTradeResult> = await loopUntilSuccess(kraken.getTrades({
+				pair: "XXBTZEUR",
+				since: date_ns
+			})
+		);
 		var newTrades = result.map(
 			([price, vol, time, type, ordertype, misc]) =>
 				({ time: new Date(time * 1000), price_EURperBTC: parseFloat(price) } as Trade)
@@ -45,7 +46,7 @@ async function getKrakenTrades() {
 		tradeList.push(...newTrades);
         debug(`Fetched ${newTrades.length} trades.`);
         date_ns = last!;
-		await sleep(2000 - (Date.now() - startTime));
+		//await sleep(2000 - (Date.now() - startTime));
 	} while (newTrades.length > 0);
 	return tradeList;
 }
@@ -58,3 +59,32 @@ async function main() {
 }
 
 main();
+
+async function loopUntilSuccess<T>(promise: Promise<T>) {
+	let retry = false;
+	let result: T | null = null;
+	do {
+		retry = false;
+		try {
+			result = await promise;
+		} catch (error) {
+			// TODO distinguish different errors
+			if (typeof error === 'object' && error.hasOwnKey('statusCode') && error.hasOwnKey('response')) {
+				// Error of the API request directly
+				// Has keys: name,statusCode,message,error,options,response
+				if (error.statusCode == 504 && error.response.includes('Cloudflare')) {
+					debug("Kraken Request only reached Cloudflare. Retry in 4s.");
+				} else {
+					debug(`Request error! Status code ${error.statusCode} and error message: ${error.message!}`);
+				}
+			} else {
+				debug(`There occured an error. Retry...`);
+				debug(`Type: ${typeof error}`);
+				debug(error);
+			}
+			await sleep(2*2000);
+			retry = true;
+		}
+	} while (retry);
+	return result;
+}
