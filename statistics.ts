@@ -106,6 +106,7 @@ async function loopUntilSuccess<T>(promise: Promise<T>) {
 		retry = false;
 		try {
 			result = await promise;
+			retryCounter = 0;
 		} catch (error) {
 			// TODO distinguish different errors
 			if (error && typeof error === 'object') {
@@ -130,9 +131,9 @@ async function loopUntilSuccess<T>(promise: Promise<T>) {
 
 				debug(error);
 			}
-			retryCounter++;
-			
 			debug(`Retry (${retryCounter}/10)...`);
+			retryCounter++;
+
 			await sleep(2000);
 			retry = true;
 		}
