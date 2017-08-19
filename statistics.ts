@@ -121,7 +121,7 @@ async function loopUntilSuccess<T>(promise: Promise<T>) {
 						debug(`Request error! Status code ${error.statusCode} and error response: ${error.response!}`);
 					}
 				} else {
-					debug(`Keys: ${error.keys()}`);
+					debug(`Keys: ${Object.keys(error)}`);
 					for (const key in error) {
 						debug(`${key} --> ${error[key]}`);
 					}
