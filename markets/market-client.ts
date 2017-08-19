@@ -1,15 +1,14 @@
-export abstract class MarketClient<tradingCurrency, baseCurrency> {
-	/**
-     * Initializes a market client.
-     *
-     * Args:
-     *   baseCurrency: The currency in which all amounts are given (e.g. EUR)
-     *   tradingCurrency: The currency that will be traded with.
-     */
-	constructor() {
-		return;
-	}
+// TODO Think if some of these methods may need to by Async?
 
+/**
+ * Abstract class for a market client defining standard interface
+ * so all market places can be handled the same way.
+ *
+ * Types:
+ * * baseCurrency: The currency in which all amounts are given (e.g. EUR)
+ * * tradingCurrency: The currency that will be traded with.
+ */
+export abstract class MarketClient<tradingCurrency, baseCurrency> {
 	/**
      * Returns the current price one entity of *tradingCurrency*
      * can be sold at on this market, measured in *baseCurrency*.
@@ -63,13 +62,36 @@ export abstract class MarketClient<tradingCurrency, baseCurrency> {
      * *baseCurrency* back instead.
      */
 	abstract getHighestOfferToSell(volume: tradingCurrency): TradeOffer<tradingCurrency, baseCurrency>;
+
+	/**
+     * Places a market order to buy *amount* of *tradingCurrency*.
+     * @param amount Amount of *tradingCurrency* to buy.
+     * @param amount_min If set, trades with volumes between *[amount_min, amount]* are possible.
+     * @returns *true* if order was successfully created, *false* otherwise.
+     */
+    abstract setMarketBuyOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
+    /**
+     * Places a market order to sell *amount* of *tradingCurrency*.
+     * @param amount Amount of *tradingCurrency* to sell.
+     * @param amount_min If set, trades with volumes between *[amount_min, amount]* are possible.
+     * @returns *true* if order was successfully created, *false* otherwise.
+     */
+    abstract setMarketSellOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
+    /**
+     * Executes a priviously fetched open trade offer.
+     * @param offer The pending trade offer to accept.
+     * @returns *true* if trade was completed, *false* if not.
+     */
+    abstract executePendingTradeOffer(offer: TradeOffer<tradingCurrency, baseCurrency>): boolean;
 }
 
 export interface TradeOffer<tradingCurrency, baseCurrency> {
 	amount_min: tradingCurrency;
 	amount_max: tradingCurrency;
 	price: baseCurrency; // per entity of tradingCurrency
-	time: Date;
+    time: Date;
+    type: "buy" | "sell"; // TODO Maybe externalize to own type
+	id?: string; // optional identifier to know with which order you are dealing
 }
 
 // Cranck shit for currencies: number.EUR or 1.28.BTC
