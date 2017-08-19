@@ -17,7 +17,7 @@ const krakenTradesFile = "./data/krakenTrades.json";
 
 type KrakenTradeResult = [string, string, number, string, string, string]; // <price>, <volume>, <time>, <buy/sell>, <market/limit>, <miscellaneous>)
 interface KrakenResult<T> {
-    XXBTZEUR: T[];
+	XXBTZEUR: T[];
 	last?: string;
 }
 
@@ -40,33 +40,34 @@ async function queryKrakenTrades(last_ns: string) {
 	const tradeList = [] as Trade[];
 	do {
 		//const startTime = Date.now();
-		debug(`Fetch trades since: ${new Date(parseInt(date_ns)/1e6)}`);
-		const queryResult: KrakenResult<KrakenTradeResult> = await loopUntilSuccess(kraken.getTrades({
+		debug(`Fetch trades since: ${new Date(parseInt(date_ns) / 1e6)}`);
+		const queryResult: KrakenResult<KrakenTradeResult> = await loopUntilSuccess(
+			kraken.getTrades({
 				pair: "XXBTZEUR",
 				since: date_ns
 			})
 		);
 		if (queryResult === null) {
-			debug(`Could not fetch more trades. Abort.`)
+			debug(`Could not fetch more trades. Abort.`);
 			break;
 		}
-		
+
 		var newTrades = queryResult.XXBTZEUR.map(
 			([price, vol, time, type, ordertype, misc]) =>
 				({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade)
 		);
 		tradeList.push(...newTrades);
-        debug(`Fetched ${newTrades.length} trades.`);
-        date_ns = queryResult.last!;
+		debug(`Fetched ${newTrades.length} trades.`);
+		date_ns = queryResult.last!;
 		//await sleep(2000 - (Date.now() - startTime));
 	} while (newTrades.length > 0);
 	return { tradeList: tradeList, last: date_ns };
 }
 async function getKrakenTrades() {
 	let date = new Date();
-    date.setDate(date.getDate() - 1);
-    let last_ns = String(date.getTime() * 1e6);
-	
+	date.setDate(date.getDate() - 1);
+	let last_ns = String(date.getTime() * 1e6);
+
 	const krakenTradeList: Trade[] = [];
 
 	// Check if there is already a cached version
@@ -74,7 +75,7 @@ async function getKrakenTrades() {
 		const krakenTradesFileObject = await fs.readFileToObjectAsync<krakenTradesFile>(krakenTradesFile);
 		last_ns = krakenTradesFileObject.last; // only fetch new trades
 		krakenTradeList.push(...krakenTradesFileObject.tradeList);
-		debug(`Found existing kraken file and imported ${krakenTradeList.length} trades.`)
+		debug(`Found existing kraken file and imported ${krakenTradeList.length} trades.`);
 	}
 
 	const { tradeList: newKrakenTradeList, last: lastTimeFetched } = await queryKrakenTrades(last_ns);
@@ -110,11 +111,11 @@ async function loopUntilSuccess<T>(promise: Promise<T>) {
 			retryCounter = 0;
 		} catch (error) {
 			// TODO distinguish different errors
-			if (error && typeof error === 'object') {
-				if (error.hasOwnProperty('statusCode') && error.hasOwnProperty('message')) {
+			if (error && typeof error === "object") {
+				if (error.hasOwnProperty("statusCode") && error.hasOwnProperty("message")) {
 					// Error of the API request directly
 					// Has keys: name,statusCode,message,error,options,response
-					if (error.message.includes('Cloudflare')) {
+					if (error.message.includes("Cloudflare")) {
 						debug(`Only got an answer from Cloudflare (status code ${error.statusCode}). Retry in 4s.`);
 						await sleep(2000); // Extra delay to give Kraken some time
 					} else {
