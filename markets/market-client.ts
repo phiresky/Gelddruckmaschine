@@ -43,25 +43,15 @@ export abstract class MarketClient<tradingCurrency, baseCurrency> {
 	/**
      * Returns the cheapest offer currently open where you can buy
      * *tradingCurrency* for *baseCurrency*.
+     * @param volume If set, only offers that can be bought for less *baseCurrency* are considered.
      */
-	abstract getCheapestOfferToBuy(): TradeOffer<tradingCurrency, baseCurrency>;
-	/**
-     * Returns the cheapest offer currently open where you can buy
-     * *tradingCurrency* for *baseCurrency* that you can fulfil
-     * with able to spend *volume* in the *baseCurrency*. 
-     */
-	abstract getCheapestOfferToBuy(volume: baseCurrency): TradeOffer<tradingCurrency, baseCurrency>;
+	abstract getCheapestOfferToBuy(volume?: baseCurrency): TradeOffer<tradingCurrency, baseCurrency>;
 	/**
      * Returns the highest open offer where you can sell
      * *tradingCurrency* and get *baseCurrency* instead.
+     * @param volume If set, only offers where you can sell this amount of *tradingCurrency* are taken into account.
      */
-	abstract getHighestOfferToSell(): TradeOffer<tradingCurrency, baseCurrency>;
-	/**
-     * Returns the highest open offer where you can sell
-     * up to *volume* of *tradingCurrency* and get
-     * *baseCurrency* back instead.
-     */
-	abstract getHighestOfferToSell(volume: tradingCurrency): TradeOffer<tradingCurrency, baseCurrency>;
+	abstract getHighestOfferToSell(volume?: tradingCurrency): TradeOffer<tradingCurrency, baseCurrency>;
 
 	/**
      * Places a market order to buy *amount* of *tradingCurrency*.
