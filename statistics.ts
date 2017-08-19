@@ -31,6 +31,15 @@ interface Trade {
 	price_EURperBTC: number;
 }
 
+type TradeBins = {
+	[time_min: number]: {
+		mean_EURperBTC: number;
+		min_EURperBTC: number;
+		max_EURperBTC: number;
+		count: number;
+	}
+};
+
 async function getBtcdeTrades() {
 	const result = (await api.Sonstiges.showPublicTradeHistory(bitcoinde, {})).trades;
 	return result.map(({ date, price }) => ({ time_s: date, price_EURperBTC: price } as Trade));
@@ -81,7 +90,6 @@ async function getKrakenTrades() {
 	krakenTradeList.push(...newKrakenTradeList);
 
 	debug(`Have in total ${krakenTradeList.length} trades including ${newKrakenTradeList.length} new ones.`);
-	debug("Last trade: " + krakenTradeList[krakenTradeList.length - 1]);
 
 	// write trades to file so we only need to get them once.
 	writeObjectToFileAsync(krakenTradesFile, {
@@ -92,9 +100,38 @@ async function getKrakenTrades() {
 	return krakenTradeList;
 }
 
+function getTradesBinned(tradeList: Trade[]) {
+	const result: TradeBins = {};
+	tradeList.forEach(({ time_s, price_EURperBTC }) => {
+		const time_min = Math.floor(time_s / 60);
+		if (!result[time_min]) {
+			result[time_min] = {
+				count: 0,
+				max_EURperBTC: price_EURperBTC,
+				min_EURperBTC: price_EURperBTC,
+				mean_EURperBTC: 0
+			};
+		}
+		const bin = result[time_min];
+		bin.count++;
+		bin.mean_EURperBTC += price_EURperBTC;
+		bin.max_EURperBTC = Math.max(bin.max_EURperBTC, price_EURperBTC);
+		bin.min_EURperBTC = Math.min(bin.min_EURperBTC, price_EURperBTC);
+	});
+	for (const key in result) {
+		const bin = result[key];
+		bin.mean_EURperBTC /= 1. * bin.count;
+	}
+	return result;
+}
+
+
 async function main() {
 	//const btcdeTradeList = getBtcdeTrades();
 	const krakenTradeList = await getKrakenTrades();
+
+	const krakenTradesBinned = getTradesBinned(krakenTradeList);
+	debug(krakenTradesBinned);
 }
 
 main();

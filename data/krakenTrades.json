@@ -1,5 +1,5 @@
 {
-	"last": "1503158627656063487",
+	"last": "1503160202635935739",
 	"tradeList": [
 		{
 			"time_s": 1503069093.5593,
@@ -127244,6 +127244,1702 @@
 		{
 			"time_s": 1503158627.6561,
 			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503158650.1098,
+			"price_EURperBTC": 3458.139
+		},
+		{
+			"time_s": 1503158654.9719,
+			"price_EURperBTC": 3455.129
+		},
+		{
+			"time_s": 1503158655.0001,
+			"price_EURperBTC": 3449.574
+		},
+		{
+			"time_s": 1503158655.0199,
+			"price_EURperBTC": 3449.574
+		},
+		{
+			"time_s": 1503158659.0089,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503158663.6547,
+			"price_EURperBTC": 3459.653
+		},
+		{
+			"time_s": 1503158663.9071,
+			"price_EURperBTC": 3459.653
+		},
+		{
+			"time_s": 1503158677.2079,
+			"price_EURperBTC": 3459.653
+		},
+		{
+			"time_s": 1503158677.2327,
+			"price_EURperBTC": 3460
+		},
+		{
+			"time_s": 1503158677.2445,
+			"price_EURperBTC": 3466.999
+		},
+		{
+			"time_s": 1503158677.2506,
+			"price_EURperBTC": 3466.999
+		},
+		{
+			"time_s": 1503158677.8665,
+			"price_EURperBTC": 3454.825
+		},
+		{
+			"time_s": 1503158679.7543,
+			"price_EURperBTC": 3454.825
+		},
+		{
+			"time_s": 1503158679.8346,
+			"price_EURperBTC": 3449.685
+		},
+		{
+			"time_s": 1503158680.4663,
+			"price_EURperBTC": 3459.652
+		},
+		{
+			"time_s": 1503158703.9277,
+			"price_EURperBTC": 3449.708
+		},
+		{
+			"time_s": 1503158715.8748,
+			"price_EURperBTC": 3459.652
+		},
+		{
+			"time_s": 1503158744.3606,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158753.414,
+			"price_EURperBTC": 3449.685
+		},
+		{
+			"time_s": 1503158763.9987,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158767.1847,
+			"price_EURperBTC": 3449.597
+		},
+		{
+			"time_s": 1503158806.3698,
+			"price_EURperBTC": 3459.648
+		},
+		{
+			"time_s": 1503158806.3979,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158846.4301,
+			"price_EURperBTC": 3463.889
+		},
+		{
+			"time_s": 1503158846.4488,
+			"price_EURperBTC": 3463.89
+		},
+		{
+			"time_s": 1503158850.3604,
+			"price_EURperBTC": 3463.89
+		},
+		{
+			"time_s": 1503158850.3795,
+			"price_EURperBTC": 3463.892
+		},
+		{
+			"time_s": 1503158850.3912,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503158850.5924,
+			"price_EURperBTC": 3459.652
+		},
+		{
+			"time_s": 1503158851.1625,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503158860.4806,
+			"price_EURperBTC": 3459.652
+		},
+		{
+			"time_s": 1503158862.6941,
+			"price_EURperBTC": 3459.652
+		},
+		{
+			"time_s": 1503158862.6988,
+			"price_EURperBTC": 3459.652
+		},
+		{
+			"time_s": 1503158863.5467,
+			"price_EURperBTC": 3459.652
+		},
+		{
+			"time_s": 1503158869.8326,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158869.838,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158873.0368,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158874.8347,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158876.5638,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158876.6888,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158876.6926,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158884.0783,
+			"price_EURperBTC": 3463.889
+		},
+		{
+			"time_s": 1503158884.1033,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158884.1075,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158884.1103,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158884.1132,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158890.4027,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503158902.244,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158912.8148,
+			"price_EURperBTC": 3466.999
+		},
+		{
+			"time_s": 1503158914.4621,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158917.9809,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158927.8027,
+			"price_EURperBTC": 3463
+		},
+		{
+			"time_s": 1503158933.3944,
+			"price_EURperBTC": 3463
+		},
+		{
+			"time_s": 1503158954.7,
+			"price_EURperBTC": 3462.889
+		},
+		{
+			"time_s": 1503158966.0123,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158983.9932,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503158985.7772,
+			"price_EURperBTC": 3463
+		},
+		{
+			"time_s": 1503158991.0692,
+			"price_EURperBTC": 3463
+		},
+		{
+			"time_s": 1503158996.3246,
+			"price_EURperBTC": 3463
+		},
+		{
+			"time_s": 1503158996.3391,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159009.4852,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159019.5021,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159023.8367,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159032.8094,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159034.0484,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159036.4643,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159037.432,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159037.6781,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159038.1657,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159038.76,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159039.5359,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159049.4612,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159049.721,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159050.6017,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159050.6927,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159051.7533,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159052.3722,
+			"price_EURperBTC": 3463.245
+		},
+		{
+			"time_s": 1503159052.5947,
+			"price_EURperBTC": 3463.245
+		},
+		{
+			"time_s": 1503159053.0262,
+			"price_EURperBTC": 3463.245
+		},
+		{
+			"time_s": 1503159055.3546,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159058.2932,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159059.7711,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159063.3698,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159064.5967,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159066.0883,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159066.1124,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159066.6275,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159067.3967,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159067.6346,
+			"price_EURperBTC": 3462.9
+		},
+		{
+			"time_s": 1503159069.019,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159071.2242,
+			"price_EURperBTC": 3462.889
+		},
+		{
+			"time_s": 1503159077.6373,
+			"price_EURperBTC": 3462
+		},
+		{
+			"time_s": 1503159078.9071,
+			"price_EURperBTC": 3462
+		},
+		{
+			"time_s": 1503159078.9339,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159079.5211,
+			"price_EURperBTC": 3462.889
+		},
+		{
+			"time_s": 1503159086.3084,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159090.645,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159092.2976,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159099.2482,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159100.7258,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159105.6109,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159105.6162,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159108.2747,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159110.4318,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159111.3906,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159112.5768,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159116.6525,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159128.2324,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159129.6181,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159130.136,
+			"price_EURperBTC": 3459.659
+		},
+		{
+			"time_s": 1503159130.1572,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159130.1615,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159130.1645,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159130.7168,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159132.8892,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159132.9041,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159135.4346,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159135.456,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159136.8407,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159136.845,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159136.8476,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159136.8506,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159136.8536,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159136.8566,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159136.8597,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159138.3768,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159140.8881,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159143.1792,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159144.5403,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159145.2363,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159146.0798,
+			"price_EURperBTC": 3464.41
+		},
+		{
+			"time_s": 1503159146.1078,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159148.5492,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159149.0323,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159149.0378,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159149.0495,
+			"price_EURperBTC": 3465.978
+		},
+		{
+			"time_s": 1503159149.0604,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503159149.9582,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159151.3989,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159153.3148,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159155.1425,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159162.4609,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159162.4737,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159162.4768,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159162.4799,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159167.9133,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159173.49,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159173.626,
+			"price_EURperBTC": 3459.651
+		},
+		{
+			"time_s": 1503159173.6343,
+			"price_EURperBTC": 3459.651
+		},
+		{
+			"time_s": 1503159173.6406,
+			"price_EURperBTC": 3459.651
+		},
+		{
+			"time_s": 1503159173.652,
+			"price_EURperBTC": 3466.997
+		},
+		{
+			"time_s": 1503159173.6653,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503159176.9276,
+			"price_EURperBTC": 3464.757
+		},
+		{
+			"time_s": 1503159188.1728,
+			"price_EURperBTC": 3460
+		},
+		{
+			"time_s": 1503159189.3748,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159191.592,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159195.5524,
+			"price_EURperBTC": 3460
+		},
+		{
+			"time_s": 1503159202.7257,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159207.8784,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159209.6469,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159215.7556,
+			"price_EURperBTC": 3460
+		},
+		{
+			"time_s": 1503159218.9114,
+			"price_EURperBTC": 3460
+		},
+		{
+			"time_s": 1503159224.5949,
+			"price_EURperBTC": 3460
+		},
+		{
+			"time_s": 1503159232.4904,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.4979,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5023,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5072,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5106,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5139,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5169,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.52,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5231,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5262,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5292,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5322,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5359,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.539,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5424,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5462,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5499,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5529,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5559,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5588,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5619,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5649,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.568,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5711,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5746,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5777,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159232.5814,
+			"price_EURperBTC": 3459.65
+		},
+		{
+			"time_s": 1503159243.4754,
+			"price_EURperBTC": 3459.078
+		},
+		{
+			"time_s": 1503159264.5902,
+			"price_EURperBTC": 3458.967
+		},
+		{
+			"time_s": 1503159265.3892,
+			"price_EURperBTC": 3459.078
+		},
+		{
+			"time_s": 1503159269.4366,
+			"price_EURperBTC": 3459.078
+		},
+		{
+			"time_s": 1503159285.3854,
+			"price_EURperBTC": 3456.935
+		},
+		{
+			"time_s": 1503159286.8959,
+			"price_EURperBTC": 3458.967
+		},
+		{
+			"time_s": 1503159287.0438,
+			"price_EURperBTC": 3459.078
+		},
+		{
+			"time_s": 1503159290.5952,
+			"price_EURperBTC": 3459.423
+		},
+		{
+			"time_s": 1503159299.9575,
+			"price_EURperBTC": 3456.935
+		},
+		{
+			"time_s": 1503159300.5583,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159300.5793,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159319.6488,
+			"price_EURperBTC": 3456.935
+		},
+		{
+			"time_s": 1503159319.6596,
+			"price_EURperBTC": 3459.998
+		},
+		{
+			"time_s": 1503159323.3579,
+			"price_EURperBTC": 3459.998
+		},
+		{
+			"time_s": 1503159323.3812,
+			"price_EURperBTC": 3459.999
+		},
+		{
+			"time_s": 1503159329.3468,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159330.445,
+			"price_EURperBTC": 3459.999
+		},
+		{
+			"time_s": 1503159332.8493,
+			"price_EURperBTC": 3459.998
+		},
+		{
+			"time_s": 1503159336.2915,
+			"price_EURperBTC": 3459.998
+		},
+		{
+			"time_s": 1503159338.6329,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159338.6467,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159338.665,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.6717,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.6775,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.6833,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.6889,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.6951,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7009,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7066,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7121,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7178,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7236,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7297,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.735,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7402,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7455,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7508,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159338.7561,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159355.0011,
+			"price_EURperBTC": 3459.887
+		},
+		{
+			"time_s": 1503159359.4244,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159360.4758,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159370.4957,
+			"price_EURperBTC": 3459.886
+		},
+		{
+			"time_s": 1503159371.4073,
+			"price_EURperBTC": 3459.886
+		},
+		{
+			"time_s": 1503159371.493,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159371.5137,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159397.4573,
+			"price_EURperBTC": 3449.702
+		},
+		{
+			"time_s": 1503159414.9214,
+			"price_EURperBTC": 3449.999
+		},
+		{
+			"time_s": 1503159416.4985,
+			"price_EURperBTC": 3449.999
+		},
+		{
+			"time_s": 1503159417.9686,
+			"price_EURperBTC": 3449.999
+		},
+		{
+			"time_s": 1503159419.6717,
+			"price_EURperBTC": 3449.999
+		},
+		{
+			"time_s": 1503159430.6334,
+			"price_EURperBTC": 3449.999
+		},
+		{
+			"time_s": 1503159430.6808,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159430.7027,
+			"price_EURperBTC": 3459.775
+		},
+		{
+			"time_s": 1503159430.7249,
+			"price_EURperBTC": 3459.884
+		},
+		{
+			"time_s": 1503159430.7466,
+			"price_EURperBTC": 3459.885
+		},
+		{
+			"time_s": 1503159430.7528,
+			"price_EURperBTC": 3459.885
+		},
+		{
+			"time_s": 1503159432.3916,
+			"price_EURperBTC": 3460.343
+		},
+		{
+			"time_s": 1503159440.5357,
+			"price_EURperBTC": 3449.703
+		},
+		{
+			"time_s": 1503159445.4695,
+			"price_EURperBTC": 3449.703
+		},
+		{
+			"time_s": 1503159445.4794,
+			"price_EURperBTC": 3449.703
+		},
+		{
+			"time_s": 1503159445.5031,
+			"price_EURperBTC": 3449.597
+		},
+		{
+			"time_s": 1503159445.5228,
+			"price_EURperBTC": 3449.574
+		},
+		{
+			"time_s": 1503159445.5418,
+			"price_EURperBTC": 3447.629
+		},
+		{
+			"time_s": 1503159450.3257,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159451.9354,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159452.5633,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159452.9326,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159453.7006,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159462.9114,
+			"price_EURperBTC": 3449.703
+		},
+		{
+			"time_s": 1503159463.7221,
+			"price_EURperBTC": 3462.099
+		},
+		{
+			"time_s": 1503159465.2283,
+			"price_EURperBTC": 3462.443
+		},
+		{
+			"time_s": 1503159470.7738,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503159470.7791,
+			"price_EURperBTC": 3467
+		},
+		{
+			"time_s": 1503159470.7912,
+			"price_EURperBTC": 3467.4
+		},
+		{
+			"time_s": 1503159472.9239,
+			"price_EURperBTC": 3467.4
+		},
+		{
+			"time_s": 1503159475.4428,
+			"price_EURperBTC": 3467.4
+		},
+		{
+			"time_s": 1503159476.4352,
+			"price_EURperBTC": 3467.399
+		},
+		{
+			"time_s": 1503159477.5991,
+			"price_EURperBTC": 3467.399
+		},
+		{
+			"time_s": 1503159477.6182,
+			"price_EURperBTC": 3467.4
+		},
+		{
+			"time_s": 1503159477.6309,
+			"price_EURperBTC": 3467.5
+		},
+		{
+			"time_s": 1503159498.4713,
+			"price_EURperBTC": 3467.499
+		},
+		{
+			"time_s": 1503159498.4942,
+			"price_EURperBTC": 3467.5
+		},
+		{
+			"time_s": 1503159515.5491,
+			"price_EURperBTC": 3467.5
+		},
+		{
+			"time_s": 1503159515.6871,
+			"price_EURperBTC": 3468.975
+		},
+		{
+			"time_s": 1503159515.692,
+			"price_EURperBTC": 3468.975
+		},
+		{
+			"time_s": 1503159515.6961,
+			"price_EURperBTC": 3468.975
+		},
+		{
+			"time_s": 1503159515.7,
+			"price_EURperBTC": 3468.975
+		},
+		{
+			"time_s": 1503159517.6776,
+			"price_EURperBTC": 3468.975
+		},
+		{
+			"time_s": 1503159550.0783,
+			"price_EURperBTC": 3464
+		},
+		{
+			"time_s": 1503159559.1005,
+			"price_EURperBTC": 3464
+		},
+		{
+			"time_s": 1503159576.6584,
+			"price_EURperBTC": 3463.83
+		},
+		{
+			"time_s": 1503159588.4816,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159589.6046,
+			"price_EURperBTC": 3459.887
+		},
+		{
+			"time_s": 1503159591.0743,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159592.9227,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159593.188,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159604.7752,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159607.7199,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159616.1541,
+			"price_EURperBTC": 3459.887
+		},
+		{
+			"time_s": 1503159616.1581,
+			"price_EURperBTC": 3459.887
+		},
+		{
+			"time_s": 1503159619.0756,
+			"price_EURperBTC": 3459.887
+		},
+		{
+			"time_s": 1503159630.7289,
+			"price_EURperBTC": 3459.75
+		},
+		{
+			"time_s": 1503159639.1735,
+			"price_EURperBTC": 3459.75
+		},
+		{
+			"time_s": 1503159642.3027,
+			"price_EURperBTC": 3450.1
+		},
+		{
+			"time_s": 1503159646.5144,
+			"price_EURperBTC": 3450.084
+		},
+		{
+			"time_s": 1503159653.1965,
+			"price_EURperBTC": 3450.084
+		},
+		{
+			"time_s": 1503159664.9984,
+			"price_EURperBTC": 3450.084
+		},
+		{
+			"time_s": 1503159665.9539,
+			"price_EURperBTC": 3450.084
+		},
+		{
+			"time_s": 1503159669.0608,
+			"price_EURperBTC": 3450.084
+		},
+		{
+			"time_s": 1503159669.7723,
+			"price_EURperBTC": 3450.084
+		},
+		{
+			"time_s": 1503159714.5766,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159733.963,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159740.3768,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159743.4752,
+			"price_EURperBTC": 3447.472
+		},
+		{
+			"time_s": 1503159746.7557,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159752.7462,
+			"price_EURperBTC": 3447.472
+		},
+		{
+			"time_s": 1503159752.7505,
+			"price_EURperBTC": 3447.472
+		},
+		{
+			"time_s": 1503159761.628,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159764.5771,
+			"price_EURperBTC": 3447.472
+		},
+		{
+			"time_s": 1503159770.7998,
+			"price_EURperBTC": 3447.472
+		},
+		{
+			"time_s": 1503159771.6743,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159774.974,
+			"price_EURperBTC": 3446
+		},
+		{
+			"time_s": 1503159775.6522,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159782.799,
+			"price_EURperBTC": 3446
+		},
+		{
+			"time_s": 1503159783.4934,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159791.132,
+			"price_EURperBTC": 3446
+		},
+		{
+			"time_s": 1503159791.7185,
+			"price_EURperBTC": 3445.815
+		},
+		{
+			"time_s": 1503159791.7252,
+			"price_EURperBTC": 3445.815
+		},
+		{
+			"time_s": 1503159791.8233,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159798.5762,
+			"price_EURperBTC": 3445.18
+		},
+		{
+			"time_s": 1503159799.6637,
+			"price_EURperBTC": 3445.813
+		},
+		{
+			"time_s": 1503159799.691,
+			"price_EURperBTC": 3445.813
+		},
+		{
+			"time_s": 1503159799.7038,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159799.9847,
+			"price_EURperBTC": 3445.18
+		},
+		{
+			"time_s": 1503159801.8028,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159808.9905,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159809.0004,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159810.3333,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159813.7869,
+			"price_EURperBTC": 3445.813
+		},
+		{
+			"time_s": 1503159813.9671,
+			"price_EURperBTC": 3445.814
+		},
+		{
+			"time_s": 1503159813.9924,
+			"price_EURperBTC": 3446
+		},
+		{
+			"time_s": 1503159814.0152,
+			"price_EURperBTC": 3447.472
+		},
+		{
+			"time_s": 1503159814.0372,
+			"price_EURperBTC": 3447.473
+		},
+		{
+			"time_s": 1503159830.36,
+			"price_EURperBTC": 3450.099
+		},
+		{
+			"time_s": 1503159830.3747,
+			"price_EURperBTC": 3459.867
+		},
+		{
+			"time_s": 1503159831.54,
+			"price_EURperBTC": 3447.473
+		},
+		{
+			"time_s": 1503159831.558,
+			"price_EURperBTC": 3446
+		},
+		{
+			"time_s": 1503159831.61,
+			"price_EURperBTC": 3445.181
+		},
+		{
+			"time_s": 1503159831.6142,
+			"price_EURperBTC": 3445.181
+		},
+		{
+			"time_s": 1503159831.6313,
+			"price_EURperBTC": 3445.18
+		},
+		{
+			"time_s": 1503159842.0537,
+			"price_EURperBTC": 3447.816
+		},
+		{
+			"time_s": 1503159842.1894,
+			"price_EURperBTC": 3447.816
+		},
+		{
+			"time_s": 1503159846.0703,
+			"price_EURperBTC": 3459.887
+		},
+		{
+			"time_s": 1503159865.9159,
+			"price_EURperBTC": 3446.001
+		},
+		{
+			"time_s": 1503159869.7618,
+			"price_EURperBTC": 3459.866
+		},
+		{
+			"time_s": 1503159869.9904,
+			"price_EURperBTC": 3459.866
+		},
+		{
+			"time_s": 1503159870.7167,
+			"price_EURperBTC": 3459.866
+		},
+		{
+			"time_s": 1503159878.1992,
+			"price_EURperBTC": 3459.887
+		},
+		{
+			"time_s": 1503159878.2844,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159885.9365,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159886.5065,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159887.5948,
+			"price_EURperBTC": 3462.098
+		},
+		{
+			"time_s": 1503159887.6081,
+			"price_EURperBTC": 3462.098
+		},
+		{
+			"time_s": 1503159893.3122,
+			"price_EURperBTC": 3462.098
+		},
+		{
+			"time_s": 1503159893.3377,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159893.5568,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159897.0309,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159897.0414,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159899.9281,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159899.9561,
+			"price_EURperBTC": 3463.83
+		},
+		{
+			"time_s": 1503159902.5186,
+			"price_EURperBTC": 3463.83
+		},
+		{
+			"time_s": 1503159912.1038,
+			"price_EURperBTC": 3462.1
+		},
+		{
+			"time_s": 1503159917.1319,
+			"price_EURperBTC": 3459.866
+		},
+		{
+			"time_s": 1503159917.1553,
+			"price_EURperBTC": 3446.113
+		},
+		{
+			"time_s": 1503159917.9008,
+			"price_EURperBTC": 3446.114
+		},
+		{
+			"time_s": 1503159922.8395,
+			"price_EURperBTC": 3462.099
+		},
+		{
+			"time_s": 1503159929.7887,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159930.6492,
+			"price_EURperBTC": 3462.099
+		},
+		{
+			"time_s": 1503159932.7491,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159936.9767,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159937.9647,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159939.791,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159941.5453,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159941.5598,
+			"price_EURperBTC": 3462.099
+		},
+		{
+			"time_s": 1503159941.5733,
+			"price_EURperBTC": 3463.83
+		},
+		{
+			"time_s": 1503159944.5238,
+			"price_EURperBTC": 3463.83
+		},
+		{
+			"time_s": 1503159947.7101,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159955.9831,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159956.1674,
+			"price_EURperBTC": 3447.585
+		},
+		{
+			"time_s": 1503159956.1711,
+			"price_EURperBTC": 3447.585
+		},
+		{
+			"time_s": 1503159956.1944,
+			"price_EURperBTC": 3447.585
+		},
+		{
+			"time_s": 1503159977.1053,
+			"price_EURperBTC": 3462
+		},
+		{
+			"time_s": 1503159977.7416,
+			"price_EURperBTC": 3462
+		},
+		{
+			"time_s": 1503159986.252,
+			"price_EURperBTC": 3447.696
+		},
+		{
+			"time_s": 1503159986.8704,
+			"price_EURperBTC": 3447.696
+		},
+		{
+			"time_s": 1503159987.5751,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159987.7698,
+			"price_EURperBTC": 3447.696
+		},
+		{
+			"time_s": 1503159987.7932,
+			"price_EURperBTC": 3447
+		},
+		{
+			"time_s": 1503159988.7817,
+			"price_EURperBTC": 3447
+		},
+		{
+			"time_s": 1503159989.8985,
+			"price_EURperBTC": 3447
+		},
+		{
+			"time_s": 1503159989.9146,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503159993.6782,
+			"price_EURperBTC": 3447
+		},
+		{
+			"time_s": 1503160000.1999,
+			"price_EURperBTC": 3447
+		},
+		{
+			"time_s": 1503160001.226,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160010.5335,
+			"price_EURperBTC": 3459.886
+		},
+		{
+			"time_s": 1503160014.9154,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160014.9232,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160023.7321,
+			"price_EURperBTC": 3459.775
+		},
+		{
+			"time_s": 1503160033.5279,
+			"price_EURperBTC": 3450.001
+		},
+		{
+			"time_s": 1503160033.5644,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160034.1196,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160034.1472,
+			"price_EURperBTC": 3446.733
+		},
+		{
+			"time_s": 1503160034.1714,
+			"price_EURperBTC": 3446.01
+		},
+		{
+			"time_s": 1503160047.6613,
+			"price_EURperBTC": 3459.773
+		},
+		{
+			"time_s": 1503160047.6947,
+			"price_EURperBTC": 3459.774
+		},
+		{
+			"time_s": 1503160050.8023,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160060.9672,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160066.6397,
+			"price_EURperBTC": 3455
+		},
+		{
+			"time_s": 1503160069.4657,
+			"price_EURperBTC": 3459.662
+		},
+		{
+			"time_s": 1503160070.731,
+			"price_EURperBTC": 3459.662
+		},
+		{
+			"time_s": 1503160111.96,
+			"price_EURperBTC": 3459.438
+		},
+		{
+			"time_s": 1503160122.6803,
+			"price_EURperBTC": 3459.438
+		},
+		{
+			"time_s": 1503160130.296,
+			"price_EURperBTC": 3459.216
+		},
+		{
+			"time_s": 1503160131.1053,
+			"price_EURperBTC": 3459.216
+		},
+		{
+			"time_s": 1503160143.2372,
+			"price_EURperBTC": 3459.216
+		},
+		{
+			"time_s": 1503160145.3932,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160172.8378,
+			"price_EURperBTC": 3459
+		},
+		{
+			"time_s": 1503160175.1181,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160187.6798,
+			"price_EURperBTC": 3458.889
+		},
+		{
+			"time_s": 1503160190.9977,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160191.0145,
+			"price_EURperBTC": 3450
+		},
+		{
+			"time_s": 1503160191.0387,
+			"price_EURperBTC": 3447
+		},
+		{
+			"time_s": 1503160195.8494,
+			"price_EURperBTC": 3447
+		},
+		{
+			"time_s": 1503160202.6359,
+			"price_EURperBTC": 3458.888
 		}
 	]
 }
