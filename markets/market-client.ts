@@ -1,3 +1,4 @@
+import { currency } from "../definitions/currency";
 // TODO Think if some of these methods may need to by Async?
 
 /**
@@ -8,7 +9,8 @@
  * * baseCurrency: The currency in which all amounts are given (e.g. EUR)
  * * tradingCurrency: The currency that will be traded with.
  */
-export abstract class MarketClient<tradingCurrency, baseCurrency> {
+
+export abstract class MarketClient<tradingCurrency extends currency, baseCurrency extends currency> {
 	/**
      * Returns the current price one entity of *tradingCurrency*
      * can be sold at on this market, measured in *baseCurrency*.
@@ -59,28 +61,28 @@ export abstract class MarketClient<tradingCurrency, baseCurrency> {
      * @param amount_min If set, trades with volumes between *[amount_min, amount]* are possible.
      * @returns *true* if order was successfully created, *false* otherwise.
      */
-    abstract setMarketBuyOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
-    /**
+	abstract setMarketBuyOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
+	/**
      * Places a market order to sell *amount* of *tradingCurrency*.
      * @param amount Amount of *tradingCurrency* to sell.
      * @param amount_min If set, trades with volumes between *[amount_min, amount]* are possible.
      * @returns *true* if order was successfully created, *false* otherwise.
      */
-    abstract setMarketSellOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
-    /**
+	abstract setMarketSellOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
+	/**
      * Executes a priviously fetched open trade offer.
      * @param offer The pending trade offer to accept.
      * @returns *true* if trade was completed, *false* if not.
      */
-    abstract executePendingTradeOffer(offer: TradeOffer<tradingCurrency, baseCurrency>): boolean;
+	abstract executePendingTradeOffer(offer: TradeOffer<tradingCurrency, baseCurrency>): boolean;
 }
 
 export interface TradeOffer<tradingCurrency, baseCurrency> {
 	amount_min: tradingCurrency;
 	amount_max: tradingCurrency;
 	price: baseCurrency; // per entity of tradingCurrency
-    time: Date;
-    type: "buy" | "sell"; // TODO Maybe externalize to own type
+	time: Date;
+	type: "buy" | "sell"; // TODO Maybe externalize to own type
 	id?: string; // optional identifier to know with which order you are dealing
 }
 

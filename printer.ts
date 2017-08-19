@@ -121,6 +121,7 @@ async function doTrade(order: BitcoindeOrder, amount: number) {
 	debug(`kraken order create success!!`, res);
 }
 
+const x = 1.44.EUR;
 function getMaxBTCTradeAmount(direction: "bitcoin.de to kraken") {
 	return 0.1;
 }

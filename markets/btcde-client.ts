@@ -1,4 +1,5 @@
 import { MarketClient, TradeOffer } from "./market-client";
+import { BTC, EUR } from "../definitions/currency";
 
 export class BitcoindeClient implements MarketClient<BTC, EUR> {
 	getCurrentSellPrice(): EUR {
