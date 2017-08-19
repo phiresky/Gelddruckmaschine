@@ -7,6 +7,7 @@ import keyconfig from "./config";
 import { BitcoindeClient } from "./bitcoin-de";
 import { KrakenClient } from "./kraken";
 import { literal, sleep, readFileToObjectAsync, writeObjectToFileAsync } from "./util";
+import { RequestError } from "request-promise-native/errors";
 
 const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
 const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
@@ -52,8 +53,7 @@ async function queryKrakenTrades(last_ns: string) {
 		}
 
 		var newTrades = queryResult.XXBTZEUR.map(
-			([price, vol, time, type, ordertype, misc]) =>
-				({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade)
+			([price, vol, time, type, ordertype, misc]) => ({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade)
 		);
 		tradeList.push(...newTrades);
 		debug(`Fetched ${newTrades.length} trades.`);
@@ -115,13 +115,20 @@ async function loopUntilSuccess<T>(promise: Promise<T>) {
 					// Error of the API request directly
 					// Has keys: name,statusCode,message,error,options,response
 					if (error.message.includes("Cloudflare")) {
-						debug(`Only got an answer from Cloudflare (status code ${error.statusCode}). Retry in 4s.`);
-						await sleep(2000); // Extra delay to give Kraken some time
+						debug(`Only got an answer from Cloudflare (status code ${error.statusCode}).`);
 					} else {
 						debug(`Request error! Status code ${error.statusCode} and error response: ${error.response!}`);
 					}
+				} else if (error instanceof RequestError) {
+					debug(`Got an request error with message: ${error.message}`);
+					debug(`Stack: ${error.stack}`);
+					// Konkret kam an --> name: RequestError, message/cause/error: Error: ESOCKETTIMEDOUT;
+					for (const key in error) {
+						debug(`${key} --> ${(error as any)[key]}`);
+					}
 				} else {
-					debug(`Keys: ${error.keys()}`);
+					debug("Error: " + error);
+					debug(`Keys: ${Object.keys(error)}`);
 					for (const key in error) {
 						debug(`${key} --> ${error[key]}`);
 					}
@@ -132,10 +139,11 @@ async function loopUntilSuccess<T>(promise: Promise<T>) {
 
 				debug(error);
 			}
-			debug(`Retry (${retryCounter}/10)...`);
+			const retryDelay = 2 ** (retryCounter % 5);
+			debug(`Retry (already tried ${retryCounter} / 10) in ${retryDelay} seconds...`);
 			retryCounter++;
 
-			await sleep(2000);
+			await sleep(retryDelay * 1000);
 			retry = true;
 		}
 	} while (retry && retryCounter <= 10); // Limit number of retrys
