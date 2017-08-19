@@ -9,6 +9,7 @@
     "@types/request-promise-native": "^1.0.6",
     "@types/socket.io-client": "^1.4.29",
     "debug": "^3.0.0",
+    "fs": "^0.0.1-security",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.4",
     "socket.io-client": "0.9.*",

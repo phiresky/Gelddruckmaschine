@@ -1,5 +1,6 @@
 import { Websocket_API } from "./generated";
 import * as api from "./generated";
+import * as fs from "./files";
 
 import * as _debug from "debug";
 import keyconfig from "./config";
@@ -11,57 +12,95 @@ const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoin
 const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
 const debug = _debug("statistics");
 
+const krakenTradesFile = "./data/krakenTrades.json";
+
 type KrakenTradeResult = [string, string, number, string, string, string]; // <price>, <volume>, <time>, <buy/sell>, <market/limit>, <miscellaneous>)
 interface KrakenResult<T> {
     XXBTZEUR: T[];
-    last?: string
+	last?: string;
+}
+
+interface krakenTradesFile {
+	last: string;
+	tradeList: Trade[];
 }
 
 interface Trade {
-	time: Date;
+	time_s: number;
 	price_EURperBTC: number;
 }
 
 async function getBtcdeTrades() {
 	const result = (await api.Sonstiges.showPublicTradeHistory(bitcoinde, {})).trades;
-	return result.map(({ date, price }) => ({ time: new Date(date * 1000), price_EURperBTC: price } as Trade));
+	return result.map(({ date, price }) => ({ time_s: date, price_EURperBTC: price } as Trade));
 }
-async function getKrakenTrades() {
-	let date = new Date();
-    date.setDate(date.getDate() - 0.1);
-    let date_ns = String(date.getTime() * 1e6);
+async function queryKrakenTrades(last_ns: string) {
+	let date_ns = last_ns;
 	const tradeList = [] as Trade[];
 	do {
 		//const startTime = Date.now();
-		debug(`Fetch trades since: ${date}`);
-		const { XXBTZEUR: result, last }: KrakenResult<KrakenTradeResult> = await loopUntilSuccess(kraken.getTrades({
+		debug(`Fetch trades since: ${new Date(parseInt(date_ns)/1e6)}`);
+		const queryResult: KrakenResult<KrakenTradeResult> = await loopUntilSuccess(kraken.getTrades({
 				pair: "XXBTZEUR",
 				since: date_ns
 			})
 		);
-		var newTrades = result.map(
+		if (queryResult === null) {
+			debug(`Could not fetch more trades. Abort.`)
+			break;
+		}
+		
+		var newTrades = queryResult.XXBTZEUR.map(
 			([price, vol, time, type, ordertype, misc]) =>
-				({ time: new Date(time * 1000), price_EURperBTC: parseFloat(price) } as Trade)
+				({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade)
 		);
 		tradeList.push(...newTrades);
         debug(`Fetched ${newTrades.length} trades.`);
-        date_ns = last!;
+        date_ns = queryResult.last!;
 		//await sleep(2000 - (Date.now() - startTime));
 	} while (newTrades.length > 0);
-	return tradeList;
+	return { tradeList: tradeList, last: date_ns };
+}
+async function getKrakenTrades() {
+	let date = new Date();
+    date.setDate(date.getDate() - 1);
+    let last_ns = String(date.getTime() * 1e6);
+	
+	const krakenTradeList: Trade[] = [];
+
+	// Check if there is already a cached version
+	if (await fs.existsAsync(krakenTradesFile)) {
+		const krakenTradesFileObject = await fs.readFileToObjectAsync<krakenTradesFile>(krakenTradesFile);
+		last_ns = krakenTradesFileObject.last; // only fetch new trades
+		krakenTradeList.push(...krakenTradesFileObject.tradeList);
+		debug(`Found existing kraken file and imported ${krakenTradeList.length} trades.`)
+	}
+
+	const { tradeList: newKrakenTradeList, last: lastTimeFetched } = await queryKrakenTrades(last_ns);
+	krakenTradeList.push(...newKrakenTradeList);
+
+	debug(`Have in total ${krakenTradeList.length} trades including ${newKrakenTradeList.length} new ones.`);
+	debug("Last trade: " + krakenTradeList[krakenTradeList.length - 1]);
+
+	// write trades to file so we only need to get them once.
+	fs.writeObjectToFileAsync(krakenTradesFile, {
+		last: lastTimeFetched,
+		tradeList: krakenTradeList
+	});
+
+	return krakenTradeList;
 }
 
 async function main() {
 	//const btcdeTradeList = getBtcdeTrades();
 	const krakenTradeList = await getKrakenTrades();
-	debug(krakenTradeList);
-	debug(krakenTradeList[krakenTradeList.length - 1]);
 }
 
 main();
 
 async function loopUntilSuccess<T>(promise: Promise<T>) {
 	let retry = false;
+	let retryCounter = 0;
 	let result: T | null = null;
 	do {
 		retry = false;
@@ -69,22 +108,34 @@ async function loopUntilSuccess<T>(promise: Promise<T>) {
 			result = await promise;
 		} catch (error) {
 			// TODO distinguish different errors
-			if (typeof error === 'object' && error.hasOwnKey('statusCode') && error.hasOwnKey('response')) {
-				// Error of the API request directly
-				// Has keys: name,statusCode,message,error,options,response
-				if (error.statusCode == 504 && error.response.includes('Cloudflare')) {
-					debug("Kraken Request only reached Cloudflare. Retry in 4s.");
+			if (error && typeof error === 'object') {
+				if (error.hasOwnProperty('statusCode') && error.hasOwnProperty('message')) {
+					// Error of the API request directly
+					// Has keys: name,statusCode,message,error,options,response
+					if (error.message.includes('Cloudflare')) {
+						debug(`Only got an answer from Cloudflare (status code ${error.statusCode}). Retry in 4s.`);
+						await sleep(2000); // Extra delay to give Kraken some time
+					} else {
+						debug(`Request error! Status code ${error.statusCode} and error response: ${error.response!}`);
+					}
 				} else {
-					debug(`Request error! Status code ${error.statusCode} and error message: ${error.message!}`);
+					debug(`Keys: ${error.keys()}`);
+					for (const key in error) {
+						debug(`${key} --> ${error[key]}`);
+					}
 				}
 			} else {
-				debug(`There occured an error. Retry...`);
+				debug(`There occured an error.`);
 				debug(`Type: ${typeof error}`);
+
 				debug(error);
 			}
-			await sleep(2*2000);
+			retryCounter++;
+			
+			debug(`Retry (${retryCounter}/10)...`);
+			await sleep(2000);
 			retry = true;
 		}
-	} while (retry);
+	} while (retry && retryCounter <= 10); // Limit number of retrys
 	return result;
 }
