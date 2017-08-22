@@ -2,12 +2,12 @@ import { Websocket_API } from "./markets/btcde-client/generated";
 import * as api from "./markets/btcde-client/generated";
 
 import * as _debug from "debug";
-import keyconfig from "./config";
+import config from "./config";
 import { BitcoindeClient } from "./markets/btcde-client";
 import { KrakenClient } from "./markets/kraken-client";
 import { literal } from "./util";
 import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
-import { sleep } from "./util";
+import { sleep, significantDigits } from "./util";
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
 
@@ -18,36 +18,38 @@ export const clients = {
 	kraken: new KrakenClient()
 };
 
-/**
- * Returns profit margin if trading with a certain volume.
- * @param startClient The client buying *tradingCurrency* from *baseCurrency*
- * @param endClient The client selling *tradingCurrency* for 'baseCurrency*
- * @param volume The volume in *tradingCurrency* to buy.
- * @returns profit margin as ratio (1 = 100%)
- */
-export async function getProfitMargin<tradingCurrency extends currency, baseCurrency extends currency>(
-	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
-	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
-	volume: tradingCurrency
-) {
-	// TODO Think of better solution for type problem here
-	const {
-		costs,
-		receivedVolume
-	}: { costs: currency; receivedVolume: tradingCurrency } = await startClient.getTradeAmountsForBuyVolume(volume);
-	const refund: currency = await endClient.getRefundForSellVolume(receivedVolume);
-	return (refund - costs) / costs;
-}
-
 export async function getProfitMarginBasic<tradingCurrency extends currency, baseCurrency extends currency>(
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
 ) {
 	const buyPrice = (await startClient.getCurrentBuyCondition()) as currency;
-	console.log(buyPrice);
 	const sellPrice = (await endClient.getCurrentSellCondition()) as currency;
-	console.log(sellPrice);
 	return (sellPrice - buyPrice) / buyPrice;
+}
+
+export async function printMoney() {
+	while (true) {
+		for (const [clientName1, client1] of Object.entries(clients)) {
+			for (const [clientName2, client2] of Object.entries(clients)) {
+				if (client1 === client2) continue; // Exclude same clients
+				const possibleMargin = await getProfitMarginBasic(client1, client2);
+				const possibleMarginStr = significantDigits(possibleMargin * 100, 2);
+				debug(`${clientName1} -> ${clientName2}: Margin of ${possibleMarginStr}% possible.`);
+				if (possibleMargin > config.general.minProfit) {
+					debug(`Noice! Possible margin of ${possibleMarginStr}% found :O`);
+					await tryPrintMoney(client1, client2);
+				}
+			}
+		}
+		await sleep(2000);
+	}
+}
+
+async function tryPrintMoney<tradingCurrency extends currency, baseCurrency extends currency>(
+	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
+) {
+	// dodo
 }
 
 async function run() {
@@ -59,5 +61,6 @@ async function run() {
 }
 
 if (require.main === module) {
-	run();
+	//run();
+	printMoney();
 }
