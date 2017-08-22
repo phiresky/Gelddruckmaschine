@@ -1,31 +1,36 @@
 {
-  "scripts": {
-    "printer": "ts-node --fast ./printer",
-    "stats": "ts-node --fast ./statistics",
-    "precommit": "lint-staged"    
-  },
-  "dependencies": {
-    "@types/debug": "^0.0.30",
-    "@types/mz": "^0.0.31",
-    "@types/node": "^8.0.22",
-    "@types/request-promise-native": "^1.0.6",
-    "@types/socket.io-client": "^1.4.29",
-    "debug": "^3.0.0",
-    "mz": "^2.6.0",
-    "request": "^2.81.0",
-    "request-promise-native": "^1.0.4",
-    "socket.io-client": "0.9.*",
-    "ts-node": "^3.3.0",
-    "typescript": "^2.5.0-dev.20170815",
-    "prettier": "^1.5.3"
-  },
-	"devDependencies": {
-		"husky": "^0.14.3",
-		"lint-staged": "^4.0.3"
-	},
-	"lint-staged": {
-		"linters": {
-			"*.{css,less,scss,js,ts,tsx}": ["prettier --with-node-modules --write --tab-width 4 --print-width 120 --use-tabs", "git add"]
-		}
-	}
+ "scripts": {
+  "printer": "ts-node --fast ./printer",
+  "stats": "ts-node --fast ./statistics",
+  "precommit": "lint-staged"
+ },
+ "dependencies": {
+  "@types/debug": "^0.0.30",
+  "@types/mz": "^0.0.31",
+  "@types/node": "^8.0.22",
+  "@types/node-telegram-bot-api": "^0.28.0",
+  "@types/request-promise-native": "^1.0.6",
+  "@types/socket.io-client": "^1.4.29",
+  "debug": "^3.0.0",
+  "mz": "^2.6.0",
+  "node-telegram-bot-api": "^0.28.0",
+  "prettier": "^1.5.3",
+  "request": "^2.81.0",
+  "request-promise-native": "^1.0.4",
+  "socket.io-client": "0.9.*",
+  "ts-node": "^3.3.0",
+  "typescript": "^2.5.0-dev.20170815"
+ },
+ "devDependencies": {
+  "husky": "^0.14.3",
+  "lint-staged": "^4.0.3"
+ },
+ "lint-staged": {
+  "linters": {
+   "*.{css,less,scss,js,ts,tsx}": [
+    "prettier --with-node-modules --write --tab-width 4 --print-width 120 --use-tabs",
+    "git add"
+   ]
+  }
+ }
 }
