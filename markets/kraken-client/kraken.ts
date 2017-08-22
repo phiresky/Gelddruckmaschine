@@ -298,7 +298,7 @@ export class KrakenClient {
 		//the key "error". We should then propagate back the error message as a proper error.
 		if (data.error && data.error.length > 0) {
 			console.error(data.error);
-			throw new Error(`Kraken API returned an error`);
+			throw new Error(`Kraken API returned an error: ` + data.error.join(", "));
 		} else {
 			return data.result;
 		}
