@@ -90,11 +90,11 @@ export interface TradeOffer<tradingCurrency, baseCurrency> {
 // TODO find better place to move this to
 Object.defineProperty(Number.prototype, "EUR", {
 	get() {
-		return this;
+		return this.valueOf();
 	}
 });
 Object.defineProperty(Number.prototype, "BTC", {
 	get() {
-		return this;
+		return this.valueOf();
 	}
 });
