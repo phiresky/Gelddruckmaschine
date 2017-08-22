@@ -27,7 +27,6 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 			type: "sell",
 			only_express_orders: 1
 		});
-		console.log(orders);
 		return Math.max(...orders.map(order => order.price)).EUR;
 	}
 	async getCurrentBuyPrice(): Promise<EUR> {

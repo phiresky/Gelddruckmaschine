@@ -26,3 +26,15 @@ export function minBy<T>(f: (x: T) => number): (a: T, b: T) => T {
 		return f(a) < f(b) ? a : b;
 	};
 }
+export function normalTemplate(template: TemplateStringsArray, ...substitutions: any[]) {
+	return template
+		.map((chunk, i) => {
+			if (template.length <= i) {
+				return chunk;
+			}
+			return substitutions[i - 1] ? substitutions[i - 1] + chunk : chunk;
+		})
+		.join("");
+}
+
+if (!(Symbol as any).asyncIterator) (Symbol as any).asyncIterator = Symbol("asyncIterator");
