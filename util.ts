@@ -20,3 +20,9 @@ export type Simplify<T> = { [k in keyof T]: T[k] };
 export class As<S extends string> {
 	private __as: S;
 }
+
+export function minBy<T>(f: (x: T) => number): (a: T, b: T) => T {
+	return (a: T, b: T) => {
+		return f(a) < f(b) ? a : b;
+	};
+}

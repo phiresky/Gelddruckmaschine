@@ -1,6 +1,6 @@
 import { MarketClient, TradeOffer } from "./market-client";
 import { BTC, EUR } from "../definitions/currency";
-import { As, Simplify } from "../util";
+import { As, Simplify, minBy } from "../util";
 import config from "../config";
 import { BitcoindeClient as APIClient } from "./btcde-client/bitcoin-de";
 import * as API from "./btcde-client/generated";
@@ -43,8 +43,24 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	async getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
-	async getCheapestOfferToBuy(volume?: EUR): Promise<BitcoindeOffer> {
-		throw new Error("Method not implemented.");
+	async getCheapestOfferToBuy(volume?: EUR): Promise<BitcoindeOffer | null> {
+		const { orders } = await API.Orders.showOrderbook(this.client, {
+			type: "buy",
+			only_express_orders: 1,
+			amount: volume
+		});
+		if (orders.length === 0) {
+			return null;
+		}
+		const order = orders.reduce(minBy(order => order.price));
+		return {
+			amount_max: order.max_amount.BTC,
+			amount_min: order.min_amount.BTC,
+			bitcoindeId: order.order_id,
+			price: order.price.EUR,
+			time: new Date(),
+			type: "buy"
+		};
 	}
 	async getHighestOfferToSell(volume?: BTC): Promise<BitcoindeOffer> {
 		throw new Error("Method not implemented.");

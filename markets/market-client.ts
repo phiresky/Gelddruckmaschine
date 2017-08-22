@@ -31,13 +31,13 @@ export abstract class MarketClient<
 	abstract getCurrentBuyPrice(): Promise<baseCurrency>;
 
 	/**
-     * Returns the *price* for a certain *buyVolume* you have to pay
+     * Returns the *costs* for a certain *buyVolume* you have to pay
      * and how much the *receivedVolume* in *tradingCurrency* really is.
      * This function simulates a trade and thus takes all fees into account.
      */
 	abstract getTradeAmountsForBuyVolume(
 		buyVolume: tradingCurrency
-	): Promise<{ price: baseCurrency; receivedVolume: tradingCurrency }>;
+	): Promise<{ costs: baseCurrency; receivedVolume: tradingCurrency }>;
 
 	// TODO Think if it makes sense that you could later on have sold a different volume than you wanted to sell
 	/**

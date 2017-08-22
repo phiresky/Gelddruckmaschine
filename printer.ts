@@ -3,104 +3,39 @@ import * as api from "./markets/btcde-client/generated";
 
 import * as _debug from "debug";
 import keyconfig from "./config";
-import { BitcoindeClient } from "./markets/btcde-client/bitcoin-de";
-import { KrakenClient } from "./kraken";
+import { BitcoindeClient } from "./markets/btcde-client";
+import { KrakenClient } from "./markets/kraken-client";
 import { literal } from "./util";
 import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
 import { sleep } from "./util";
+import { MarketClient, TradeOffer } from "./markets/market-client";
+import { currency } from "./definitions/currency";
 
-const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
-const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
 const debug = _debug("printer");
 
-const config = {
-	/**
-     * target amount of BTC to hold. Will try to keep the amount of BTC owned at this value.
-     */
-	hodlTarget_BTC: 9,
-	/**
-     * maxStray
-     * only create new moneyprinting trades as long as the amount of BTC owned is within [a, b] * hodlTarget 
-     */
-	maxStray: [0.8, 1.2],
-	/**
-     * Create trades that have a minimum of this profit relative to the transaction amount
-     * 
-     * Example: if minProfit is 0.01, then you make 10€ profit for a trade with 1000€ value
-     */
-	minProfit: 0.01,
-	/**
-	 * Kraken fee (btc -> eur)
-	 */
-	krakenFee: 0.002,
-	/**
-	 * Bitcoin.de fee (eur -> btc)
-	 * you pay 0,4% less in euros for your bitcoins
-	 */
-	btcdeBuyFee: 0.004,
-	/**
-	 * Bitcoin.de fee (eur -> btc)
-	 * you receive 0,8% less bitcoins than ordered
-	 */
-	btcdeSellFee: 0.008,
-	/**
-	 * Maximum allowed age of Kraken prices in seconds
-	 */
-	maxPriceAge_SECS: 60
-};
-type SpreadResult = [number, string, string];
-interface MarketPrice {
-	time: Date;
-	price_EUR: number;
-}
-interface GetSpreadResult {
-	"XXBTZEUR": SpreadResult[];
+const clients = [new BitcoindeClient(), new KrakenClient()];
+
+/**
+ * 
+ * @param startClient The client buying *tradingCurrency* from *baseCurrency*
+ * @param endClient The client selling *tradingCurrency* for 'baseCurrency*
+ * @param min_volume The minimum volume in *tradingCurrency* to use.
+ * @returns profit margin as ratio (1 = 100%)
+ */
+export async function getProfitMargin<tradingCurrency extends currency, baseCurrency extends currency>(
+	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+	volume: tradingCurrency
+) {
+	// TODO Think of better solution for type problem here
+	const {
+		costs,
+		receivedVolume
+	}: { costs: currency; receivedVolume: tradingCurrency } = await startClient.getTradeAmountsForBuyVolume(volume);
+	const refund: currency = await endClient.getRefundForSellVolume(receivedVolume);
+	return (refund - costs) / costs;
 }
 
-let krakenPrice_EUR: number | "unknown" = "unknown";
-async function updateKrakenPrice() {
-	try {
-		const result: GetSpreadResult = await kraken.getSpread({
-			pair: "XXBTZEUR"
-		});
-		const formattedResult = result.XXBTZEUR.map(
-			([timestamp, bid, ask]) =>
-				({
-					time: new Date(timestamp * 1000),
-					price_EUR: parseFloat(bid) // TODO Should be ask?
-				} as MarketPrice)
-		);
-		if (formattedResult.length === 0) throw Error("Empty GetSpreadResult!");
-		console.log(formattedResult.slice().reverse());
-		const lastTime = formattedResult[formattedResult.length - 1].time;
-		const timediff_SECS = (new Date().getTime() - lastTime.getTime()) / 1000;
-		if (timediff_SECS > config.maxPriceAge_SECS) {
-			throw Error(`Last Kraken price is more than ${config.maxPriceAge_SECS} seconds old.`);
-		}
-		krakenPrice_EUR = formattedResult[formattedResult.length - 1].price_EUR;
-		debug(`Fetched new Kraken price: ${krakenPrice_EUR} EUR (from ${lastTime})`);
-	} catch (error) {
-		if (error.statusCode) {
-			error = `Status Code: ${error.statusCode}`;
-		}
-		krakenPrice_EUR = "unknown";
-		console.warn(`Could not fetch new Kraken prices - setting 'unknown'. Error: ${error}`);
-	}
-}
-
-function getProfitMargin(krakenPrice_EURperBTC: number, btcdePrice_EURperBTC: number) {
-	// 1BTC * (Price/BTC - 0,4% * Price) / (1 - 0,8 %) BTC
-	const krakenPriceWithFees_EURperBTC = krakenPrice_EURperBTC * (1 - config.krakenFee); // sell --> get less €
-	const btcdePriceWithFees_EURperBTC = btcdePrice_EURperBTC * (1 - config.btcdeBuyFee) / (1 - config.btcdeSellFee); // buy --> have to pay more €
-	// debug({ krakenPrice_EURperBTC, btcdePrice_EURperBTC, btcdePriceWithFees_EURperBTC, krakenPriceWithFees_EURperBTC });
-	return (krakenPriceWithFees_EURperBTC - btcdePriceWithFees_EURperBTC) / btcdePriceWithFees_EURperBTC;
-}
-type KrakenAddOrderResponse = {
-	descr: {
-		order: KrakenOrderDescription;
-	};
-	txid: string[];
-};
 async function doTrade(order: BitcoindeOrder, amount: number) {
 	debug(`executing bitcoin.de trade ${order.order_id} (buying ${amount} BTC for ${order.price} EUR / BTC`);
 	await api.Trades.executeTrade(bitcoinde, {
