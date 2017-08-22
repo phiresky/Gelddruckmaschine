@@ -1,6 +1,9 @@
 import { MarketClient, TradeOffer } from "./market-client";
 import { BTC, EUR } from "../definitions/currency";
 import { As, Simplify } from "../util";
+import config from "../config";
+import { BitcoindeClient as APIClient } from "./btcde-client/bitcoin-de";
+import * as API from "./btcde-client/generated";
 
 export type BitcoindeOffer = Simplify<
 	TradeOffer<BTC, EUR> & {
@@ -9,31 +12,46 @@ export type BitcoindeOffer = Simplify<
 >;
 
 export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
-	getCurrentSellPrice(): Promise<EUR> {
+	client: APIClient;
+
+	/**
+	 *
+	 */
+	constructor() {
+		this.client = new APIClient(config.bitcoinde.key, config.bitcoinde.secret);
+	}
+
+	async getCurrentSellPrice(): Promise<EUR> {
+		const { orders } = await API.Orders.showOrderbook(this.client, {
+			type: "sell",
+			only_express_orders: 1
+		});
+
+		return (0).EUR; //orders.map(order => order.price)
+	}
+	async getCurrentBuyPrice(): Promise<EUR> {
+		const { price } = await this.getTradeAmountsForBuyVolume((0).BTC);
+		return price;
+	}
+	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ price: EUR; receivedVolume: BTC }> {
 		throw new Error("Method not implemented.");
 	}
-	getCurrentBuyPrice(): Promise<EUR> {
+	async getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
-	getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ price: EUR; receivedVolume: BTC }> {
+	async getCheapestOfferToBuy(volume?: EUR): Promise<BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
-	getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
+	async getHighestOfferToSell(volume?: BTC): Promise<BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
-	getCheapestOfferToBuy(volume?: EUR): Promise<BitcoindeOffer> {
+	async setMarketBuyOrder(amount: BTC, amount_min?: BTC): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	getHighestOfferToSell(volume?: BTC): Promise<BitcoindeOffer> {
+	async setMarketSellOrder(amount: BTC, amount_min?: BTC): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	setMarketBuyOrder(amount: BTC, amount_min?: BTC): Promise<boolean> {
-		throw new Error("Method not implemented.");
-	}
-	setMarketSellOrder(amount: BTC, amount_min?: BTC): Promise<boolean> {
-		throw new Error("Method not implemented.");
-	}
-	executePendingTradeOffer(offer: BitcoindeOffer): Promise<boolean> {
+	async executePendingTradeOffer(offer: BitcoindeOffer): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
 }
