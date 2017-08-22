@@ -32,13 +32,13 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 		return (+price).EUR;
 	}
 
-	async getCurrentSellCondition(): Promise<EUR> {
-		return ((await this.getCurrentSellPrice()) * (1 - config.krakencom.krakenFee)) as EUR;
+	getEffectiveSellPrice(price: EUR): EUR {
+		return (price * (1 - config.krakencom.krakenFee)) as EUR;
 	}
-	async getCurrentBuyCondition(): Promise<EUR> {
+	getEffectiveBuyPrice(price: EUR): EUR {
 		// buy a * (prize - 0.4%) EUR for a * (1 - 0.8%) BTC =!= 1 BTC
 		// => a = 1 / (1 - 0.8%)
-		return ((await this.getCurrentBuyPrice()) * (1 + config.krakencom.krakenFee)) as EUR;
+		return (price * (1 + config.krakencom.krakenFee)) as EUR;
 	}
 
 	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ costs: EUR; receivedVolume: BTC }> {

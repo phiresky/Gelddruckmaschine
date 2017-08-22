@@ -31,13 +31,25 @@ export abstract class MarketClient<
 	abstract getCurrentBuyPrice(): Promise<baseCurrency>;
 
 	/**
+     * Based on market sell price returns price including fees.
+     */
+	abstract getEffectiveSellPrice(price: baseCurrency): baseCurrency;
+	/**
+     * Based on market buy price returns price including fees.
+     */
+	abstract getEffectiveBuyPrice(price: baseCurrency): baseCurrency;
+	/**
      * Returns the refund for selling one entity of *tradingCurrency* including fees.
      */
-	abstract getCurrentSellCondition(): Promise<baseCurrency>;
+	async getEffCurrSellPrice(): Promise<baseCurrency> {
+		return this.getEffectiveSellPrice(await this.getCurrentSellPrice());
+	}
 	/**
      * Returns the cost for _really_ buying one entity of *tradingCurrency*. (So you have 1 at the end)
      */
-	abstract getCurrentBuyCondition(): Promise<baseCurrency>;
+	async getEffCurrBuyPrice(): Promise<baseCurrency> {
+		return this.getEffectiveBuyPrice(await this.getCurrentBuyPrice());
+	}
 
 	/**
      * Returns the *costs* for a certain *buyVolume* you have to pay

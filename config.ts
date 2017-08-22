@@ -47,7 +47,11 @@ const defaultConfig = {
 		emoji: [["😡", -Infinity], ["💩", -2], ["😢", -1], ["😔", -0.5], ["😋", 0.2], ["😁", 0.4], ["🔥", 0.8]] as [
 			string,
 			number
-		][]
+		][],
+		/**
+		 * How much the printer will invest to print money
+		 */
+		maxStake: (2000).EUR // baseCurrency (EUR)
 	},
 	telegram: {
 		token: ""

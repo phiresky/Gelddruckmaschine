@@ -37,15 +37,13 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		return Math.min(...orders.map(order => order.price)).EUR;
 	}
 
-	async getCurrentSellCondition(): Promise<EUR> {
-		return ((await this.getCurrentSellPrice()) * (1 - config.bitcoinde.feeLessPrice)) as EUR;
+	getEffectiveSellPrice(price: EUR): EUR {
+		return (price * (1 - config.bitcoinde.feeLessPrice)) as EUR;
 	}
-	async getCurrentBuyCondition(): Promise<EUR> {
+	getEffectiveBuyPrice(price: EUR): EUR {
 		// buy a * (prize - 0.4%) EUR for a * (1 - 0.8%) BTC =!= 1 BTC
 		// => a = 1 / (1 - 0.8%)
-		return ((await this.getCurrentBuyPrice()) *
-			(1 - config.bitcoinde.feeLessPrice) /
-			(1 - config.bitcoinde.feeLessBTC)) as EUR;
+		return (price * (1 - config.bitcoinde.feeLessPrice) / (1 - config.bitcoinde.feeLessBTC)) as EUR;
 	}
 
 	async getCheapestOfferToBuy(volume?: EUR): Promise<BitcoindeOffer | null> {

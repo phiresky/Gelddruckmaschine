@@ -22,8 +22,8 @@ export async function getProfitMarginBasic<tradingCurrency extends currency, bas
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
 ) {
-	const buyPrice = (await startClient.getCurrentBuyCondition()) as currency;
-	const sellPrice = (await endClient.getCurrentSellCondition()) as currency;
+	const buyPrice = (await startClient.getEffCurrBuyPrice()) as currency;
+	const sellPrice = (await endClient.getEffCurrSellPrice()) as currency;
 	return (sellPrice - buyPrice) / buyPrice;
 }
 
@@ -49,7 +49,15 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
 ) {
-	// dodo
+	const availableMoney = Math.min(
+		await startClient.getAvailableBaseCurrency(),
+		config.general.maxStake
+	) as baseCurrency;
+	const startOffer = await startClient.getCheapestOfferToBuy(availableMoney);
+	if (startOffer === null) {
+		debug(`No offer was found for client ${startClient.constructor.name}`);
+		return;
+	}
 }
 
 async function run() {
