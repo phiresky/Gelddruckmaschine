@@ -1,3 +1,5 @@
+import * as _debug from "debug";
+const debug = _debug("printer");
 // COllection of old printer stuff
 
 async function doTrade(order: BitcoindeOrder, amount: number) {
@@ -5,7 +7,7 @@ async function doTrade(order: BitcoindeOrder, amount: number) {
 	await api.Trades.executeTrade(bitcoinde, {
 		order_id: order.order_id,
 		type: "buy", //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
-		amount
+		amount,
 	});
 	debug(`bitcoin buy success!`);
 	const actualAmount_BTC = amount * (1 - config.btcdeSellFee);
@@ -15,7 +17,7 @@ async function doTrade(order: BitcoindeOrder, amount: number) {
 		type: "sell",
 		ordertype: "market",
 		volume: actualAmount_BTC,
-		oflags: "viqc"
+		oflags: "viqc",
 	});
 	debug(`kraken order create success!!`, res);
 }
@@ -85,7 +87,7 @@ export async function printMoney() {
 				trading_pair: "btceur",
 				price: order.price,
 				min_amount: order.min_amount,
-				amount: order.max_amount
+				amount: order.max_amount,
 			});
 		await sleep(30000);
 	}

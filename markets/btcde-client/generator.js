@@ -8,6 +8,11 @@ var myMappings = {
 	"Orders.showOrderbook.Response.Success_200.orders": "Orders.showOrderbook.Response.Orders[]",
 	"Sonstiges.showPublicTradeHistory.Response.Success_200.trades":
 		"Sonstiges.showPublicTradeHistory.Response.Trade_Informationen[]",
+	"Sonstiges.showAccountInfo.Response.Success_200.data": "Sonstiges.showAccountInfo.Response.Data",
+	"Sonstiges.showAccountInfo.Response.Data.btc_balance": "Sonstiges.showAccountInfo.Response.BTC_Balance",
+	"Sonstiges.showAccountInfo.Response.Data.fidor_reservation": "Sonstiges.showAccountInfo.Response.Fidor_Reservation",
+	"Sonstiges.showAccountInfo.Response.Data.encrypted_information":
+		"Sonstiges.showAccountInfo.Response.Encrypted_Information_",
 };
 var myRefs = {
 	// "bankenländer": ,

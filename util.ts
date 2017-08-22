@@ -87,3 +87,5 @@ export function rateProfitMargin(margin: number) {
 export function lineTrim(string: string) {
 	return string.trim().split("\n").map(l => l.trim()).join("\n");
 }
+
+export function cache(...stuff: any[]) {}

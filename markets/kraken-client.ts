@@ -1,6 +1,6 @@
 import { EUR, BTC } from "../definitions/currency";
 import { MarketClient, TradeOffer } from "./market-client";
-import { Simplify, As } from "../util";
+import { Simplify, As, cache } from "../util";
 import { KrakenClient as APIClient } from "./kraken-client/kraken";
 import config from "../config";
 
@@ -17,6 +17,11 @@ export type KrakenOffer = Simplify<
 type returnTypes = {
 	/** <price>, <volume>, <timestamp> */
 	getDepth: KrakenResult<{ bids: [string, string, number]; asks: [string, string, number] }>;
+	getBalance: {
+		ZEUR: string;
+		XXBT: string;
+		BCH: string;
+	};
 };
 
 export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
@@ -65,11 +70,17 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	async executePendingTradeOffer(offer: KrakenOffer): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
+	//@cache(10.seconds)
+	async getBalance(): Promise<returnTypes["getBalance"]> {
+		return await this.api.getBalance();
+	}
 	async getAvailableTradingCurrency(): Promise<BTC> {
-		throw new Error("Method not implemented.");
+		const { XXBT } = await this.getBalance();
+		return (+XXBT).BTC;
 	}
 	async getAvailableBaseCurrency(): Promise<EUR> {
-		throw new Error("Method not implemented.");
+		const { ZEUR } = await this.getBalance();
+		return (+ZEUR).EUR;
 	}
 }
 

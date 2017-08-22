@@ -1105,7 +1105,7 @@ export namespace Sonstiges {
              *
              * Account-Infos (s.Tabelle Data)
              */
-				data: Data[];
+				data: Data;
 			}
 
 			/**
@@ -1117,19 +1117,19 @@ export namespace Sonstiges {
              *
              * Infos zur BTC-Balance (s.Tabelle BTC-Balance)
              */
-				btc_balance: BTC_Balance[];
+				btc_balance: BTC_Balance;
 				/**
              * fidor_reservation
              *
              * Infos zur ggfs. vorhandenen Fidor-Reservierung (s.Tabelle Fidor-Reservation)
              */
-				fidor_reservation?: Fidor_Reservation[];
+				fidor_reservation?: Fidor_Reservation;
 				/**
              * encrypted_information
              *
              * Verschlüsselte Infos (s.Tabelle Encrypted-Information¹)
              */
-				encrypted_information: Encrypted_Information_[];
+				encrypted_information: Encrypted_Information_;
 			}
 
 			/**

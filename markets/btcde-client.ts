@@ -66,32 +66,37 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		};
 	}
 
-	getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ costs: EUR; receivedVolume: BTC }> {
+	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ costs: EUR; receivedVolume: BTC }> {
 		throw new Error("Method not implemented.");
 	}
-	getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
+	async getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
-	getHighestOfferToSell(
-		volume?: BTC | undefined,
-	): Promise<Simplify<TradeOffer<BTC, EUR> & { bitcoindeId: string } & As<"bitcoindeoffer">>> {
+	async getHighestOfferToSell(volume?: BTC | undefined): Promise<BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
-	setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
+	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
+	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	executePendingTradeOffer(
-		offer: Simplify<TradeOffer<BTC, EUR> & { bitcoindeId: string } & As<"bitcoindeoffer">>,
-	): Promise<boolean> {
+	async executePendingTradeOffer(offer: BitcoindeOffer): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	getAvailableTradingCurrency(): Promise<BTC> {
-		throw new Error("Method not implemented.");
+	async getAccountInfo(): Promise<API.Sonstiges.showAccountInfo.Response.Data> {
+		const { data } = await API.Sonstiges.showAccountInfo(this.client);
+		return data;
 	}
-	getAvailableBaseCurrency(): Promise<EUR> {
-		throw new Error("Method not implemented.");
+	async getAvailableTradingCurrency(): Promise<BTC> {
+		const res = await this.getAccountInfo();
+		return (+res.btc_balance.available_amount).BTC;
+	}
+	async getAvailableBaseCurrency(): Promise<EUR> {
+		const res = await this.getAccountInfo();
+		if (!res.fidor_reservation) return (0).EUR;
+		const { valid_until, available_amount } = res.fidor_reservation;
+		if (new Date(valid_until).getTime() < Date.now() + 5 * 60 * 1000) return (0).EUR;
+		return (+available_amount).EUR;
 	}
 }
