@@ -101,8 +101,8 @@ async function updateKrakenPrice() {
 		console.log(formattedResult.slice().reverse());
 		const lastTime = formattedResult[formattedResult.length - 1].time;
 		const timediff_SECS = (new Date().getTime() - lastTime.getTime()) / 1000;
-		if (timediff_SECS > config.maxPriceAge_SECS) {
-			throw Error(`Last Kraken price is more than ${config.maxPriceAge_SECS} seconds old.`);
+		if (timediff_SECS > config.krakencom.maxPriceAge_SECS) {
+			throw Error(`Last Kraken price is more than ${config.krakencom.maxPriceAge_SECS} seconds old.`);
 		}
 		krakenPrice_EUR = formattedResult[formattedResult.length - 1].price_EUR;
 		debug(`Fetched new Kraken price: ${krakenPrice_EUR} EUR (from ${lastTime})`);

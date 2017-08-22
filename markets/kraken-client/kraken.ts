@@ -269,15 +269,15 @@ export class KrakenClient {
 		var hash = crypto.createHash("sha256");
 		var hmac = crypto.createHmac("sha512", secret);
 
-		var hashDigest = hash.update(nonce + message).digest("binary");
-		var hmacDigest = hmac.update(path + hashDigest, "binary").digest("base64");
+		var hashDigest = hash.update(nonce + message).digest("binary" as any);
+		var hmacDigest = hmac.update(path + hashDigest, "binary" as any).digest("base64");
 
 		return hmacDigest;
 	}
 
 	private async rawRequest(url: string, headers: object, params: object) {
 		// Set custom User-Agent string
-		headers["User-Agent"] = "Kraken Typescript API Client";
+		(headers as any)["User-Agent"] = "Kraken Typescript API Client";
 
 		var options = {
 			url: url,
