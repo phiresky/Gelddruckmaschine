@@ -79,6 +79,10 @@ export abstract class MarketClient<
      * @returns *true* if trade was completed, *false* if not.
      */
 	abstract executePendingTradeOffer(offer: OfferType): Promise<boolean>;
+
+	abstract getAvailableTradingCurrency(): Promise<tradingCurrency>;
+
+	abstract getAvailableBaseCurrency(): Promise<baseCurrency>;
 }
 
 export interface TradeOffer<tradingCurrency, baseCurrency> {
