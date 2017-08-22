@@ -43,9 +43,9 @@ export async function getProfitMarginBasic<tradingCurrency extends currency, bas
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
 ) {
-	const buyPrize = ((await startClient.getCurrentBuyPrice()) as currency) * (1 - 0.004);
-	const sellPrize = ((await endClient.getCurrentSellPrice()) as currency) * (1 - 0.002);
-	return (sellPrize - buyPrize) / buyPrize;
+	const buyPrice = ((await startClient.getCurrentBuyPrice()) as currency) * (1 - 0.004) / (1 - 0.008);
+	const sellPrice = ((await endClient.getCurrentSellPrice()) as currency) * (1 - 0.002) * (1 - 0.008);
+	return (sellPrice - buyPrice) / buyPrice;
 }
 
 async function doTrade(order: BitcoindeOrder, amount: number) {
