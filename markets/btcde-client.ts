@@ -26,12 +26,14 @@ export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
 			type: "sell",
 			only_express_orders: 1
 		});
-
-		return (0).EUR; //orders.map(order => order.price)
+		return Math.max(...orders.map(order => order.price)).EUR;
 	}
 	async getCurrentBuyPrice(): Promise<EUR> {
-		const { price } = await this.getTradeAmountsForBuyVolume((0).BTC);
-		return price;
+		const { orders } = await API.Orders.showOrderbook(this.client, {
+			type: "buy",
+			only_express_orders: 1
+		});
+		return Math.min(...orders.map(order => order.price)).EUR;
 	}
 	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ price: EUR; receivedVolume: BTC }> {
 		throw new Error("Method not implemented.");
@@ -52,6 +54,12 @@ export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
 	async executePendingTradeOffer(offer: BitcoindeOffer): Promise<boolean> {
+		throw new Error("Method not implemented.");
+	}
+	async getAvailableTradingCurrency(): Promise<BTC> {
+		throw new Error("Method not implemented.");
+	}
+	async getAvailableBaseCurrency(): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
 }
