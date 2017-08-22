@@ -15,3 +15,8 @@ export async function readFileToObjectAsync<T>(path: string) {
 export async function writeObjectToFileAsync(path: string, object: {}) {
 	return fs.writeFile(path, JSON.stringify(object, null, "\t"));
 }
+
+export type Simplify<T> = { [k in keyof T]: T[k] };
+export class As<S extends string> {
+	private __as: S;
+}

@@ -1,14 +1,13 @@
+import { EUR, BTC } from "../definitions/currency";
 import { MarketClient, TradeOffer } from "./market-client";
-import { BTC, EUR } from "../definitions/currency";
-import { As, Simplify } from "../util";
-
-export type BitcoindeOffer = Simplify<
+import { Simplify, As } from "../util";
+export type KrakenOffer = Simplify<
 	TradeOffer<BTC, EUR> & {
 		bitcoindeId: string; // optional identifier to know with which order you are dealing
-	} & As<"bitcoindeoffer">
+	} & As<"krakenoffer">
 >;
 
-export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
+export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	getCurrentSellPrice(): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
@@ -21,20 +20,19 @@ export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
 	getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
-	getCheapestOfferToBuy(volume?: EUR): Promise<BitcoindeOffer> {
+	getCheapestOfferToBuy(volume?: EUR | undefined): Promise<KrakenOffer> {
 		throw new Error("Method not implemented.");
 	}
-	getHighestOfferToSell(volume?: BTC): Promise<BitcoindeOffer> {
+	getHighestOfferToSell(volume?: BTC | undefined): Promise<KrakenOffer> {
 		throw new Error("Method not implemented.");
 	}
-	setMarketBuyOrder(amount: BTC, amount_min?: BTC): Promise<boolean> {
+	setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	setMarketSellOrder(amount: BTC, amount_min?: BTC): Promise<boolean> {
+	setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	executePendingTradeOffer(offer: BitcoindeOffer): Promise<boolean> {
+	executePendingTradeOffer(offer: KrakenOffer): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
 }
-a;

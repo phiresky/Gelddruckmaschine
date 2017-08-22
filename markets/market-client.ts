@@ -10,7 +10,11 @@ import { currency } from "../definitions/currency";
  * * tradingCurrency: The currency that will be traded with.
  */
 
-export abstract class MarketClient<tradingCurrency extends currency, baseCurrency extends currency> {
+export abstract class MarketClient<
+	tradingCurrency extends currency,
+	baseCurrency extends currency,
+	OfferType extends TradeOffer<currency, baseCurrency>
+> {
 	/**
      * Returns the current price one entity of *tradingCurrency*
      * can be sold at on this market, measured in *baseCurrency*.
@@ -47,13 +51,13 @@ export abstract class MarketClient<tradingCurrency extends currency, baseCurrenc
      * *tradingCurrency* for *baseCurrency*.
      * @param volume If set, only offers that can be bought for less *baseCurrency* are considered.
      */
-	abstract getCheapestOfferToBuy(volume?: baseCurrency): Promise<TradeOffer<tradingCurrency, baseCurrency>>;
+	abstract getCheapestOfferToBuy(volume?: baseCurrency): Promise<OfferType>;
 	/**
      * Returns the highest open offer where you can sell
      * *tradingCurrency* and get *baseCurrency* instead.
      * @param volume If set, only offers where you can sell this amount of *tradingCurrency* are taken into account.
      */
-	abstract getHighestOfferToSell(volume?: tradingCurrency): Promise<TradeOffer<tradingCurrency, baseCurrency>>;
+	abstract getHighestOfferToSell(volume?: tradingCurrency): Promise<OfferType>;
 
 	/**
      * Places a market order to buy *amount* of *tradingCurrency*.
@@ -74,7 +78,7 @@ export abstract class MarketClient<tradingCurrency extends currency, baseCurrenc
      * @param offer The pending trade offer to accept.
      * @returns *true* if trade was completed, *false* if not.
      */
-	abstract executePendingTradeOffer(offer: TradeOffer<tradingCurrency, baseCurrency>): Promise<boolean>;
+	abstract executePendingTradeOffer(offer: OfferType): Promise<boolean>;
 }
 
 export interface TradeOffer<tradingCurrency, baseCurrency> {
@@ -83,7 +87,6 @@ export interface TradeOffer<tradingCurrency, baseCurrency> {
 	price: baseCurrency; // per entity of tradingCurrency
 	time: Date;
 	type: "buy" | "sell"; // TODO Maybe externalize to own type
-	id?: string; // optional identifier to know with which order you are dealing
 }
 
 // Cranck shit for currencies: number.EUR or 1.28.BTC

@@ -1,6 +1,4 @@
-declare class As<S extends string> {
-	private __as: S;
-}
+import { As } from "../util";
 
 export type EUR = number & As<"EUR">;
 export type BTC = number & As<"BTC">;
