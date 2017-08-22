@@ -16,8 +16,8 @@ const debug = _debug("statistics");
 const krakenTradesFile = "./data/krakenTrades.json";
 
 type KrakenTradeResult = [string, string, number, string, string, string]; // <price>, <volume>, <time>, <buy/sell>, <market/limit>, <miscellaneous>)
-interface KrakenResult<T> {
-	XXBTZEUR: T[];
+export interface KrakenResult<T> {
+	XXBTZEUR: T;
 	last?: string;
 }
 
@@ -37,7 +37,7 @@ type TradeBins = {
 		min_EURperBTC: number;
 		max_EURperBTC: number;
 		count: number;
-	}
+	};
 };
 
 async function getBtcdeTrades() {
@@ -50,7 +50,7 @@ async function queryKrakenTrades(last_ns: string) {
 	do {
 		//const startTime = Date.now();
 		debug(`Fetch trades since: ${new Date(parseInt(date_ns) / 1e6)}`);
-		const queryResult: KrakenResult<KrakenTradeResult> = await loopUntilSuccess(
+		const queryResult: KrakenResult<KrakenTradeResult[]> = await loopUntilSuccess(
 			kraken.getTrades({
 				pair: "XXBTZEUR",
 				since: date_ns
@@ -62,7 +62,8 @@ async function queryKrakenTrades(last_ns: string) {
 		}
 
 		var newTrades = queryResult.XXBTZEUR.map(
-			([price, vol, time, type, ordertype, misc]) => ({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade)
+			([price, vol, time, type, ordertype, misc]) =>
+				({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade)
 		);
 		tradeList.push(...newTrades);
 		debug(`Fetched ${newTrades.length} trades.`);
@@ -120,11 +121,10 @@ function getTradesBinned(tradeList: Trade[]) {
 	});
 	for (const key in result) {
 		const bin = result[key];
-		bin.mean_EURperBTC /= 1. * bin.count;
+		bin.mean_EURperBTC /= 1 * bin.count;
 	}
 	return result;
 }
-
 
 async function main() {
 	//const btcdeTradeList = getBtcdeTrades();

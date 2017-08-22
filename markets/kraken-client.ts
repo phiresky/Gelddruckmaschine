@@ -1,46 +1,69 @@
 import { EUR, BTC } from "../definitions/currency";
 import { MarketClient, TradeOffer } from "./market-client";
 import { Simplify, As } from "../util";
+import { KrakenClient as APIClient } from "./kraken-client/kraken";
+import config from "../config";
+import { KrakenResult } from "../statistics";
+
 export type KrakenOffer = Simplify<
 	TradeOffer<BTC, EUR> & {
-		bitcoindeId: string; // optional identifier to know with which order you are dealing
+		krakenId: string; // optional identifier to know with which order you are dealing
 	} & As<"krakenoffer">
 >;
 
+type returnTypes = {
+	/** <price>, <volume>, <timestamp> */
+	getDepth: KrakenResult<{ bids: [string, string, number]; asks: [string, string, number] }>;
+};
+
 export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
-	getCurrentSellPrice(): Promise<EUR> {
+	api = new APIClient(config.krakencom.key, config.krakencom.secret);
+	constructor() {
+		super();
+	}
+	async getCurrentSellPrice(): Promise<EUR> {
+		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
+		const [price, volume, timestamp] = offers.XXBTZEUR.bids[0];
+		return (+price).EUR;
+	}
+	async getCurrentBuyPrice(): Promise<EUR> {
+		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
+		const [price, volume, timestamp] = offers.XXBTZEUR.asks[0];
+		return (+price).EUR;
+	}
+	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ costs: EUR; receivedVolume: BTC }> {
 		throw new Error("Method not implemented.");
 	}
-	getCurrentBuyPrice(): Promise<EUR> {
+	async getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
-	getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ price: EUR; receivedVolume: BTC }> {
+	async getCheapestOfferToBuy(volume?: EUR | undefined): Promise<KrakenOffer> {
 		throw new Error("Method not implemented.");
 	}
-	getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
+	async getHighestOfferToSell(volume?: BTC | undefined): Promise<KrakenOffer> {
 		throw new Error("Method not implemented.");
 	}
-	getCheapestOfferToBuy(volume?: EUR | undefined): Promise<KrakenOffer> {
+	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	getHighestOfferToSell(volume?: BTC | undefined): Promise<KrakenOffer> {
+	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
+	async executePendingTradeOffer(offer: KrakenOffer): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
+	async getAvailableTradingCurrency(): Promise<BTC> {
 		throw new Error("Method not implemented.");
 	}
-	executePendingTradeOffer(offer: KrakenOffer): Promise<boolean> {
+	async getAvailableBaseCurrency(): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
 }
 
 // Old stuff from printer
 let kraken: any;
-let config: any;
 let debug: any;
+const BTCEUR = "XXBTZEUR";
 
 type SpreadResult = [number, string, string];
 interface MarketPrice {
