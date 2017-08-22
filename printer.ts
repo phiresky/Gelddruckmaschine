@@ -58,4 +58,6 @@ async function run() {
 	console.log(await getProfitMarginBasic(clients.bde, clients.kraken));
 }
 
-run();
+if (require.main === module) {
+	run();
+}

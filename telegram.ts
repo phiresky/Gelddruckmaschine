@@ -1,7 +1,7 @@
 import TelegramBot = require("node-telegram-bot-api");
 import config from "./config";
 import { BitcoindeClient } from "./markets/btcde-client";
-import { sleep, normalTemplate } from "./util";
+import { sleep, normalTemplate, significantDigits, currency } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
 import * as printer from "./printer";
 
@@ -13,14 +13,12 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	"/getgap": () => {
 		const [api1, api2] = [printer.clients.bde, printer.clients.kraken];
 		return Procedural`
-		bde -> kraken: ${api1.getCurrentBuyPrice()} -> ${api2.getCurrentSellPrice()}
-		bde -> kraken: ${printer.getProfitMarginBasic(api1, api2)}
+		bde -> kraken: buy @ ${api1.getCurrentBuyPrice().then(currency)} € -> ${api2.getCurrentSellPrice().then(currency)} €
+		bde -> kraken: ${printer.getProfitMarginBasic(api1, api2).then(x => significantDigits(x * 100, 2))}% profit
 
-		kraken -> bde: ${api2.getCurrentBuyPrice()} -> ${api1.getCurrentSellPrice()}
-		kraken -> bde: ${printer.getProfitMarginBasic(api2, api1)}
+		kraken -> bde: buy @ ${api2.getCurrentBuyPrice().then(currency)} € -> ${api1.getCurrentSellPrice().then(currency)} €
+		kraken -> bde: ${printer.getProfitMarginBasic(api2, api1).then(x => significantDigits(x * 100, 2))}% profit
 
-		bde: ${api1.getCurrentBuyCondition()} ${api1.getCurrentSellCondition()}
-		kraken: ${api2.getCurrentBuyCondition()} ${api2.getCurrentSellCondition()}
 		`;
 	},
 	"/status": () => {
@@ -28,8 +26,8 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	},
 	"/bdePrice": () => {
 		return Procedural`
-			Buy: ${bdeClient.getCurrentBuyPrice()}
-			Sell: ${bdeClient.getCurrentSellPrice()}
+			Buy: ${printer.clients.bde.getCurrentBuyPrice()}
+			Sell: ${printer.clients.bde.getCurrentSellPrice()}
 		`;
 	},
 	/*"/getMargin": () => {

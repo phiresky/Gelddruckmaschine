@@ -70,3 +70,11 @@ export function mergeDeep(target: any, ...sources: any[]): any {
 
 	return mergeDeep(target, ...sources);
 }
+
+export function significantDigits(inp: number, digits: number) {
+	return inp.toLocaleString(undefined, { minimumSignificantDigits: digits, maximumSignificantDigits: digits });
+}
+
+export function currency(inp: number) {
+	return inp.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
