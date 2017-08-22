@@ -1,7 +1,7 @@
 import TelegramBot = require("node-telegram-bot-api");
 import config from "./config";
 import { BitcoindeClient } from "./markets/btcde-client";
-import { sleep, normalTemplate, significantDigits, currency } from "./util";
+import { sleep, normalTemplate, significantDigits, currency, rateProfitMargin, lineTrim } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
 import * as printer from "./printer";
 
@@ -11,13 +11,21 @@ const unresolved = Symbol("unresolved");
 
 const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	"/getgap": () => {
-		const [api1, api2] = [printer.clients.bde, printer.clients.kraken];
+		const apis = [printer.clients.bde, printer.clients.kraken];
+		const [api1, api2] = apis.map(api => ({
+			buy: api.getCurrentBuyPrice().then(currency),
+			sell: api.getCurrentSellPrice().then(currency)
+		}));
 		return Procedural`
-		bde -> kraken: buy @ ${api1.getCurrentBuyPrice().then(currency)} € -> ${api2.getCurrentSellPrice().then(currency)} €
-		bde -> kraken: ${printer.getProfitMarginBasic(api1, api2).then(x => significantDigits(x * 100, 2))}% profit
+		bde -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €
+		bde -> kraken: ${printer
+			.getProfitMarginBasic(apis[0], apis[1])
+			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
 
-		kraken -> bde: buy @ ${api2.getCurrentBuyPrice().then(currency)} € -> ${api1.getCurrentSellPrice().then(currency)} €
-		kraken -> bde: ${printer.getProfitMarginBasic(api2, api1).then(x => significantDigits(x * 100, 2))}% profit
+		kraken -> bde: buy @ ${api2.buy} € -> sell @ ${api1.sell} €
+		kraken -> bde: ${printer
+			.getProfitMarginBasic(apis[1], apis[0])
+			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
 
 		`;
 	},
@@ -51,12 +59,20 @@ type WaitingMessage = () => AsyncIterableIterator<string>;
 function Procedural(strs: TemplateStringsArray, ...args: Promise<string | number>[]): WaitingMessage {
 	return async function* listener() {
 		const resolved: (string | number | symbol)[] = args.map(p => unresolved);
-		const withIndices = args.map((arg, index) => arg.then(value => ({ value, index })));
+		const withIndices = args.map((arg, index) =>
+			arg.then(value => ({ value, index }), value => Promise.reject({ value, index }))
+		);
 		while (true) {
-			yield normalTemplate(strs, ...resolved.map(r => (r === unresolved ? "[pending...]" : r)));
+			yield lineTrim(normalTemplate(strs, ...resolved.map(r => (r === unresolved ? "[pending...]" : r))));
 			const pending = withIndices.filter((p, i) => resolved[i] === unresolved);
 			if (pending.length === 0) return;
-			const { index, value } = await Promise.race(pending);
+			let index: number, value: any;
+			try {
+				({ index, value } = await Promise.race(pending));
+			} catch (e) {
+				index = e.index;
+				value = "Error: " + e.value;
+			}
 			console.log("got", value);
 			resolved[index] = value;
 		}
@@ -74,8 +90,10 @@ async function sendDelayed(bot: TelegramBot, chat_id: string, msg: WaitingMessag
 
 bot.on("message", async msg => {
 	const cmd = commands[msg.text];
-	if (!cmd) bot.sendMessage(msg.chat.id, "Unknown command " + msg.text);
-	else {
+	if (!cmd) {
+		console.log(msg.text);
+		bot.sendMessage(msg.chat.id, "Unknown command " + msg.text);
+	} else {
 		let result = await cmd();
 		if (typeof result === "string") await bot.sendMessage(msg.chat.id, result);
 		else {

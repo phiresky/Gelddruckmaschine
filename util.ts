@@ -1,4 +1,5 @@
 import * as fs from "mz/fs";
+import config from "./config";
 
 export function literal<T extends string | number>(t: T): T {
 	return t;
@@ -77,4 +78,12 @@ export function significantDigits(inp: number, digits: number) {
 
 export function currency(inp: number) {
 	return inp.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export function rateProfitMargin(margin: number) {
+	return config.general.emoji.reverse().find(p => margin * 100 >= p[1])![0];
+}
+
+export function lineTrim(string: string) {
+	return string.trim().split("\n").map(l => l.trim()).join("\n");
 }
