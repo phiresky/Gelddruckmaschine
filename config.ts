@@ -1,4 +1,6 @@
-export default {
+import localConfig from "./config.local";
+import { mergeDeep } from "./util";
+const defaultConfig = {
 	bitcoinde: {
 		/**
 		 * Bitcoin.de fee (eur -> btc)
@@ -9,7 +11,9 @@ export default {
 		 * Bitcoin.de fee (eur -> btc)
 		 * you receive 0,8% less bitcoins than ordered
 		 */
-		feeLessBTC: 0.008
+		feeLessBTC: 0.008,
+		key: "",
+		secret: ""
 	},
 	krakencom: {
 		/**
@@ -19,7 +23,9 @@ export default {
 		/**
 		 * Maximum allowed age of Kraken prices in seconds
 		 */
-		maxPriceAge_SECS: 60
+		maxPriceAge_SECS: 60,
+		key: "",
+		secret: ""
 	},
 	general: {
 		/**
@@ -37,5 +43,11 @@ export default {
 		 * Example: if minProfit is 0.01, then you make 10€ profit for a trade with 1000€ value
 		 */
 		minProfit: 0.01
+	},
+	telegram: {
+		token: ""
 	}
 };
+const res: typeof defaultConfig = mergeDeep({}, defaultConfig, localConfig);
+
+export default res;
