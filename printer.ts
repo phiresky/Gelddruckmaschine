@@ -1,12 +1,12 @@
-import { Websocket_API } from "./generated";
-import * as api from "./generated";
+import { Websocket_API } from "./markets/btcde-client/generated";
+import * as api from "./markets/btcde-client/generated";
 
 import * as _debug from "debug";
 import keyconfig from "./config";
-import { BitcoindeClient } from "./bitcoin-de";
+import { BitcoindeClient } from "./markets/btcde-client/bitcoin-de";
 import { KrakenClient } from "./kraken";
 import { literal } from "./util";
-import { onBitcoindeOrderCreated } from "./bitcoin-de-ws";
+import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
 import { sleep } from "./util";
 
 const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
@@ -71,7 +71,7 @@ async function updateKrakenPrice() {
 				} as MarketPrice)
 		);
 		if (formattedResult.length === 0) throw Error("Empty GetSpreadResult!");
-
+		console.log(formattedResult.slice().reverse());
 		const lastTime = formattedResult[formattedResult.length - 1].time;
 		const timediff_SECS = (new Date().getTime() - lastTime.getTime()) / 1000;
 		if (timediff_SECS > config.maxPriceAge_SECS) {

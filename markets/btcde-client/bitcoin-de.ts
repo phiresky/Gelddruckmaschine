@@ -59,7 +59,7 @@ export class BitcoindeClient {
      * @return {Object}            The request object
      */
 	async rawRequest(method: "GET" | "POST" | "DELETE", url: string, params: any) {
-		url = url.replace(/:([a-z_]+)/g, k => {
+		url = url.replace(/:([a-z_]+)/g, (_, k) => {
 			if (!(k in params)) throw Error(`Parameter ${k} missing`);
 			const v = params[k];
 			delete params[k];

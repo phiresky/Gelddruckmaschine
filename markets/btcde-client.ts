@@ -11,13 +11,14 @@ export type BitcoindeOffer = Simplify<
 	} & As<"bitcoindeoffer">
 >;
 
-export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
+export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	client: APIClient;
 
 	/**
 	 *
 	 */
 	constructor() {
+		super();
 		this.client = new APIClient(config.bitcoinde.key, config.bitcoinde.secret);
 	}
 
@@ -26,6 +27,7 @@ export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
 			type: "sell",
 			only_express_orders: 1
 		});
+		console.log(orders);
 		return Math.max(...orders.map(order => order.price)).EUR;
 	}
 	async getCurrentBuyPrice(): Promise<EUR> {
@@ -63,4 +65,3 @@ export class BitcoindeClient implements MarketClient<BTC, EUR, BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
 }
-a;
