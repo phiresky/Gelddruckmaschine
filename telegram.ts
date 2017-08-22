@@ -2,6 +2,7 @@ import TelegramBot = require("node-telegram-bot-api");
 import config from "./config";
 import { BitcoindeClient } from "./markets/btcde-client";
 import { sleep, normalTemplate } from "./util";
+//import * as printer from "./printer";
 
 const bot = new TelegramBot(config.telegram.token, { polling: true });
 
@@ -22,8 +23,14 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 			Sell: ${bdeClient.getCurrentSellPrice()}
 		`;
 	},
+	/*"/getMargin": () => {
+		return Procedural`
+			Current margin: ${printer.getProfitMargin(printer.clients.bde, printer.clients.kraken, 10)}
+			`;
+	},*/
 	"/asyncTest": () => {
 		return Procedural`
+		resolving after:
 			5s: ${sleep(5000).then(x => "yep")}
 			10s: ${sleep(10000).then(x => "yep")}
 			5s: ${sleep(5000).then(x => "yep")}

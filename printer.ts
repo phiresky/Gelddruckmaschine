@@ -13,7 +13,10 @@ import { currency } from "./definitions/currency";
 
 const debug = _debug("printer");
 
-const clients = [new BitcoindeClient(), new KrakenClient()];
+export const clients = {
+	bde: new BitcoindeClient(),
+	kraken: new KrakenClient()
+};
 
 /**
  * 
