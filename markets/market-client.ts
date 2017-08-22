@@ -31,6 +31,15 @@ export abstract class MarketClient<
 	abstract getCurrentBuyPrice(): Promise<baseCurrency>;
 
 	/**
+     * Returns the refund for selling one entity of *tradingCurrency* including fees.
+     */
+	abstract getCurrentSellCondition(): Promise<baseCurrency>;
+	/**
+     * Returns the cost for _really_ buying one entity of *tradingCurrency*. (So you have 1 at the end)
+     */
+	abstract getCurrentBuyCondition(): Promise<baseCurrency>;
+
+	/**
      * Returns the *costs* for a certain *buyVolume* you have to pay
      * and how much the *receivedVolume* in *tradingCurrency* really is.
      * This function simulates a trade and thus takes all fees into account.
@@ -51,7 +60,7 @@ export abstract class MarketClient<
      * *tradingCurrency* for *baseCurrency*.
      * @param volume If set, only offers that can be bought for less *baseCurrency* are considered.
      */
-	abstract getCheapestOfferToBuy(volume?: baseCurrency): Promise<OfferType>;
+	abstract getCheapestOfferToBuy(volume?: baseCurrency): Promise<OfferType | null>;
 	/**
      * Returns the highest open offer where you can sell
      * *tradingCurrency* and get *baseCurrency* instead.

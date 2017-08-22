@@ -43,8 +43,8 @@ export async function getProfitMarginBasic<tradingCurrency extends currency, bas
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
 ) {
-	const buyPrice = ((await startClient.getCurrentBuyPrice()) as currency) * (1 - 0.004) / (1 - 0.008);
-	const sellPrice = ((await endClient.getCurrentSellPrice()) as currency) * (1 - 0.002) * (1 - 0.008);
+	const buyPrice = (await startClient.getCurrentBuyCondition()) as currency;
+	const sellPrice = (await endClient.getCurrentSellCondition()) as currency;
 	return (sellPrice - buyPrice) / buyPrice;
 }
 
