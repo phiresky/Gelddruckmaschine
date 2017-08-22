@@ -19,10 +19,10 @@ export const clients = {
 };
 
 /**
- * 
+ * Returns profit margin if trading with a certain volume.
  * @param startClient The client buying *tradingCurrency* from *baseCurrency*
  * @param endClient The client selling *tradingCurrency* for 'baseCurrency*
- * @param min_volume The minimum volume in *tradingCurrency* to use.
+ * @param volume The volume in *tradingCurrency* to buy.
  * @returns profit margin as ratio (1 = 100%)
  */
 export async function getProfitMargin<tradingCurrency extends currency, baseCurrency extends currency>(
@@ -37,6 +37,15 @@ export async function getProfitMargin<tradingCurrency extends currency, baseCurr
 	}: { costs: currency; receivedVolume: tradingCurrency } = await startClient.getTradeAmountsForBuyVolume(volume);
 	const refund: currency = await endClient.getRefundForSellVolume(receivedVolume);
 	return (refund - costs) / costs;
+}
+
+export async function getProfitMarginBasic<tradingCurrency extends currency, baseCurrency extends currency>(
+	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
+) {
+	const buyPrize = ((await startClient.getCurrentBuyPrice()) as currency) * (1 - 0.004);
+	const sellPrize = ((await endClient.getCurrentSellPrice()) as currency) * (1 - 0.002);
+	return (sellPrize - buyPrize) / buyPrize;
 }
 
 async function doTrade(order: BitcoindeOrder, amount: number) {
