@@ -3,8 +3,11 @@ import { MarketClient, TradeOffer } from "./market-client";
 import { Simplify, As } from "../util";
 import { KrakenClient as APIClient } from "./kraken-client/kraken";
 import config from "../config";
-import { KrakenResult } from "../statistics";
 
+export interface KrakenResult<T> {
+	XXBTZEUR: T;
+	last?: string;
+}
 export type KrakenOffer = Simplify<
 	TradeOffer<BTC, EUR> & {
 		krakenId: string; // optional identifier to know with which order you are dealing
