@@ -107,10 +107,12 @@ async function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient): Prom
 
 async function getBalance(bitcoinde: BitcoindeClient, kraken: KrakenClient) {
 	//const r = await api.Sonstiges.showAccountInfo(bitcoinde);
-	console.log(await api.Orders.showOrderbook(bitcoinde, {
-		only_express_orders: 1,
-		type: "buy" // gibt angebote zurück wo ich buyen kann (order mit type = 'sell')
-	}));
+	console.log(
+		await api.Orders.showOrderbook(bitcoinde, {
+			only_express_orders: 1,
+			type: "buy" // gibt angebote zurück wo ich buyen kann (order mit type = 'sell')
+		})
+	);
 	//console.log(r);
 }
 
