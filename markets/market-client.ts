@@ -99,7 +99,7 @@ export abstract class MarketClient<
      * @param offer The pending trade offer to accept.
      * @returns *true* if trade was completed, *false* if not.
      */
-	abstract executePendingTradeOffer(offer: OfferType): Promise<boolean>;
+	abstract executePendingTradeOffer(offer: OfferType, amount: tradingCurrency): Promise<boolean>;
 
 	abstract getAvailableTradingCurrency(): Promise<tradingCurrency>;
 
@@ -122,6 +122,11 @@ Object.defineProperty(Number.prototype, "EUR", {
 	},
 });
 Object.defineProperty(Number.prototype, "BTC", {
+	get() {
+		return this.valueOf();
+	},
+});
+Object.defineProperty(Number.prototype, "n", {
 	get() {
 		return this.valueOf();
 	},

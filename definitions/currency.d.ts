@@ -9,5 +9,6 @@ declare global {
 	interface Number {
 		EUR: EUR;
 		BTC: BTC;
+		n: number;
 	}
 }

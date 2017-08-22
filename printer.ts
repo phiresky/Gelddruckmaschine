@@ -15,12 +15,12 @@ const debug = _debug("printer");
 
 export const clients = {
 	bde: new BitcoindeClient(),
-	kraken: new KrakenClient()
+	kraken: new KrakenClient(),
 };
 
 export async function getProfitMarginBasic<tradingCurrency extends currency, baseCurrency extends currency>(
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
-	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
+	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 ) {
 	const buyPrice = (await startClient.getEffCurrBuyPrice()) as currency;
 	const sellPrice = (await endClient.getEffCurrSellPrice()) as currency;
@@ -47,16 +47,50 @@ export async function printMoney() {
 
 async function tryPrintMoney<tradingCurrency extends currency, baseCurrency extends currency>(
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
-	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>
+	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 ) {
 	const availableMoney = Math.min(
 		await startClient.getAvailableBaseCurrency(),
-		config.general.maxStake
+		config.general.maxStake,
 	) as baseCurrency;
+	// will be market order but we check for price in order to ensure gap
+	const endOffer = await endClient.getHighestOfferToSell();
+	const endPriceEffective: currency = endClient.getEffectiveSellPrice(endOffer.price);
+
+	// check if buy order was found for given money
 	const startOffer = await startClient.getCheapestOfferToBuy(availableMoney);
 	if (startOffer === null) {
 		debug(`No offer was found for client ${startClient.constructor.name}`);
 		return;
+	}
+	const startPriceEffective: currency = startClient.getEffectiveBuyPrice(startOffer.price);
+	// calculate how many tradingCurrency we can buy with this
+	const tradeAmount = Math.min(availableMoney.n / startPriceEffective, startOffer.amount_max) as tradingCurrency;
+
+	// check if gap condition is still satisfied
+	const margin = (endPriceEffective - startPriceEffective) / startPriceEffective;
+	const marginStr = significantDigits(margin * 100, 2);
+	if (margin > config.general.minProfit) {
+		debug(`Noice! Found trades with margin ${marginStr}%. EXECUUUUTEEE!`);
+		// Accept start offer
+		if (await startClient.executePendingTradeOffer(startOffer, tradeAmount)) {
+			debug(
+				`Buy trade (amount: ${significantDigits(
+					tradeAmount,
+					3,
+				)}, price: ${startPriceEffective}) from ${startClient.constructor.name} successfull.`,
+			);
+			// Insert market order to endMarket:
+			if (await endClient.setMarketSellOrder(tradeAmount)) {
+				debug(`Market order on ${endClient.constructor.name} created.`);
+			} else {
+				throw new Error(`ERROR while creating market order on endClient!!`);
+			}
+		} else {
+			throw new Error(`ERROR while accepting order on startClient!!`);
+		}
+	} else {
+		debug(`Actual margin of ${marginStr}% unfortunately is too low now.. Sorry bro.`);
 	}
 }
 
