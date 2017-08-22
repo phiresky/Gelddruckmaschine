@@ -17,14 +17,14 @@ export abstract class MarketClient<tradingCurrency extends currency, baseCurrenc
      *
      * Remark: This price does not include any fees.
      */
-	abstract getCurrentSellPrice(): baseCurrency;
+	abstract getCurrentSellPrice(): Promise<baseCurrency>;
 	/**
      * Returns the current price in *baseCurrency* for which
      * you can buy one entity of *tradingCurrency*.
      *
      * Remark: This price does not include any fees.
      */
-	abstract getCurrentBuyPrice(): baseCurrency;
+	abstract getCurrentBuyPrice(): Promise<baseCurrency>;
 
 	/**
      * Returns the *price* for a certain *buyVolume* you have to pay
@@ -33,27 +33,27 @@ export abstract class MarketClient<tradingCurrency extends currency, baseCurrenc
      */
 	abstract getTradeAmountsForBuyVolume(
 		buyVolume: tradingCurrency
-	): { price: baseCurrency; receivedVolume: tradingCurrency };
+	): Promise<{ price: baseCurrency; receivedVolume: tradingCurrency }>;
 
 	// TODO Think if it makes sense that you could later on have sold a different volume than you wanted to sell
 	/**
      * Returns the refund in *baseCurrency* you get when selling a certain *sellVolume*.
      * This function simulates a trade and thus takes all fees into account.
      */
-	abstract getRefundForSellVolume(sellVolume: tradingCurrency): baseCurrency;
+	abstract getRefundForSellVolume(sellVolume: tradingCurrency): Promise<baseCurrency>;
 
 	/**
      * Returns the cheapest offer currently open where you can buy
      * *tradingCurrency* for *baseCurrency*.
      * @param volume If set, only offers that can be bought for less *baseCurrency* are considered.
      */
-	abstract getCheapestOfferToBuy(volume?: baseCurrency): TradeOffer<tradingCurrency, baseCurrency>;
+	abstract getCheapestOfferToBuy(volume?: baseCurrency): Promise<TradeOffer<tradingCurrency, baseCurrency>>;
 	/**
      * Returns the highest open offer where you can sell
      * *tradingCurrency* and get *baseCurrency* instead.
      * @param volume If set, only offers where you can sell this amount of *tradingCurrency* are taken into account.
      */
-	abstract getHighestOfferToSell(volume?: tradingCurrency): TradeOffer<tradingCurrency, baseCurrency>;
+	abstract getHighestOfferToSell(volume?: tradingCurrency): Promise<TradeOffer<tradingCurrency, baseCurrency>>;
 
 	/**
      * Places a market order to buy *amount* of *tradingCurrency*.
@@ -61,20 +61,20 @@ export abstract class MarketClient<tradingCurrency extends currency, baseCurrenc
      * @param amount_min If set, trades with volumes between *[amount_min, amount]* are possible.
      * @returns *true* if order was successfully created, *false* otherwise.
      */
-	abstract setMarketBuyOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
+	abstract setMarketBuyOrder(amount: tradingCurrency, amount_min?: tradingCurrency): Promise<boolean>;
 	/**
      * Places a market order to sell *amount* of *tradingCurrency*.
      * @param amount Amount of *tradingCurrency* to sell.
      * @param amount_min If set, trades with volumes between *[amount_min, amount]* are possible.
      * @returns *true* if order was successfully created, *false* otherwise.
      */
-	abstract setMarketSellOrderAsync(amount: tradingCurrency, amount_min?: tradingCurrency): boolean;
+	abstract setMarketSellOrder(amount: tradingCurrency, amount_min?: tradingCurrency): Promise<boolean>;
 	/**
      * Executes a priviously fetched open trade offer.
      * @param offer The pending trade offer to accept.
      * @returns *true* if trade was completed, *false* if not.
      */
-	abstract executePendingTradeOffer(offer: TradeOffer<tradingCurrency, baseCurrency>): boolean;
+	abstract executePendingTradeOffer(offer: TradeOffer<tradingCurrency, baseCurrency>): Promise<boolean>;
 }
 
 export interface TradeOffer<tradingCurrency, baseCurrency> {
