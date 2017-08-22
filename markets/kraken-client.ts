@@ -91,14 +91,14 @@ let krakenPrice_EUR: number | "unknown" = "unknown";
 async function updateKrakenPrice() {
 	try {
 		const result: GetSpreadResult = await kraken.getSpread({
-			pair: "XXBTZEUR"
+			pair: "XXBTZEUR",
 		});
 		const formattedResult = result.XXBTZEUR.map(
 			([timestamp, bid, ask]) =>
 				({
 					time: new Date(timestamp * 1000),
-					price_EUR: parseFloat(bid) // TODO Should be ask?
-				} as MarketPrice)
+					price_EUR: parseFloat(bid), // TODO Should be ask?
+				} as MarketPrice),
 		);
 		if (formattedResult.length === 0) throw Error("Empty GetSpreadResult!");
 		console.log(formattedResult.slice().reverse());

@@ -25,14 +25,14 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	async getCurrentSellPrice(): Promise<EUR> {
 		const { orders } = await API.Orders.showOrderbook(this.client, {
 			type: "sell",
-			only_express_orders: 1
+			only_express_orders: 1,
 		});
 		return Math.max(...orders.map(order => order.price)).EUR;
 	}
 	async getCurrentBuyPrice(): Promise<EUR> {
 		const { orders } = await API.Orders.showOrderbook(this.client, {
 			type: "buy",
-			only_express_orders: 1
+			only_express_orders: 1,
 		});
 		return Math.min(...orders.map(order => order.price)).EUR;
 	}
@@ -50,7 +50,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		const { orders } = await API.Orders.showOrderbook(this.client, {
 			type: "buy",
 			only_express_orders: 1,
-			amount: volume
+			amount: volume,
 		});
 		if (orders.length === 0) {
 			return null;
@@ -62,7 +62,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 			bitcoindeId: order.order_id,
 			price: order.price.EUR,
 			time: new Date(),
-			type: "buy"
+			type: "buy",
 		};
 	}
 
@@ -73,7 +73,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
 	getHighestOfferToSell(
-		volume?: BTC | undefined
+		volume?: BTC | undefined,
 	): Promise<Simplify<TradeOffer<BTC, EUR> & { bitcoindeId: string } & As<"bitcoindeoffer">>> {
 		throw new Error("Method not implemented.");
 	}
@@ -84,7 +84,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
 	executePendingTradeOffer(
-		offer: Simplify<TradeOffer<BTC, EUR> & { bitcoindeId: string } & As<"bitcoindeoffer">>
+		offer: Simplify<TradeOffer<BTC, EUR> & { bitcoindeId: string } & As<"bitcoindeoffer">>,
 	): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}

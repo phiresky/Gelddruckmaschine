@@ -57,7 +57,7 @@ export abstract class MarketClient<
      * This function simulates a trade and thus takes all fees into account.
      */
 	abstract getTradeAmountsForBuyVolume(
-		buyVolume: tradingCurrency
+		buyVolume: tradingCurrency,
 	): Promise<{ costs: baseCurrency; receivedVolume: tradingCurrency }>;
 
 	// TODO Think if it makes sense that you could later on have sold a different volume than you wanted to sell
@@ -119,10 +119,10 @@ export interface TradeOffer<tradingCurrency, baseCurrency> {
 Object.defineProperty(Number.prototype, "EUR", {
 	get() {
 		return this.valueOf();
-	}
+	},
 });
 Object.defineProperty(Number.prototype, "BTC", {
 	get() {
 		return this.valueOf();
-	}
+	},
 });

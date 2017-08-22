@@ -47,7 +47,7 @@ export class BitcoindeClient {
 			agent: "Money Printer",
 			key,
 			secret,
-			timeoutMS: 20000
+			timeoutMS: 20000,
 		};
 	}
 	emptyHash = crypto.createHash("md5").digest("hex");
@@ -73,7 +73,7 @@ export class BitcoindeClient {
 			url: url,
 			timeout: this.config.timeoutMS,
 			form: null as any,
-			headers: {}
+			headers: {},
 		};
 
 		if (params) {
@@ -106,13 +106,13 @@ export class BitcoindeClient {
 			"User-Agent": this.config.agent,
 			"X-API-KEY": this.config.key,
 			"X-API-NONCE": nonce,
-			"X-API-SIGNATURE": signature
+			"X-API-SIGNATURE": signature,
 		};
 		try {
 			var response = await {
 				GET: request.get,
 				DELETE: request.delete,
-				POST: request.post
+				POST: request.post,
 			}[method](options);
 		} catch (e) {
 			if (e.name === "StatusCodeError") {

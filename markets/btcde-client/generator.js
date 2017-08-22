@@ -7,7 +7,7 @@ var myMappings = {
 	"Sonstiges.showOrderbookCompact.Response.Orders.asks": "Sonstiges.showOrderbookCompact.Response.Asks[]",
 	"Orders.showOrderbook.Response.Success_200.orders": "Orders.showOrderbook.Response.Orders[]",
 	"Sonstiges.showPublicTradeHistory.Response.Success_200.trades":
-		"Sonstiges.showPublicTradeHistory.Response.Trade_Informationen[]"
+		"Sonstiges.showPublicTradeHistory.Response.Trade_Informationen[]",
 };
 var myRefs = {
 	// "bankenländer": ,
@@ -17,7 +17,7 @@ var myRefs = {
 	table_showAccountStatement_trade: "#table_showAccountLedger_trade",
 	table_showAccountStatement_btc: "#table_showAccountLedger_btc",
 	table_showAccountStatement_euro: "#table_showAccountLedger_euro",
-	table_showMyOrders_order: "#table_showMyOrderDetails_order"
+	table_showMyOrders_order: "#table_showMyOrderDetails_order",
 };
 function getValue(x) {
 	if ($$("code", x).length > 1) {
@@ -135,7 +135,7 @@ function makeField(x, iface) {
 	if (!x.Name.value) return null;
 	let str = [
 		`/**
-    * ${x.Name.value}`
+    * ${x.Name.value}`,
 	];
 	if (x.Notes)
 		str.push(`
@@ -224,7 +224,7 @@ function categorize(eles) {
 	const tree = {
 		$type: "module",
 		header: "Root",
-		children: []
+		children: [],
 	};
 	const allInterfaces = [];
 	for (const ele of eles) {
@@ -242,7 +242,7 @@ function categorize(eles) {
 		const i = {
 			...ele,
 			header: iface,
-			path
+			path,
 		};
 		allInterfaces.push(i);
 		target.children.push(i);
@@ -261,11 +261,11 @@ var docs = $$("table")
 					Object.assign(
 						{},
 						...$$("td", line).map((x, i) => ({
-							[hm[i]]: checkOptional(x)
-						}))
-					)
+							[hm[i]]: checkOptional(x),
+						})),
+					),
 				)
-				.filter(x => x.Name)
+				.filter(x => x.Name),
 		};
 	})
 	.filter(x => x.vals.length > 0);

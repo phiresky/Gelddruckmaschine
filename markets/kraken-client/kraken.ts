@@ -31,7 +31,7 @@ export class KrakenClient {
 			version: "0",
 			timeout: 20000,
 			key,
-			secret
+			secret,
 		};
 	}
 
@@ -257,7 +257,7 @@ export class KrakenClient {
 
 		var headers = {
 			"API-Key": this.config.key,
-			"API-Sign": signature
+			"API-Sign": signature,
 		};
 
 		return this.rawRequest(url, headers, params);
@@ -284,7 +284,7 @@ export class KrakenClient {
 			method: "POST",
 			headers,
 			form: params,
-			timeout: this.config.timeout
+			timeout: this.config.timeout,
 		};
 
 		var body = await request.post(options);

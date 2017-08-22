@@ -639,7 +639,7 @@ export namespace Orders {
     */
 	export function showOrderbook(
 		api: Api,
-		parameters: showOrderbook.Parameter
+		parameters: showOrderbook.Parameter,
 	): Promise<showOrderbook.Response.Success_200> {
 		return rawRequest(api, "GET", "orders", parameters);
 	}
@@ -656,7 +656,7 @@ export namespace Orders {
     */
 	export function createOrder(
 		api: Api,
-		parameters: createOrder.Parameter
+		parameters: createOrder.Parameter,
 	): Promise<createOrder.Response.Success_201> {
 		return rawRequest(api, "POST", "orders", parameters);
 	}
@@ -687,7 +687,7 @@ export namespace Orders {
     */
 	export function showMyOrders(
 		api: Api,
-		parameters: showMyOrders.Parameter
+		parameters: showMyOrders.Parameter,
 	): Promise<showMyOrders.Response.Success_200> {
 		return rawRequest(api, "GET", "orders/my_own", parameters);
 	}
@@ -704,7 +704,7 @@ export namespace Orders {
     */
 	export function showMyOrderDetails(
 		api: Api,
-		parameters: showMyOrderDetails.Parameter
+		parameters: showMyOrderDetails.Parameter,
 	): Promise<showMyOrderDetails.Response.Success_200> {
 		return rawRequest(api, "GET", "orders/:order_id", parameters);
 	}
@@ -1054,7 +1054,7 @@ export namespace Trades {
     */
 	export function showMyTrades(
 		api: Api,
-		parameters: showMyTrades.Parameter
+		parameters: showMyTrades.Parameter,
 	): Promise<showMyTrades.Response.Success_200> {
 		return rawRequest(api, "GET", "trades", parameters);
 	}
@@ -1071,7 +1071,7 @@ export namespace Trades {
     */
 	export function showMyTradeDetails(
 		api: Api,
-		parameters: showMyTradeDetails.Parameter
+		parameters: showMyTradeDetails.Parameter,
 	): Promise<showMyTradeDetails.Response.Success_200> {
 		return rawRequest(api, "GET", "trades/:trade_id", parameters);
 	}
@@ -1675,7 +1675,7 @@ export namespace Sonstiges {
     */
 	export function showPublicTradeHistory(
 		api: Api,
-		parameters: showPublicTradeHistory.Parameter
+		parameters: showPublicTradeHistory.Parameter,
 	): Promise<showPublicTradeHistory.Response.Success_200> {
 		return rawRequest(api, "GET", "trades/history", parameters);
 	}
@@ -1707,7 +1707,7 @@ export namespace Sonstiges {
     */
 	export function showAccountLedger(
 		api: Api,
-		parameters: showAccountLedger.Parameter
+		parameters: showAccountLedger.Parameter,
 	): Promise<showAccountLedger.Response.Success_200> {
 		return rawRequest(api, "GET", "account/ledger", parameters);
 	}
