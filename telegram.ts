@@ -3,21 +3,24 @@ import config from "./config";
 import { BitcoindeClient } from "./markets/btcde-client";
 import { sleep, normalTemplate } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
-//import * as printer from "./printer";
+import * as printer from "./printer";
 
 const bot = new TelegramBot(config.telegram.token, { polling: true });
-
-const bdeClient = new BitcoindeClient();
-const krakenClient = new KrakenClient();
 
 const unresolved = Symbol("unresolved");
 
 const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	"/getgap": () => {
-		const [api1, api2] = [bdeClient, krakenClient];
+		const [api1, api2] = [printer.clients.bde, printer.clients.kraken];
 		return Procedural`
 		bde -> kraken: ${api1.getCurrentBuyPrice()} -> ${api2.getCurrentSellPrice()}
+		bde -> kraken: ${printer.getProfitMarginBasic(api1, api2)}
+
 		kraken -> bde: ${api2.getCurrentBuyPrice()} -> ${api1.getCurrentSellPrice()}
+		kraken -> bde: ${printer.getProfitMarginBasic(api2, api1)}
+
+		bde: ${api1.getCurrentBuyCondition()} ${api1.getCurrentSellCondition()}
+		kraken: ${api2.getCurrentBuyCondition()} ${api2.getCurrentSellCondition()}
 		`;
 	},
 	"/status": () => {
@@ -54,9 +57,9 @@ function Procedural(strs: TemplateStringsArray, ...args: Promise<string | number
 		while (true) {
 			yield normalTemplate(strs, ...resolved.map(r => (r === unresolved ? "[pending...]" : r)));
 			const pending = withIndices.filter((p, i) => resolved[i] === unresolved);
-			console.log("pending", pending);
 			if (pending.length === 0) return;
 			const { index, value } = await Promise.race(pending);
+			console.log("got", value);
 			resolved[index] = value;
 		}
 	};
