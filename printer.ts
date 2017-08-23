@@ -54,7 +54,7 @@ export async function printMoney() {
 				}
 			}
 		}
-		await sleep(2000);
+		await sleep(10000);
 	}
 }
 
