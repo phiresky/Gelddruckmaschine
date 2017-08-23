@@ -77,7 +77,18 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 		} as KrakenOffer;
 	}
 	async getHighestOfferToSell(volume?: BTC | undefined): Promise<KrakenOffer> {
-		throw new Error("Method getHighestOfferToSell not implemented.");
+		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
+		if (offers.XXBTZEUR.bids.length === 0) throw Error(`no asks found`);
+		let gotVolume = 0;
+		const [price, ask_volume, timestamp] = offers.XXBTZEUR.bids[0];
+		console.log("chea", price, ask_volume, timestamp);
+		return {
+			amount_min: (+ask_volume).BTC,
+			amount_max: (+ask_volume).BTC,
+			price: (+price).EUR,
+			time: new Date(timestamp * 1000),
+			type: "buy",
+		} as KrakenOffer;
 	}
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method setMarketBuyOrder not implemented.");
@@ -94,10 +105,12 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	}
 	async getAvailableTradingCurrency(): Promise<BTC> {
 		const { XXBT } = await this.getBalance();
+		console.log("avbtc", XXBT);
 		return (+XXBT).BTC;
 	}
 	async getAvailableBaseCurrency(): Promise<EUR> {
 		const { ZEUR } = await this.getBalance();
+		console.log("aveur", ZEUR);
 		return (+ZEUR).EUR;
 	}
 }

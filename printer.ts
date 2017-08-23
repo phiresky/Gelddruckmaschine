@@ -127,7 +127,7 @@ async function run() {
 	console.log("bde -> kraken");
 	console.log(await getProfitMarginBasic(clients.bde, clients.kraken));
 }
-
+console.log("running");
 if (require.main === module) {
 	//run();
 	printMoney();

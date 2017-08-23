@@ -3,6 +3,8 @@
 import request = require("request-promise-native");
 import crypto = require("crypto");
 import querystring = require("querystring");
+import * as _debug from "debug";
+const debug = _debug("kraken.com");
 /**
  * The KrakenClient offers methods for calling the Kraken API as
  * described here: https://www.kraken.com/help/api
@@ -286,11 +288,12 @@ export class KrakenClient {
 			form: params,
 			timeout: this.config.timeout,
 		};
-
+		debug("POST", options);
 		var body = await request.post(options);
 		var data;
 		try {
 			data = JSON.parse(body);
+			debug("RESPONSE", data);
 		} catch (e) {
 			throw new Error(`Could not understand response from server: ${body}`);
 		}

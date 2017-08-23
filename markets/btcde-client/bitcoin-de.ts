@@ -134,6 +134,7 @@ export class BitcoindeClient {
 		if (data.errors && data.errors.length > 0) {
 			throw new Error("Bitcoin.de API returned errors: " + data.errors);
 		}
+		debug("RESPONSE", data);
 		return data;
 	}
 }
