@@ -1,6 +1,24 @@
 import * as fs from "mz/fs";
 import config from "./config";
 
+// Cranck shit for currencies: number.EUR or 1.28.BTC
+// TODO find better place to move this to
+Object.defineProperty(Number.prototype, "EUR", {
+	get() {
+		return this.valueOf();
+	},
+});
+Object.defineProperty(Number.prototype, "BTC", {
+	get() {
+		return this.valueOf();
+	},
+});
+Object.defineProperty(Number.prototype, "n", {
+	get() {
+		return this.valueOf();
+	},
+});
+
 export function literal<T extends string | number>(t: T): T {
 	return t;
 }

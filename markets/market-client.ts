@@ -129,21 +129,3 @@ export interface TradeOffer<tradingCurrency, baseCurrency> {
 	time: Date;
 	type: "buy" | "sell"; // TODO Maybe externalize to own type
 }
-
-// Cranck shit for currencies: number.EUR or 1.28.BTC
-// TODO find better place to move this to
-Object.defineProperty(Number.prototype, "EUR", {
-	get() {
-		return this.valueOf();
-	},
-});
-Object.defineProperty(Number.prototype, "BTC", {
-	get() {
-		return this.valueOf();
-	},
-});
-Object.defineProperty(Number.prototype, "n", {
-	get() {
-		return this.valueOf();
-	},
-});

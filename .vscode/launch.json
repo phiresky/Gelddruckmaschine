@@ -6,10 +6,12 @@
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/node_modules/ts-node/dist/_bin.js",
-			"args": ["${relativeFile}"],
+			"args": ["--fast", "${relativeFile}"],
 			"cwd": "${workspaceRoot}",
-			"protocol": "inspector"
+			"protocol": "inspector",
+			"env": {
+				"DEBUG": "printer,bitcoin.de"
+			}
 		}
 	]
 }
-
