@@ -13,7 +13,7 @@ const defaultConfig = {
 		 */
 		feeLessBTC: 0.008,
 		key: "",
-		secret: ""
+		secret: "",
 	},
 	krakencom: {
 		/**
@@ -25,7 +25,7 @@ const defaultConfig = {
 		 */
 		maxPriceAge_SECS: 60,
 		key: "",
-		secret: ""
+		secret: "",
 	},
 	general: {
 		/**
@@ -42,7 +42,7 @@ const defaultConfig = {
 		 * 
 		 * Example: if minProfit is 0.01, then you make 10€ profit for a trade with 1000€ value
 		 */
-		minProfit: 0.01,
+		minProfit: 0.001, // TODO change back to 0.01
 
 		emoji: [["😡", -Infinity], ["💩", -2], ["😢", -1], ["😔", -0.5], ["😋", 0.2], ["😁", 0.4], ["🔥", 0.8]] as [
 			string,
@@ -51,11 +51,11 @@ const defaultConfig = {
 		/**
 		 * How much the printer will invest to print money
 		 */
-		maxStake: (2000).EUR // baseCurrency (EUR)
+		maxStake: (2000).EUR, // baseCurrency (EUR)
 	},
 	telegram: {
-		token: ""
-	}
+		token: "",
+	},
 };
 const res: typeof defaultConfig = mergeDeep({}, defaultConfig, localConfig);
 
