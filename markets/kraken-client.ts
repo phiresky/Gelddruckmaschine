@@ -8,15 +8,11 @@ export interface KrakenResult<T> {
 	XXBTZEUR: T;
 	last?: string;
 }
-export type KrakenOffer = Simplify<
-	TradeOffer<BTC, EUR> & {
-		krakenId: string; // optional identifier to know with which order you are dealing
-	} & As<"krakenoffer">
->;
+export type KrakenOffer = Simplify<TradeOffer<BTC, EUR> & {} & As<"krakenoffer">>;
 
 type returnTypes = {
 	/** <price>, <volume>, <timestamp> */
-	getDepth: KrakenResult<{ bids: [string, string, number]; asks: [string, string, number] }>;
+	getDepth: KrakenResult<{ bids: [string, string, number][]; asks: [string, string, number][] }>;
 	getBalance: {
 		ZEUR: string;
 		XXBT: string;
@@ -61,25 +57,36 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	}
 
 	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ costs: EUR; receivedVolume: BTC }> {
-		throw new Error("Method not implemented.");
+		throw new Error("Method getTradeAmountsForBuyVolume not implemented.");
 	}
 	async getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
-		throw new Error("Method not implemented.");
+		throw new Error("Method getRefundForSellVolume not implemented.");
 	}
 	async getCheapestOfferToBuy(volume?: EUR | undefined): Promise<KrakenOffer> {
-		throw new Error("Method not implemented.");
+		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
+		if (offers.XXBTZEUR.asks.length === 0) throw Error(`no asks found`);
+		let gotVolume = 0;
+		const [price, ask_volume, timestamp] = offers.XXBTZEUR.asks[0];
+		console.log("chea", price, ask_volume, timestamp);
+		return {
+			amount_min: (+ask_volume).BTC,
+			amount_max: (+ask_volume).BTC,
+			price: (+price).EUR,
+			time: new Date(timestamp * 1000),
+			type: "sell",
+		} as KrakenOffer;
 	}
 	async getHighestOfferToSell(volume?: BTC | undefined): Promise<KrakenOffer> {
-		throw new Error("Method not implemented.");
+		throw new Error("Method getHighestOfferToSell not implemented.");
 	}
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
-		throw new Error("Method not implemented.");
+		throw new Error("Method setMarketBuyOrder not implemented.");
 	}
 	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
-		throw new Error("Method not implemented.");
+		throw new Error("Method setMarketSellOrder not implemented.");
 	}
 	async executePendingTradeOffer(offer: KrakenOffer): Promise<boolean> {
-		throw new Error("Method not implemented.");
+		throw new Error("Method executePendingTradeOffer not implemented.");
 	}
 	//@cache(10.seconds)
 	async getBalance(): Promise<returnTypes["getBalance"]> {
