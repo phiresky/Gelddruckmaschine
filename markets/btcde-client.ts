@@ -12,6 +12,9 @@ export type BitcoindeOffer = Simplify<
 >;
 
 export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
+	risk = 5;
+	name = "Bitcoin.de";
+
 	client: APIClient;
 
 	/**
@@ -72,17 +75,50 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	async getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
 		throw new Error("Method not implemented.");
 	}
-	async getHighestOfferToSell(volume?: BTC | undefined): Promise<BitcoindeOffer> {
-		throw new Error("Method not implemented.");
+	async getHighestOfferToSell(volume?: BTC | undefined): Promise<BitcoindeOffer | null> {
+		const { orders } = await API.Orders.showOrderbook(this.client, {
+			type: "sell",
+			only_express_orders: 1,
+			amount: volume,
+		});
+		if (orders.length === 0) {
+			return null;
+		}
+		const order = orders.reduce(minBy(order => -order.price));
+		return {
+			amount_max: order.max_amount.BTC,
+			amount_min: order.min_amount.BTC,
+			bitcoindeId: order.order_id,
+			price: order.price.EUR,
+			time: new Date(),
+			type: "sell",
+		};
 	}
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
 		throw new Error("Method not implemented.");
 	}
 	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
-		throw new Error("Method not implemented.");
+		throw new Error("Dont do market orders on Bitcoin.de, you fool!");
+		/*
+		const response = await API.Orders.createOrder(this.client, {
+			type: "sell",
+			max_amount: amount,
+			min_amount: amount_min === undefined ? amount : amount_min,
+			price: await this.getCurrentSellPrice(),
+		});
+		*/
 	}
-	async executePendingTradeOffer(offer: BitcoindeOffer): Promise<boolean> {
-		throw new Error("Method not implemented.");
+	async executePendingTradeOffer(offer: BitcoindeOffer, amount: BTC): Promise<boolean> {
+		try {
+			await API.Trades.executeTrade(this.client, {
+				order_id: offer.bitcoindeId,
+				type: offer.type, //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
+				amount,
+			});
+			return true;
+		} catch (error) {
+			return false;
+		}
 	}
 	async getAccountInfo(): Promise<API.Sonstiges.showAccountInfo.Response.Data> {
 		const { data } = await API.Sonstiges.showAccountInfo(this.client);

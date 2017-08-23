@@ -15,6 +15,9 @@ export abstract class MarketClient<
 	baseCurrency extends currency,
 	OfferType extends TradeOffer<currency, baseCurrency>
 > {
+	abstract get risk(): number;
+	abstract get name(): string;
+
 	/**
      * Returns the current price one entity of *tradingCurrency*
      * can be sold at on this market, measured in *baseCurrency*.
@@ -78,7 +81,7 @@ export abstract class MarketClient<
      * *tradingCurrency* and get *baseCurrency* instead.
      * @param volume If set, only offers where you can sell this amount of *tradingCurrency* are taken into account.
      */
-	abstract getHighestOfferToSell(volume?: tradingCurrency): Promise<OfferType>;
+	abstract getHighestOfferToSell(volume?: tradingCurrency): Promise<OfferType | null>;
 
 	/**
      * Places a market order to buy *amount* of *tradingCurrency*.
@@ -94,6 +97,15 @@ export abstract class MarketClient<
      * @returns *true* if order was successfully created, *false* otherwise.
      */
 	abstract setMarketSellOrder(amount: tradingCurrency, amount_min?: tradingCurrency): Promise<boolean>;
+
+	setMarketOrder(type: "buy" | "sell", amount: tradingCurrency, amount_min?: tradingCurrency): Promise<boolean> {
+		// TODO Enable typings here
+		return {
+			buy: this.setMarketBuyOrder.bind(this),
+			sell: this.setMarketSellOrder.bind(this),
+		}[type](amount, amount_min);
+	}
+
 	/**
      * Executes a priviously fetched open trade offer.
      * @param offer The pending trade offer to accept.

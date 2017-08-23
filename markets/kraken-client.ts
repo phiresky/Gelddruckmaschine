@@ -25,6 +25,9 @@ type returnTypes = {
 };
 
 export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
+	risk = 1;
+	name = "Kraken.com";
+
 	api = new APIClient(config.krakencom.key, config.krakencom.secret);
 	constructor() {
 		super();

@@ -89,3 +89,7 @@ export function lineTrim(string: string) {
 }
 
 export function cache(...stuff: any[]) {}
+
+export async function asyncSwap<T>(swap: boolean, { a, b }: { a: () => Promise<T>; b: () => Promise<T> }) {
+	return swap ? { b: await b(), a: await a() } : { a: await a(), b: await b() };
+}
