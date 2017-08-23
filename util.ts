@@ -19,7 +19,7 @@ export async function writeObjectToFileAsync(path: string, object: {}) {
 
 export type Simplify<T> = { [k in keyof T]: T[k] };
 export class As<S extends string> {
-	private __as: S;
+	public __as: S;
 }
 
 export function minBy<T>(f: (x: T) => number): (a: T, b: T) => T {

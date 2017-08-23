@@ -17,6 +17,8 @@ export abstract class MarketClient<
 > {
 	abstract get risk(): number;
 	abstract get name(): string;
+	abstract get tradingCurrency(): tradingCurrency["__as"]; // TODO Fix to ensure right string?
+	abstract get baseCurrency(): baseCurrency["__as"];
 
 	/**
      * Returns the current price one entity of *tradingCurrency*
@@ -24,14 +26,14 @@ export abstract class MarketClient<
      *
      * Remark: This price does not include any fees.
      */
-	abstract getCurrentSellPrice(): Promise<baseCurrency>;
+	abstract getCurrentSellPrice(): Promise<baseCurrency | null>;
 	/**
      * Returns the current price in *baseCurrency* for which
      * you can buy one entity of *tradingCurrency*.
      *
      * Remark: This price does not include any fees.
      */
-	abstract getCurrentBuyPrice(): Promise<baseCurrency>;
+	abstract getCurrentBuyPrice(): Promise<baseCurrency | null>;
 
 	/**
      * Based on market sell price returns price including fees.
@@ -44,14 +46,16 @@ export abstract class MarketClient<
 	/**
      * Returns the refund for selling one entity of *tradingCurrency* including fees.
      */
-	async getEffCurrSellPrice(): Promise<baseCurrency> {
-		return this.getEffectiveSellPrice(await this.getCurrentSellPrice());
+	async getEffCurrSellPrice(): Promise<baseCurrency | null> {
+		const price = await this.getCurrentSellPrice();
+		return price === null ? null : this.getEffectiveSellPrice(price);
 	}
 	/**
      * Returns the cost for _really_ buying one entity of *tradingCurrency*. (So you have 1 at the end)
      */
-	async getEffCurrBuyPrice(): Promise<baseCurrency> {
-		return this.getEffectiveBuyPrice(await this.getCurrentBuyPrice());
+	async getEffCurrBuyPrice(): Promise<baseCurrency | null> {
+		const price = await this.getCurrentBuyPrice();
+		return price === null ? null : this.getEffectiveBuyPrice(price);
 	}
 
 	/**

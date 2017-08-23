@@ -14,6 +14,8 @@ export type BitcoindeOffer = Simplify<
 export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	risk = 5;
 	name = "Bitcoin.de";
+	tradingCurrency = "BTC";
+	baseCurrency = "EUR";
 
 	client: APIClient;
 
@@ -25,18 +27,24 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		this.client = new APIClient(config.bitcoinde.key, config.bitcoinde.secret);
 	}
 
-	async getCurrentSellPrice(): Promise<EUR> {
+	async getCurrentSellPrice(): Promise<EUR | null> {
 		const { orders } = await API.Orders.showOrderbook(this.client, {
 			type: "sell",
 			only_express_orders: 1,
 		});
+		if (orders.length === 0) {
+			return null;
+		}
 		return Math.max(...orders.map(order => order.price)).EUR;
 	}
-	async getCurrentBuyPrice(): Promise<EUR> {
+	async getCurrentBuyPrice(): Promise<EUR | null> {
 		const { orders } = await API.Orders.showOrderbook(this.client, {
 			type: "buy",
 			only_express_orders: 1,
 		});
+		if (orders.length === 0) {
+			return null;
+		}
 		return Math.min(...orders.map(order => order.price)).EUR;
 	}
 

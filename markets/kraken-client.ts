@@ -27,18 +27,26 @@ type returnTypes = {
 export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	risk = 1;
 	name = "Kraken.com";
+	tradingCurrency = "BTC";
+	baseCurrency = "EUR";
 
 	api = new APIClient(config.krakencom.key, config.krakencom.secret);
 	constructor() {
 		super();
 	}
-	async getCurrentSellPrice(): Promise<EUR> {
+	async getCurrentSellPrice(): Promise<EUR | null> {
 		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
+		if (offers.XXBTZEUR.bids.length === 0) {
+			return null;
+		}
 		const [price, volume, timestamp] = offers.XXBTZEUR.bids[0];
 		return (+price).EUR;
 	}
-	async getCurrentBuyPrice(): Promise<EUR> {
+	async getCurrentBuyPrice(): Promise<EUR | null> {
 		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
+		if (offers.XXBTZEUR.asks.length === 0) {
+			return null;
+		}
 		const [price, volume, timestamp] = offers.XXBTZEUR.asks[0];
 		return (+price).EUR;
 	}

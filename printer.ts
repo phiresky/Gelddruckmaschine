@@ -22,17 +22,30 @@ export async function getProfitMarginBasic<tradingCurrency extends currency, bas
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 ) {
-	const buyPrice = (await startClient.getEffCurrBuyPrice()) as currency;
-	const sellPrice = (await endClient.getEffCurrSellPrice()) as currency;
-	return (sellPrice - buyPrice) / buyPrice;
+	const buyPrice = await startClient.getEffCurrBuyPrice();
+	const sellPrice = await endClient.getEffCurrSellPrice();
+	if (buyPrice === null || sellPrice === null) {
+		return null;
+	}
+	return (sellPrice.n - buyPrice.n) / buyPrice.n;
 }
 
 export async function printMoney() {
 	while (true) {
 		for (const [clientName1, client1] of Object.entries(clients)) {
 			for (const [clientName2, client2] of Object.entries(clients)) {
-				if (client1 === client2) continue; // Exclude same clients
+				if (
+					client1 === client2 ||
+					client1.tradingCurrency !== client2.tradingCurrency ||
+					client1.baseCurrency !== client2.baseCurrency
+				)
+					continue; // Exclude same clients
+
 				const possibleMargin = await getProfitMarginBasic(client1, client2);
+				if (possibleMargin === null) {
+					debug(`Could not retrieve margin for: ${client1.name} --> ${client2.name}. Continue`);
+					continue;
+				}
 				const possibleMarginStr = significantDigits(possibleMargin * 100, 2);
 				debug(`${clientName1} -> ${clientName2}: Margin of ${possibleMarginStr}% possible.`);
 				if (possibleMargin > config.general.minProfit) {
