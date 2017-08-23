@@ -86,6 +86,17 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	}
 	const sellPriceEffective = sellClient.getEffectiveSellPrice(sellOffer.price);
 
+	const buy = {
+		offer: buyOffer,
+		client: buyClient,
+		effPrice: buyPriceEffective,
+	};
+	const sell = {
+		offer: sellOffer,
+		client: sellClient,
+		effPrice: sellPriceEffective,
+	};
+
 	// calculate how many tradingCurrency we can buy with this
 	const tradeAmount = Math.min(availableMoney.n / buyPriceEffective.n, buyOffer.amount_max) as tradingCurrency;
 
@@ -98,26 +109,24 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	}
 	debug(`Noice! Found trades with margin ${marginStr}%. EXECUUUUTEEE!`);
 	// Accept start offer
-	const [riskyClient, riskyOffer, saferClient, saferOffer] = isBuyMoreRisky
-		? [buyClient, buyOffer, sellClient, sellOffer]
-		: [sellClient, sellOffer, buyClient, buyOffer];
+	const [risky, safer] = isBuyMoreRisky ? [buy, sell] : [sell, buy];
 
-	if (!await riskyClient.executePendingTradeOffer(riskyOffer, tradeAmount)) {
-		throw new Error(`ERROR while accepting order on ${riskyClient.name}!!`);
+	if (!await risky.client.executePendingTradeOffer(risky.offer, tradeAmount)) {
+		throw new Error(`ERROR while accepting order on ${risky.client.name}!!`);
 	}
 
 	debug(
-		`Risky offer (type: ${riskyOffer.type}, amount: ${significantDigits(tradeAmount, 3)},
-		price: ${buyPriceEffective}) from ${buyClient.name} successfull.`,
+		`Risky offer (type: ${risky.offer.type}, amount: ${significantDigits(tradeAmount, 3)},
+		price: ${risky.effPrice}) from ${risky.client.name} successfull.`,
 	);
 
 	// Insert market order to endMarket:
 	// TODO Check if btc.de client takes care of higher tradeamount necessary
-	if (!await saferClient.setMarketOrder(saferOffer.type, tradeAmount)) {
-		throw new Error(`ERROR while creating market order on ${saferClient.name}!!`);
+	if (!await safer.client.setMarketOrder(safer.offer.type, tradeAmount)) {
+		throw new Error(`ERROR while creating market order on ${safer.client.name}!!`);
 	}
 
-	debug(`Market order (type: ${saferOffer.type}) on ${saferClient.name} created.`);
+	debug(`Market order (type: ${safer.offer.type}) on ${safer.client.name} created.`);
 }
 
 async function run() {
