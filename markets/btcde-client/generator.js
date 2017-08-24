@@ -208,8 +208,10 @@ function formatMethod({ kind, httppath, header, description, path }) {
 /**
  * ${description.join("\n * \n * ")}
  */
-export function ${header}(api: Api${needsParam ? `, parameters: ${header}.Parameter` : ""}): Promise<${respName}> {
-  return rawRequest(api, '${kind}', '${httppath}', ${needsParam ? `parameters` : "{}"});
+export function ${header}(api: Api${needsParam
+		? `, parameters: ${header}.Parameter`
+		: ""}): CheckedPromise<${respName}> {
+  return rawRequest<${respName}>(api, '${kind}', '${httppath}', ${needsParam ? `parameters` : "{}"});
 }
   `;
 }
