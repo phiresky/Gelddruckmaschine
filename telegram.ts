@@ -36,11 +36,17 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	"/status": () => {
 		return "Not doing anything";
 	},
-	"/bdePrice": () => {
+	"/price kraken.com": () => {
 		return Procedural`
-			Buy: ${clients.bde.getCurrentBuyPrice()}
-			Sell: ${clients.bde.getCurrentSellPrice()}
+			Buy: ${clients.kraken.getCurrentBuyPrice().then(currency)} €
+			Sell: ${clients.kraken.getCurrentSellPrice().then(currency)} €
 		`;
+	},
+	"/price bitcoin.de": () => {
+		return Procedural`
+		Buy: ${clients.bde.getCurrentBuyPrice().then(currency)} €
+		Sell: ${clients.bde.getCurrentSellPrice().then(currency)} €
+	`;
 	},
 	"/balance": () => {
 		return Procedural`

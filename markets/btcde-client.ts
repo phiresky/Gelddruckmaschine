@@ -14,8 +14,8 @@ export type BitcoindeOffer = Simplify<
 export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	risk = 5;
 	name = "Bitcoin.de";
-	tradingCurrency = "BTC";
-	baseCurrency = "EUR";
+	readonly tradingCurrency = "BTC";
+	readonly baseCurrency = "EUR";
 
 	client: APIClient;
 
@@ -74,7 +74,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 			price: order.price.EUR,
 			time: new Date(),
 			type: "buy",
-		};
+		} as BitcoindeOffer;
 	}
 
 	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ costs: EUR; receivedVolume: BTC }> {
@@ -118,11 +118,12 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	}
 	async executePendingTradeOffer(offer: BitcoindeOffer, amount: BTC): Promise<boolean> {
 		try {
-			await API.Trades.executeTrade(this.client, {
+			/**await API.Trades.executeTrade(this.client, {
 				order_id: offer.bitcoindeId,
 				type: offer.type, //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
 				amount,
-			});
+			});*/
+			console.warn("WOULD EXECUTE", offer.type, amount, offer.bitcoindeId);
 			return true;
 		} catch (error) {
 			return false;

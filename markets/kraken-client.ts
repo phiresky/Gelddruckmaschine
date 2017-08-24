@@ -23,8 +23,8 @@ type returnTypes = {
 export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	risk = 1;
 	name = "Kraken.com";
-	tradingCurrency = "BTC";
-	baseCurrency = "EUR";
+	readonly tradingCurrency = "BTC";
+	readonly baseCurrency = "EUR";
 
 	api = new APIClient(config.krakencom.key, config.krakencom.secret);
 	constructor() {
