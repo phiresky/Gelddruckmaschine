@@ -2,6 +2,7 @@ import * as crypto from "crypto";
 import * as request from "request-promise-native";
 import * as querystring from "querystring";
 import * as _debug from "debug";
+import { CheckedPromise } from "../../definitions/promises";
 const debug = _debug("bitcoin.de");
 
 type Response<T> = {
@@ -58,13 +59,29 @@ export class BitcoindeClient {
      * @param    params   POST body
      * @return {Object}            The request object
      */
-	async rawRequest(method: "GET" | "POST" | "DELETE", url: string, params: any) {
+	async rawRequest(method: "GET" | "POST" | "DELETE", url: string, params: any): CheckedPromise<any> {
+		const errorOrigin = `[${method}] ${url} with params: ${params}`;
+		const missingParams: any[] = [];
 		url = url.replace(/:([a-z_]+)/g, (_, k) => {
-			if (!(k in params)) throw Error(`Parameter ${k} missing`);
+			if (!(k in params)) {
+				missingParams.push(k);
+				return;
+			}
 			const v = params[k];
 			delete params[k];
 			return v;
 		});
+		if (missingParams.length !== 0)
+			return {
+				success: false,
+				error: {
+					canRetry: false,
+					message: `There is ${missingParams.length} missing for correct Bitcoin.de API call.`,
+					origin: errorOrigin,
+					raw: missingParams,
+				},
+			};
+
 		url = this.config.url + url;
 		var nonce = this.noncer.generate();
 		let md5Query = this.emptyHash;
@@ -92,7 +109,15 @@ export class BitcoindeClient {
 					if (p) options.url += "?" + p;
 					break;
 				default:
-					throw Error(method + " not defined");
+					return {
+						success: false,
+						error: {
+							canRetry: false,
+							message: `API method ${method} is not defined. Check your code!`,
+							origin: errorOrigin,
+							raw: method,
+						},
+					};
 			}
 		}
 
@@ -116,26 +141,63 @@ export class BitcoindeClient {
 			}[method](options);
 		} catch (e) {
 			if (e.name === "StatusCodeError") {
-				console.error(url, "returned", e.statusCode);
-				console.log("body", e.response.body);
-				throw e;
+				return {
+					success: false,
+					error: {
+						canRetry: true, // depends on status code
+						message: `Bitcoin.de API returned status code ${e.statusCode}.`,
+						origin: errorOrigin,
+						raw: {
+							error: e,
+							responseBody: e.response.body,
+						},
+					},
+				};
 			} else {
-				console.error(url + ": failed: ", e);
-				throw e;
+				return {
+					success: false,
+					error: {
+						canRetry: true, // dunu
+						message: `Bitcoin.de API request failed.`,
+						origin: errorOrigin,
+						raw: e,
+					},
+				};
 			}
 		}
 		try {
 			var data = JSON.parse(response) as Response<any>;
 		} catch (e) {
-			console.error("response was:", response);
-			throw new Error(url + ": Could not understand response from server: " + e);
+			return {
+				success: false,
+				error: {
+					canRetry: true, // not sure
+					message: "Could not understand response from server!",
+					origin: errorOrigin,
+					raw: {
+						error: e,
+						response: response,
+					},
+				},
+			};
 		}
 
 		if (data.errors && data.errors.length > 0) {
-			throw new Error("Bitcoin.de API returned errors: " + data.errors);
+			return {
+				success: false,
+				error: {
+					canRetry: true, // in this case we dont know?
+					message: "Bitcoin.de API returned errors",
+					origin: errorOrigin,
+					raw: data.errors,
+				},
+			};
 		}
 		debug("RESPONSE", data);
-		return data;
+		return {
+			success: true,
+			value: data,
+		};
 	}
 }
 

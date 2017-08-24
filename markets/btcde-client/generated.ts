@@ -1,4 +1,5 @@
 import { rawRequest, BitcoindeClient as Api } from "./bitcoin-de";
+import { CheckedPromise } from "../../definitions/promises";
 
 type integer = number;
 type int = integer;
@@ -640,7 +641,7 @@ export namespace Orders {
 	export function showOrderbook(
 		api: Api,
 		parameters: showOrderbook.Parameter,
-	): Promise<showOrderbook.Response.Success_200> {
+	): CheckedPromise<showOrderbook.Response.Success_200> {
 		return rawRequest(api, "GET", "orders", parameters);
 	}
 
@@ -657,7 +658,7 @@ export namespace Orders {
 	export function createOrder(
 		api: Api,
 		parameters: createOrder.Parameter,
-	): Promise<createOrder.Response.Success_201> {
+	): CheckedPromise<createOrder.Response.Success_201> {
 		return rawRequest(api, "POST", "orders", parameters);
 	}
 
@@ -671,7 +672,7 @@ export namespace Orders {
     * 
     * Löschen einer Order
     */
-	export function deleteOrder(api: Api, parameters: deleteOrder.Parameter): Promise<{}> {
+	export function deleteOrder(api: Api, parameters: deleteOrder.Parameter): CheckedPromise<{}> {
 		return rawRequest(api, "DELETE", "orders/:order_id", parameters);
 	}
 
@@ -688,7 +689,7 @@ export namespace Orders {
 	export function showMyOrders(
 		api: Api,
 		parameters: showMyOrders.Parameter,
-	): Promise<showMyOrders.Response.Success_200> {
+	): CheckedPromise<showMyOrders.Response.Success_200> {
 		return rawRequest(api, "GET", "orders/my_own", parameters);
 	}
 
@@ -705,7 +706,7 @@ export namespace Orders {
 	export function showMyOrderDetails(
 		api: Api,
 		parameters: showMyOrderDetails.Parameter,
-	): Promise<showMyOrderDetails.Response.Success_200> {
+	): CheckedPromise<showMyOrderDetails.Response.Success_200> {
 		return rawRequest(api, "GET", "orders/:order_id", parameters);
 	}
 }
@@ -1038,7 +1039,7 @@ export namespace Trades {
     * 
     * Kaufen/Verkaufen einer konkreten Order
     */
-	export function executeTrade(api: Api, parameters: executeTrade.Parameter): Promise<{}> {
+	export function executeTrade(api: Api, parameters: executeTrade.Parameter): CheckedPromise<{}> {
 		return rawRequest(api, "POST", "trades/:order_id", parameters);
 	}
 
@@ -1055,7 +1056,7 @@ export namespace Trades {
 	export function showMyTrades(
 		api: Api,
 		parameters: showMyTrades.Parameter,
-	): Promise<showMyTrades.Response.Success_200> {
+	): CheckedPromise<showMyTrades.Response.Success_200> {
 		return rawRequest(api, "GET", "trades", parameters);
 	}
 
@@ -1072,7 +1073,7 @@ export namespace Trades {
 	export function showMyTradeDetails(
 		api: Api,
 		parameters: showMyTradeDetails.Parameter,
-	): Promise<showMyTradeDetails.Response.Success_200> {
+	): CheckedPromise<showMyTradeDetails.Response.Success_200> {
 		return rawRequest(api, "GET", "trades/:trade_id", parameters);
 	}
 }
@@ -1645,7 +1646,7 @@ export namespace Sonstiges {
     * 
     * Abruf von Account Infos
     */
-	export function showAccountInfo(api: Api): Promise<showAccountInfo.Response.Success_200> {
+	export function showAccountInfo(api: Api): CheckedPromise<showAccountInfo.Response.Success_200> {
 		return rawRequest(api, "GET", "account", {});
 	}
 
@@ -1659,7 +1660,7 @@ export namespace Sonstiges {
     * 
     * Kauf- und Verkaufsangebote (bids und asks) in kompakter Form.
     */
-	export function showOrderbookCompact(api: Api): Promise<showOrderbookCompact.Response.Success_200> {
+	export function showOrderbookCompact(api: Api): CheckedPromise<showOrderbookCompact.Response.Success_200> {
 		return rawRequest(api, "GET", "orders/compact", {});
 	}
 
@@ -1676,7 +1677,7 @@ export namespace Sonstiges {
 	export function showPublicTradeHistory(
 		api: Api,
 		parameters: showPublicTradeHistory.Parameter,
-	): Promise<showPublicTradeHistory.Response.Success_200> {
+	): CheckedPromise<showPublicTradeHistory.Response.Success_200> {
 		return rawRequest(api, "GET", "trades/history", parameters);
 	}
 
@@ -1690,7 +1691,7 @@ export namespace Sonstiges {
     * 
     * Abfrage des gewichteten Durchschnittskurses der letzten 3 Stunden und der letzten 12 Stunden.
     */
-	export function showRates(api: Api): Promise<showRates.Response.Success_200> {
+	export function showRates(api: Api): CheckedPromise<showRates.Response.Success_200> {
 		return rawRequest(api, "GET", "rates", {});
 	}
 
@@ -1708,7 +1709,7 @@ export namespace Sonstiges {
 	export function showAccountLedger(
 		api: Api,
 		parameters: showAccountLedger.Parameter,
-	): Promise<showAccountLedger.Response.Success_200> {
+	): CheckedPromise<showAccountLedger.Response.Success_200> {
 		return rawRequest(api, "GET", "account/ledger", parameters);
 	}
 }

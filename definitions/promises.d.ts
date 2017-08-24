@@ -4,6 +4,5 @@ export interface TypedError {
 	message: string;
 	canRetry: boolean;
 	origin: string;
-	code: number;
 	raw?: any;
 }
