@@ -1,8 +1,9 @@
-export type CheckedPromise<T> = Promise<T | Failure>;
+export type CheckedPromise<T> = Promise<{ success: true; value: T } | { success: false; error: TypedError }>;
 
-export interface Failure {
+export interface TypedError {
 	message: string;
 	canRetry: boolean;
 	origin: string;
 	code: number;
+	raw?: any;
 }
