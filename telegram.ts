@@ -26,8 +26,8 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	"/gap": () => {
 		const apis = [clients.bde, clients.kraken];
 		const [api1, api2] = apis.map(api => ({
-			buy: api.getCurrentBuyPrice().then(currency),
-			sell: api.getCurrentSellPrice().then(currency),
+			buy: api.getCurrentBuyPrice().then(unwrap).then(currency),
+			sell: api.getCurrentSellPrice().then(unwrap).then(currency),
 		}));
 		return Procedural`
 		bitcoin.de -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €

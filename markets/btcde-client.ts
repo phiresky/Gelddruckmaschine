@@ -106,7 +106,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 				price: order.price.EUR,
 				time: new Date(),
 				type: "buy",
-			},
+			} as BitcoindeOffer,
 		};
 	}
 
@@ -144,13 +144,13 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 				price: order.price.EUR,
 				time: new Date(),
 				type: "sell",
-			},
+			} as BitcoindeOffer,
 		};
 	}
-	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<boolean> {
+	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
 		throw new Error("Method not implemented.");
 	}
-	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<boolean> {
+	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
 		throw new Error("Dont do market orders on Bitcoin.de, you fool!");
 		/*
 		const response = await API.Orders.createOrder(this.client, {
