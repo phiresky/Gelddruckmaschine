@@ -3,7 +3,7 @@ import { BitcoindeClient } from "./markets/btcde-client/bitcoin-de";
 import config from "./config";
 import { KrakenClient } from "./markets/kraken-client/kraken";
 import { Procedural, WaitingMessage } from "./telegram";
-import { currency, significantDigits, formatBTC } from "./util";
+import { currency, significantDigits, formatBTC, unwrap } from "./util";
 
 function btcdeDate(d: Date): string {
 	// bitcoin.de apparently handles timezones incorrectly, so the js date format
@@ -78,15 +78,11 @@ export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient): Wai
 	const to = new Date();
 	to.setDate(to.getDate() + 1);
 	const bitcoinres = api.Trades.showMyTrades(bitcoinde, {
-		type: "buy",
 		state: 1,
 		date_start: btcdeDate(from),
 		date_end: btcdeDate(to),
 	});
-	const allbc = bitcoinres.then(res => {
-		if (res.success) return res.value.trades.map(parseBitcoinDeTrade);
-		else throw "bitcoin error";
-	});
+	const allbc = bitcoinres.then(unwrap).then(res => res.trades.map(parseBitcoinDeTrade));
 	const totalbc = allbc.then(trades => trades.reduce(sumAll, emptyTrade));
 
 	const krakenres = kraken.getTradesHistory({
@@ -102,7 +98,7 @@ export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient): Wai
 		bought: trades.filter(t => t.btc > 0).reduce(sumAll, emptyTrade),
 		sold: trades.filter(t => t.btc < 0).reduce(sumAll, emptyTrade),
 	}));
-	const totalbtcineur = total.then(x => x.all.btc * (x.bought.btc - x.sold.btc) / (x.sold.eur - x.bought.eur));
+	const totalbtcineur = total.then(x => x.all.btc * (x.sold.eur - x.bought.eur) / (x.bought.btc - x.sold.btc));
 	return Procedural`
 	today's delta bitcoin.de: ${totalbc.then(formatTrade)}
 	today's delta kraken.com: ${totalkraken.then(formatTrade)}
