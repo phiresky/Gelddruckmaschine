@@ -10,6 +10,7 @@ import {
 	lineTrim,
 	asyncIteratorDebounce,
 	testAsyncIteratorDebounce,
+	unwrap,
 } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
 import { clients } from "./printer";
@@ -53,8 +54,8 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	},
 	"/price bitcoin.de": () => {
 		return Procedural`
-		Buy: ${clients.bde.getCurrentBuyPrice().then(currency)} €
-		Sell: ${clients.bde.getCurrentSellPrice().then(currency)} €
+		Buy: ${clients.bde.getCurrentBuyPrice().then(unwrap).then(currency)} €
+		Sell: ${clients.bde.getCurrentSellPrice().then(unwrap).then(currency)} €
 	`;
 	},
 	"/balance": () => {
@@ -63,8 +64,8 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 			${clients.kraken.getAvailableTradingCurrency().then(x => significantDigits(x, 3))} BTC
 			${clients.kraken.getAvailableBaseCurrency().then(currency)} EUR
 			bitcoin.de:
-			${clients.bde.getAvailableTradingCurrency().then(x => significantDigits(x, 3))} BTC
-			${clients.bde.getAvailableBaseCurrency().then(currency)} EUR
+			${clients.bde.getAvailableTradingCurrency().then(unwrap).then(x => significantDigits(x, 3))} BTC
+			${clients.bde.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
 		`;
 	},
 	/*"/getMargin": () => {
