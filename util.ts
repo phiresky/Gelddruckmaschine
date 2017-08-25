@@ -191,3 +191,28 @@ export async function testAsyncIteratorDebounce() {
 process.on("unhandledRejection", (...e: any[]) => {
 	console.log("unhandledRejection", ...e);
 });
+
+class AsyncLock {
+	private unlockPromise: Promise<void> | null = null;
+	async lock() {
+		if (this.unlockPromise) await this.unlockPromise;
+		let resolveFn: () => void;
+		this.unlockPromise = new Promise(resolve => (resolveFn = resolve));
+		return resolveFn!;
+	}
+}
+export function synchronized() {
+	return (target: any, key: string, descriptor: PropertyDescriptor) => {
+		const original = descriptor.value;
+		descriptor.value = async function(this: any, ...args: any[]) {
+			if (!this[key + "Lock"]) this[key + "Lock"] = new AsyncLock();
+			const methodLock = this[key + "Lock"] as AsyncLock;
+			const unlock = await methodLock.lock();
+			try {
+				return await original.call(this, ...args);
+			} finally {
+				unlock();
+			}
+		};
+	};
+}

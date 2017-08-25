@@ -4,6 +4,7 @@ import request = require("request-promise-native");
 import crypto = require("crypto");
 import querystring = require("querystring");
 import * as _debug from "debug";
+import { synchronized } from "../../util";
 const debug = _debug("kraken.com");
 /**
  * The KrakenClient offers methods for calling the Kraken API as
@@ -277,6 +278,7 @@ export class KrakenClient {
 		return hmacDigest;
 	}
 
+	@synchronized()
 	private async rawRequest(url: string, headers: object, params: object) {
 		// Set custom User-Agent string
 		(headers as any)["User-Agent"] = "Kraken Typescript API Client";

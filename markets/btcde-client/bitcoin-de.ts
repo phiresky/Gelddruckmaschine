@@ -3,6 +3,7 @@ import * as request from "request-promise-native";
 import * as querystring from "querystring";
 import * as _debug from "debug";
 import { CheckedPromise } from "../../definitions/promises";
+import { synchronized } from "../../util";
 const debug = _debug("bitcoin.de");
 
 type Response<T> = {
@@ -59,6 +60,7 @@ export class BitcoindeClient {
      * @param    params   POST body
      * @return {Object}            The request object
      */
+	@synchronized()
 	async rawRequest(method: "GET" | "POST" | "DELETE", url: string, params: any): CheckedPromise<any> {
 		const errorOrigin = `[${method}] ${url} with params: ${params}`;
 		const missingParams: any[] = [];
