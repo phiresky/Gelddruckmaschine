@@ -194,6 +194,9 @@ process.on("unhandledRejection", (...e: any[]) => {
 
 class AsyncLock {
 	private unlockPromise: Promise<void> | null = null;
+	/**
+	 * wait and lock this lock. run the returned function to unlock
+	 */
 	async lock() {
 		if (this.unlockPromise) await this.unlockPromise;
 		let resolveFn: () => void;
@@ -201,6 +204,9 @@ class AsyncLock {
 		return resolveFn!;
 	}
 }
+/**
+ * use this as a decorator for functions for which only a single instance should run at the same time
+ */
 export function synchronized() {
 	return (target: any, key: string, descriptor: PropertyDescriptor) => {
 		const original = descriptor.value;
