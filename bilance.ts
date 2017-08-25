@@ -71,12 +71,9 @@ function sumAll<K extends string>(ele1: { [k in K]: number }, ele2: { [k in K]: 
 function formatTrade(t: UnifiedTrade) {
 	return `${formatBTC(t.btc)} BTC, ${currency(t.eur)} €`;
 }
-export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient): WaitingMessage {
-	const from = new Date();
-	from.setHours(0, 0, 0, 0);
-	from.setDate(from.getDate());
+export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient, from: Date): WaitingMessage {
 	const to = new Date();
-	to.setDate(to.getDate() + 1);
+	to.setDate(to.getDate());
 	const bitcoinres = api.Trades.showMyTrades(bitcoinde, {
 		state: 1,
 		date_start: btcdeDate(from),
@@ -100,20 +97,24 @@ export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient): Wai
 	}));
 	const totalbtcineur = total.then(x => x.all.btc * (x.sold.eur - x.bought.eur) / (x.bought.btc - x.sold.btc));
 	return Procedural`
-	today's delta bitcoin.de: ${totalbc.then(formatTrade)}
-	today's delta kraken.com: ${totalkraken.then(formatTrade)}
-	today's delta bitcoin.de + kraken.com: ${total.then(({ all }) => formatTrade(all))}
+	Since ${from.toString()}:
+	delta bitcoin.de: ${totalbc.then(formatTrade)}
+	delta kraken.com: ${totalkraken.then(formatTrade)}
+	delta bitcoin.de + kraken.com: ${total.then(({ all }) => formatTrade(all))}
 	average: bought at ${total.then(x => currency(x.bought.eur / x.bought.btc))}€/BTC, sold at ${total.then(x =>
 		currency(x.sold.eur / x.sold.btc),
 	)}€/BTC.
 
-	today's profit: ${total.then(async x => currency((await totalbtcineur) + x.all.eur))}€ (${total.then(x =>
+	profit: ${total.then(async x => currency((await totalbtcineur) + x.all.eur))}€ (${total.then(x =>
 		currency(x.all.eur),
 	)}€ + ${total.then(x => formatBTC(x.all.btc))}BTC≈${totalbtcineur.then(currency)}€)
 	`;
 }
 if (require.main === module) {
-	const msg = sumTrades(bitcoinde, kraken);
+	const from = new Date();
+	from.setHours(0, 0, 0, 0);
+	from.setDate(from.getDate());
+	const msg = sumTrades(bitcoinde, kraken, from);
 	(async () => {
 		for await (const res of msg()) {
 			console.log(res);

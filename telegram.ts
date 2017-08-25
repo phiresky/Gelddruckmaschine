@@ -16,10 +16,11 @@ import { KrakenClient } from "./markets/kraken-client";
 import { clients } from "./printer";
 import * as printer from "./printer";
 import { sumTrades } from "./bilance";
+import * as parseDuration from "parse-duration";
 
 const unresolved = Symbol("unresolved");
 
-const commands: { [cmd: string]: () => string | WaitingMessage } = {
+const commands: { [cmd: string]: (arg?: string) => string | WaitingMessage } = {
 	"/help": () => {
 		return "Available commands: " + Object.keys(commands).join(", ");
 	},
@@ -45,18 +46,25 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	"/status": () => {
 		return "Not doing anything";
 	},
-	"/bilance": () => () => asyncIteratorDebounce(sumTrades(clients.bde.client, clients.kraken.api)()),
-	"/price kraken.com": () => {
-		return Procedural`
-			Buy: ${clients.kraken.getCurrentBuyPrice().then(currency)} €
-			Sell: ${clients.kraken.getCurrentSellPrice().then(currency)} €
-		`;
+	"/bilance": (durationString = "") => {
+		durationString = durationString.trim();
+		let duration = parseDuration(durationString);
+		if (duration === 0) return "Could not parse duration. Try `/bilance 24h` or `/bilance 60 minutes`";
+		const since = new Date(Date.now() - duration);
+		return () => asyncIteratorDebounce(sumTrades(clients.bde.client, clients.kraken.api, since)());
 	},
-	"/price bitcoin.de": () => {
+	"/price": (apiname = "") => {
+		apiname = apiname.trim().toLowerCase();
+		const apis = { "kraken.com": "kraken", "bitcoin.de": "bde" } as {
+			[name: string]: "kraken" | "bde" | undefined;
+		};
+		const apiname2 = apis[apiname];
+		if (!apiname2) return `Invalid backend ${apiname}. Available backends: ${Object.keys(apis).join(", ")}`;
+		const api = clients[apiname2];
 		return Procedural`
-		Buy: ${clients.bde.getCurrentBuyPrice().then(unwrap).then(currency)} €
-		Sell: ${clients.bde.getCurrentSellPrice().then(unwrap).then(currency)} €
-	`;
+			Buy: ${api.getCurrentBuyPrice().then(unwrap).then(currency)} €
+			Sell: ${api.getCurrentSellPrice().then(unwrap).then(currency)} €
+		`;
 	},
 	"/balance": () => {
 		return Procedural`
@@ -86,11 +94,14 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 
 export type WaitingMessage = () => AsyncIterableIterator<string>;
 
-export function Procedural(strs: TemplateStringsArray, ...args: Promise<string | number>[]): WaitingMessage {
+export function Procedural(
+	strs: TemplateStringsArray,
+	...args: (Promise<string | number> | string | number)[]
+): WaitingMessage {
 	return async function* listener() {
 		const resolved: (string | number | symbol)[] = args.map(p => unresolved);
 		const withIndices = args.map((arg, index) =>
-			arg.then(value => ({ value, index }), value => Promise.reject({ value, index })),
+			Promise.resolve(arg).then(value => ({ value, index }), value => Promise.reject({ value, index })),
 		);
 		while (true) {
 			yield lineTrim(normalTemplate(strs, ...resolved.map(r => (r === unresolved ? "_[pending...]_" : r))));
@@ -119,14 +130,26 @@ async function sendDelayed(bot: TelegramBot, chat_id: string, msg: WaitingMessag
 async function init() {
 	const bot = new TelegramBot(config.telegram.token, { polling: true });
 	bot.on("message", async msg => {
-		const cmd = commands[msg.text];
-		if (!cmd) {
+		let cmdName;
+		let arg;
+		for (const command in commands) {
+			if (msg.text.startsWith(command)) {
+				cmdName = command;
+				arg = msg.text.substr(command.length);
+			}
+		}
+		if (!cmdName) {
 			console.log("Unknown command", msg.text);
 			bot.sendMessage(msg.chat.id, `Unknown command '${msg.text}', call /help for a list of commands.`);
 		} else {
-			let result = await cmd();
-			if (typeof result === "string") await bot.sendMessage(msg.chat.id, result);
-			else {
+			arg = arg.trim();
+			const cmd = commands[cmdName];
+			console.log("running", cmd, arg);
+			let result = await cmd(arg);
+			console.log("result", result);
+			if (typeof result === "string") {
+				if (result.length > 0) await bot.sendMessage(msg.chat.id, result);
+			} else {
 				sendDelayed(bot, msg.chat.id, result);
 			}
 		}
