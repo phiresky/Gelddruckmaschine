@@ -222,3 +222,22 @@ export function synchronized() {
 		};
 	};
 }
+
+export async function checkPromise<T, NewT>(promise: CheckedPromise<T>, modifyFct: (x: T) => NewT) {
+	return modifyPromise(
+		promise,
+		value =>
+			({
+				success: true,
+				value: modifyFct(value),
+			} as CheckedPromiseReturn<NewT>),
+	);
+}
+export async function modifyPromise<T, NewT>(
+	promise: CheckedPromise<T>,
+	modifyFct: (x: T) => CheckedPromiseReturn<NewT>,
+) {
+	const res = await promise;
+	if (!res.success) return res;
+	return modifyFct(res.value);
+}

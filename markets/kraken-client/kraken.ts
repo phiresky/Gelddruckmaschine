@@ -5,6 +5,7 @@ import crypto = require("crypto");
 import querystring = require("querystring");
 import * as _debug from "debug";
 import { synchronized } from "../../util";
+import { CheckedPromise } from "../../definitions/promises";
 const debug = _debug("kraken.com");
 /**
  * The KrakenClient offers methods for calling the Kraken API as
@@ -279,7 +280,8 @@ export class KrakenClient {
 	}
 
 	@synchronized()
-	private async rawRequest(url: string, headers: object, params: object) {
+	private async rawRequest(url: string, headers: object, params: object): CheckedPromise<any> {
+		const errorOrigin = `[POST] ${url} with headers: ${headers} and params: ${params}`;
 		// Set custom User-Agent string
 		(headers as any)["User-Agent"] = "Kraken Typescript API Client";
 
@@ -291,21 +293,57 @@ export class KrakenClient {
 			timeout: this.config.timeout,
 		};
 		debug("POST", options);
-		var body = await request.post(options);
-		var data;
 		try {
-			data = JSON.parse(body);
+			var body = await request.post(options);
+		} catch (e) {
+			return {
+				success: false,
+				error: {
+					canRetry: true,
+					message: "Kraken.com client failed sending the request.",
+					origin: errorOrigin,
+					raw: {
+						error: e,
+						options: options,
+					},
+				},
+			};
+		}
+
+		try {
+			var data = JSON.parse(body);
 			debug("RESPONSE", data);
 		} catch (e) {
-			throw new Error(`Could not understand response from server: ${body}`);
+			return {
+				success: false,
+				error: {
+					canRetry: true,
+					message: "Kraken.com client could not understand response from server.",
+					origin: errorOrigin,
+					raw: {
+						error: e,
+						responseBody: body,
+					},
+				},
+			};
 		}
 		//If any errors occured, Kraken will give back an array with error strings under
 		//the key "error". We should then propagate back the error message as a proper error.
 		if (data.error && data.error.length > 0) {
-			console.error(data.error);
-			throw new Error(`Kraken API returned an error: ` + data.error.join(", "));
+			return {
+				success: false,
+				error: {
+					canRetry: true,
+					message: `Kraken API returned an error: ${data.error.join(", ")}`,
+					origin: errorOrigin,
+					raw: data.error,
+				},
+			};
 		} else {
-			return data.result;
+			return {
+				success: true,
+				value: data.result,
+			};
 		}
 	}
 }

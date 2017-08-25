@@ -1,8 +1,9 @@
 import { EUR, BTC } from "../definitions/currency";
 import { MarketClient, TradeOffer } from "./market-client";
-import { Simplify, As, cache } from "../util";
+import { Simplify, As, cache, checkPromise, modifyPromise } from "../util";
 import { KrakenClient as APIClient } from "./kraken-client/kraken";
 import config from "../config";
+import { CheckedPromise, CheckedPromiseReturn } from "../definitions/promises";
 
 export interface KrakenResult<T> {
 	XXBTZEUR: T;
@@ -30,21 +31,11 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	constructor() {
 		super();
 	}
-	async getCurrentSellPrice(): Promise<EUR | null> {
-		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
-		if (offers.XXBTZEUR.bids.length === 0) {
-			return null;
-		}
-		const [price, volume, timestamp] = offers.XXBTZEUR.bids[0];
-		return (+price).EUR;
+	async getCurrentSellPrice(): CheckedPromise<EUR> {
+		return await checkPromise(this.getHighestOfferToSell(), offer => offer.price);
 	}
-	async getCurrentBuyPrice(): Promise<EUR | null> {
-		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
-		if (offers.XXBTZEUR.asks.length === 0) {
-			return null;
-		}
-		const [price, volume, timestamp] = offers.XXBTZEUR.asks[0];
-		return (+price).EUR;
+	async getCurrentBuyPrice(): CheckedPromise<EUR> {
+		return await checkPromise(this.getCheapestOfferToBuy(), offer => offer.price);
 	}
 
 	getEffectiveSellPrice(price: EUR): EUR {
@@ -56,62 +47,68 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 		return (price * (1 + config.krakencom.krakenFee)) as EUR;
 	}
 
-	async getTradeAmountsForBuyVolume(buyVolume: BTC): Promise<{ costs: EUR; receivedVolume: BTC }> {
+	async getTradeAmountsForBuyVolume(buyVolume: BTC): CheckedPromise<{ costs: EUR; receivedVolume: BTC }> {
 		throw new Error("Method getTradeAmountsForBuyVolume not implemented.");
 	}
-	async getRefundForSellVolume(sellVolume: BTC): Promise<EUR> {
+	async getRefundForSellVolume(sellVolume: BTC): CheckedPromise<EUR> {
 		throw new Error("Method getRefundForSellVolume not implemented.");
 	}
-	async getCheapestOfferToBuy(volume?: EUR | undefined): Promise<KrakenOffer> {
-		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
-		if (offers.XXBTZEUR.asks.length === 0) throw Error(`no asks found`);
-		let gotVolume = 0;
-		const [price, ask_volume, timestamp] = offers.XXBTZEUR.asks[0];
-		console.log("chea", price, ask_volume, timestamp);
-		return {
-			amount_min: (+ask_volume).BTC,
-			amount_max: (+ask_volume).BTC,
-			price: (+price).EUR,
-			time: new Date(timestamp * 1000),
-			type: "sell",
-		} as KrakenOffer;
+	async getBestOffer(type: "buy" | "sell"): CheckedPromise<KrakenOffer> {
+		return await modifyPromise(
+			this.api.getDepth({ pair: BTCEUR, count: 1 }) as CheckedPromise<returnTypes["getDepth"]>,
+			offers => {
+				const offerList = type === "buy" ? offers.XXBTZEUR.asks : offers.XXBTZEUR.bids;
+				if (offerList.length === 0) {
+					return {
+						success: false,
+						error: {
+							canRetry: true,
+							message: `Could not retrieve current ${type} price. No offers found.`,
+							origin: "KrakenClient/getBestOffer",
+							raw: offers,
+						},
+					};
+				}
+				const [price, volume, timestamp] = offerList[0];
+				return {
+					success: true,
+					value: {
+						amount_min: (+volume).BTC,
+						amount_max: (+volume).BTC,
+						price: (+price).EUR,
+						time: new Date(timestamp * 1000),
+						type: type === "sell" ? "buy" : "sell", // offer has opposite type of what we want (different viewpoint)
+					} as KrakenOffer,
+				};
+			},
+		);
 	}
-	async getHighestOfferToSell(volume?: BTC | undefined): Promise<KrakenOffer> {
-		const offers: returnTypes["getDepth"] = await this.api.getDepth({ pair: BTCEUR, count: 1 });
-		if (offers.XXBTZEUR.bids.length === 0) throw Error(`no asks found`);
-		let gotVolume = 0;
-		const [price, ask_volume, timestamp] = offers.XXBTZEUR.bids[0];
-		console.log("chea", price, ask_volume, timestamp);
-		return {
-			amount_min: (+ask_volume).BTC,
-			amount_max: (+ask_volume).BTC,
-			price: (+price).EUR,
-			time: new Date(timestamp * 1000),
-			type: "buy",
-		} as KrakenOffer;
+	async getCheapestOfferToBuy(volume?: EUR | undefined): CheckedPromise<KrakenOffer> {
+		// TODO Volume not implemented!
+		return await this.getBestOffer("buy");
 	}
-	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
+	async getHighestOfferToSell(volume?: BTC | undefined): CheckedPromise<KrakenOffer> {
+		// TODO Volume not implemented
+		return await this.getBestOffer("sell");
+	}
+	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<boolean> {
 		throw new Error("Method setMarketBuyOrder not implemented.");
 	}
-	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): Promise<boolean> {
+	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<boolean> {
 		throw new Error("Method setMarketSellOrder not implemented.");
 	}
-	async executePendingTradeOffer(offer: KrakenOffer): Promise<boolean> {
+	async executePendingTradeOffer(offer: KrakenOffer): CheckedPromise<boolean> {
 		throw new Error("Method executePendingTradeOffer not implemented.");
 	}
 	//@cache(10.seconds)
-	async getBalance(): Promise<returnTypes["getBalance"]> {
-		return await this.api.getBalance();
+	async getBalance(): CheckedPromise<returnTypes["getBalance"]> {
+		return (await this.api.getBalance()) as CheckedPromiseReturn<returnTypes["getBalance"]>;
 	}
-	async getAvailableTradingCurrency(): Promise<BTC> {
-		const { XXBT } = await this.getBalance();
-		console.log("avbtc", XXBT);
-		return (+XXBT).BTC;
+	async getAvailableTradingCurrency(): CheckedPromise<BTC> {
+		return checkPromise(this.getBalance(), balance => (+balance.XXBT).BTC);
 	}
-	async getAvailableBaseCurrency(): Promise<EUR> {
-		const { ZEUR } = await this.getBalance();
-		console.log("aveur", ZEUR);
-		return (+ZEUR).EUR;
+	async getAvailableBaseCurrency(): CheckedPromise<EUR> {
+		return checkPromise(this.getBalance(), balance => (+balance.ZEUR).EUR);
 	}
 }
 
