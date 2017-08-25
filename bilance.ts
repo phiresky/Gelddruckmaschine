@@ -2,6 +2,8 @@ import * as api from "./markets/btcde-client/generated";
 import { BitcoindeClient } from "./markets/btcde-client/bitcoin-de";
 import config from "./config";
 import { KrakenClient } from "./markets/kraken-client/kraken";
+import { Procedural, WaitingMessage } from "./telegram";
+import { currency, significantDigits, formatBTC } from "./util";
 
 function btcdeDate(d: Date): string {
 	// bitcoin.de apparently handles timezones incorrectly, so the js date format
@@ -66,43 +68,59 @@ function sumAll<K extends string>(ele1: { [k in K]: number }, ele2: { [k in K]: 
 	return ret;
 }
 
-async function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient): Promise<UnifiedTrade> {
+function formatTrade(t: UnifiedTrade) {
+	return `${formatBTC(t.btc)} BTC, ${currency(t.eur)} €`;
+}
+export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient): WaitingMessage {
 	const from = new Date();
 	from.setHours(0, 0, 0, 0);
 	from.setDate(from.getDate());
 	const to = new Date();
 	to.setDate(to.getDate() + 1);
-	const res = await api.Trades.showMyTrades(bitcoinde, {
+	const bitcoinres = api.Trades.showMyTrades(bitcoinde, {
 		type: "buy",
 		state: 1,
 		date_start: btcdeDate(from),
 		date_end: btcdeDate(to),
 	});
-	const totalbc = res.trades.map(parseBitcoinDeTrade).reduce(sumAll, emptyTrade);
-	console.log("today's delta bitcoin.de", totalbc);
+	const allbc = bitcoinres.then(res => {
+		if (res.success) return res.value.trades.map(parseBitcoinDeTrade);
+		else throw "bitcoin error";
+	});
+	const totalbc = allbc.then(trades => trades.reduce(sumAll, emptyTrade));
 
-	const re2 = await kraken.getTradesHistory({
+	const krakenres = kraken.getTradesHistory({
 		pair: "XXBTZEUR",
 		start: krakenDate(from),
 		end: krakenDate(to),
 	});
-	const trades = Object.values(re2.trades);
-	const totalkraken = trades.map(parseKrakenTrade).reduce(sumAll, emptyTrade);
-	console.log("today's delta kraken.com", totalkraken);
+	const allkraken = krakenres.then(res => Object.values(res.trades).map(parseKrakenTrade));
+	const totalkraken = allkraken.then(trades => trades.reduce(sumAll, emptyTrade));
+	const allTrades = Promise.all([allbc, allkraken]).then(([allbc, allkraken]) => [...allbc, ...allkraken]);
+	const total = allTrades.then(trades => ({
+		all: trades.reduce(sumAll, emptyTrade),
+		bought: trades.filter(t => t.btc > 0).reduce(sumAll, emptyTrade),
+		sold: trades.filter(t => t.btc < 0).reduce(sumAll, emptyTrade),
+	}));
+	const totalbtcineur = total.then(x => x.all.btc * (x.bought.btc - x.sold.btc) / (x.sold.eur - x.bought.eur));
+	return Procedural`
+	today's delta bitcoin.de: ${totalbc.then(formatTrade)}
+	today's delta kraken.com: ${totalkraken.then(formatTrade)}
+	today's delta bitcoin.de + kraken.com: ${total.then(({ all }) => formatTrade(all))}
+	average: bought at ${total.then(x => currency(x.bought.eur / x.bought.btc))}€/BTC, sold at ${total.then(x =>
+		currency(x.sold.eur / x.sold.btc),
+	)}€/BTC.
 
-	const total = sumAll(totalkraken, totalbc);
-	console.log("today's delta bitcoinde + kraken", total);
-	console.log(
-		`average: bought at ${-(totalbc.eur / totalbc.btc).toFixed(2)}€/BTC, sold at ${-(totalkraken.eur /
-			totalkraken.btc).toFixed(2)}€/BTC`,
-	);
-	const avg = -totalkraken.eur / totalkraken.btc;
-	console.log(
-		`today's profit: ${(total.btc * avg + total.eur).toFixed(2)}€ (${total.eur.toFixed(
-			2,
-		)}€, ${total.btc}BTC ≈ ${(total.btc * avg).toFixed(2)}€`,
-	);
-	return total;
+	today's profit: ${total.then(async x => currency((await totalbtcineur) + x.all.eur))}€ (${total.then(x =>
+		currency(x.all.eur),
+	)}€ + ${total.then(x => formatBTC(x.all.btc))}BTC≈${totalbtcineur.then(currency)}€)
+	`;
 }
-
-sumTrades(bitcoinde, kraken);
+if (require.main === module) {
+	const msg = sumTrades(bitcoinde, kraken);
+	(async () => {
+		for await (const res of msg()) {
+			console.log(res);
+		}
+	})();
+}

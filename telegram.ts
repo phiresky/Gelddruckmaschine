@@ -1,12 +1,20 @@
 import TelegramBot = require("node-telegram-bot-api");
 import config from "./config";
 import { BitcoindeClient } from "./markets/btcde-client";
-import { sleep, normalTemplate, significantDigits, currency, rateProfitMargin, lineTrim } from "./util";
+import {
+	sleep,
+	normalTemplate,
+	significantDigits,
+	currency,
+	rateProfitMargin,
+	lineTrim,
+	asyncIteratorDebounce,
+	testAsyncIteratorDebounce,
+} from "./util";
 import { KrakenClient } from "./markets/kraken-client";
 import { clients } from "./printer";
 import * as printer from "./printer";
-
-const bot = new TelegramBot(config.telegram.token, { polling: true });
+import { sumTrades } from "./bilance";
 
 const unresolved = Symbol("unresolved");
 
@@ -36,6 +44,7 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	"/status": () => {
 		return "Not doing anything";
 	},
+	"/bilance": () => () => asyncIteratorDebounce(sumTrades(clients.bde.client, clients.kraken.api)()),
 	"/price kraken.com": () => {
 		return Procedural`
 			Buy: ${clients.kraken.getCurrentBuyPrice().then(currency)} €
@@ -74,9 +83,9 @@ const commands: { [cmd: string]: () => string | WaitingMessage } = {
 	},
 };
 
-type WaitingMessage = () => AsyncIterableIterator<string>;
+export type WaitingMessage = () => AsyncIterableIterator<string>;
 
-function Procedural(strs: TemplateStringsArray, ...args: Promise<string | number>[]): WaitingMessage {
+export function Procedural(strs: TemplateStringsArray, ...args: Promise<string | number>[]): WaitingMessage {
 	return async function* listener() {
 		const resolved: (string | number | symbol)[] = args.map(p => unresolved);
 		const withIndices = args.map((arg, index) =>
@@ -106,17 +115,23 @@ async function sendDelayed(bot: TelegramBot, chat_id: string, msg: WaitingMessag
 		else ({ message_id } = await bot.sendMessage(chat_id, text, { parse_mode: "markdown" }));
 	}
 }
-
-bot.on("message", async msg => {
-	const cmd = commands[msg.text];
-	if (!cmd) {
-		console.log("Unknown command", msg.text);
-		bot.sendMessage(msg.chat.id, `Unknown command '${msg.text}', call /help for a list of commands.`);
-	} else {
-		let result = await cmd();
-		if (typeof result === "string") await bot.sendMessage(msg.chat.id, result);
-		else {
-			sendDelayed(bot, msg.chat.id, result);
+async function init() {
+	const bot = new TelegramBot(config.telegram.token, { polling: true });
+	bot.on("message", async msg => {
+		const cmd = commands[msg.text];
+		if (!cmd) {
+			console.log("Unknown command", msg.text);
+			bot.sendMessage(msg.chat.id, `Unknown command '${msg.text}', call /help for a list of commands.`);
+		} else {
+			let result = await cmd();
+			if (typeof result === "string") await bot.sendMessage(msg.chat.id, result);
+			else {
+				sendDelayed(bot, msg.chat.id, result);
+			}
 		}
-	}
-});
+	});
+}
+
+if (require.main === module) {
+	init();
+}

@@ -1,5 +1,6 @@
 import * as fs from "mz/fs";
 import config from "./config";
+import { CheckedPromise, CheckedPromiseReturn } from "./definitions/promises";
 
 // Cranck shit for currencies: number.EUR or 1.28.BTC
 // TODO find better place to move this to
@@ -99,6 +100,15 @@ export function currency(inp: number | null) {
 	return inp.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+export function formatBTC(inp: number) {
+	if (Math.abs(inp) < 0.000001) inp = 0;
+	return inp.toLocaleString(undefined, {
+		minimumSignificantDigits: 3,
+		maximumSignificantDigits: 3,
+		maximumFractionDigits: 6,
+	});
+}
+
 export function rateProfitMargin(margin: number) {
 	return config.general.emoji.reverse().find(p => margin * 100 >= p[1])![0];
 }
@@ -113,6 +123,71 @@ export async function asyncSwap<T>(swap: boolean, { a, b }: { a: () => Promise<T
 	return swap ? { b: await b(), a: await a() } : { a: await a(), b: await b() };
 }
 
+export function unwrap<T>(res: CheckedPromiseReturn<T>): T {
+	if (res.success) return res.value;
+	else {
+		console.error(res.error);
+		throw Error("CheckedPromise fail");
+	}
+}
+
+export async function* asyncIteratorDebounce<T>(it: AsyncIterator<T>, delay_ms = 100): AsyncIterableIterator<T> {
+	let timeout = 0;
+	let last: IteratorResult<T> | null = null;
+	const wrapped = (next: Promise<IteratorResult<T>>) => next.then(x => ({ next: x, timeout: false }));
+	const timeingout = (next: Promise<IteratorResult<T>>) =>
+		Promise.race<{ next?: IteratorResult<T>; timeout: boolean }>([
+			wrapped(next),
+			sleep(delay_ms).then(x => ({ timeout: true })),
+		]);
+	let rawnext = it.next();
+	let next = timeingout(rawnext);
+	while (true) {
+		const did = await next;
+		if (did.timeout) {
+			// console.log("timeout");
+			if (last) {
+				yield last.value;
+				last = null;
+			}
+			next = wrapped(rawnext);
+		} else {
+			// console.log("got", did.next);
+			if (did.next!.done) {
+				if (last) yield last.value;
+
+				return;
+			}
+			last = did.next!;
+			rawnext = it.next();
+			next = timeingout(rawnext);
+		}
+	}
+}
+
+export async function testAsyncIteratorDebounce() {
+	const it = async function*() {
+		yield 1;
+		await sleep(50);
+		yield 2;
+		await sleep(50);
+		yield 3;
+		await sleep(200);
+		yield 4;
+		yield 5;
+		await sleep(50);
+		yield 6;
+		await sleep(50);
+		yield 7;
+		await sleep(200);
+		yield 8;
+		// await sleep(1000);
+	};
+	for await (const msg of asyncIteratorDebounce(it())) {
+		console.log(msg);
+	}
+	return;
+}
 process.on("unhandledRejection", (...e: any[]) => {
 	console.log("unhandledRejection", ...e);
 });
