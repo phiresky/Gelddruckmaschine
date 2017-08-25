@@ -1,6 +1,6 @@
 import { MarketClient, TradeOffer } from "./market-client";
 import { BTC, EUR } from "../definitions/currency";
-import { As, Simplify, minBy } from "../util";
+import { As, Simplify, minBy, modifyPromise, checkPromise } from "../util";
 import config from "../config";
 import { BitcoindeClient as APIClient } from "./btcde-client/bitcoin-de";
 import * as API from "./btcde-client/generated";
@@ -13,8 +13,8 @@ export type BitcoindeOffer = Simplify<
 >;
 
 export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
-	risk = 5;
-	name = "Bitcoin.de";
+	readonly risk = 5;
+	readonly name = "Bitcoin.de";
 	readonly tradingCurrency = "BTC";
 	readonly baseCurrency = "EUR";
 
@@ -29,44 +29,10 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	}
 
 	async getCurrentSellPrice(): CheckedPromise<EUR> {
-		const res = await API.Orders.showOrderbook(this.client, {
-			type: "sell",
-			only_express_orders: 1,
-		});
-		if (!res.success) return res;
-
-		if (res.value.orders.length === 0) {
-			return {
-				success: false,
-				error: {
-					canRetry: true,
-					message: "No sell offers were found. API returned empty list.",
-					origin: `BitcoindeClient/getCurrentSellPrice`,
-					raw: res.value,
-				},
-			};
-		}
-		return { success: true, value: Math.max(...res.value.orders.map(order => order.price)).EUR };
+		return await checkPromise(this.getHighestOfferToSell(), offer => offer.price);
 	}
 	async getCurrentBuyPrice(): CheckedPromise<EUR> {
-		const res = await API.Orders.showOrderbook(this.client, {
-			type: "buy",
-			only_express_orders: 1,
-		});
-		if (!res.success) return res;
-
-		if (res.value.orders.length === 0) {
-			return {
-				success: false,
-				error: {
-					canRetry: true,
-					message: "No buy offers were found. API returned empty list.",
-					origin: `BitcoindeClient/getCurrentBuyPrice`,
-					raw: res.value,
-				},
-			};
-		}
-		return { success: true, value: Math.min(...res.value.orders.map(order => order.price)).EUR };
+		return await checkPromise(this.getCheapestOfferToBuy(), offer => offer.price);
 	}
 
 	getEffectiveSellPrice(price: EUR): EUR {
@@ -79,35 +45,62 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	}
 
 	async getCheapestOfferToBuy(volume?: EUR): CheckedPromise<BitcoindeOffer> {
-		const res = await API.Orders.showOrderbook(this.client, {
-			type: "buy",
-			only_express_orders: 1,
-			amount: volume,
-		});
-		if (!res.success) return res;
-
-		if (res.value.orders.length === 0)
-			return {
-				success: false,
-				error: {
-					canRetry: true,
-					message: "No buy offers were found. API returned empty list.",
-					origin: `BitcoindeClient/getCheapestOfferToBuy (volume: ${volume})`,
-					raw: res.value,
-				},
-			};
-		const order = res.value.orders.reduce(minBy(order => -order.price));
-		return {
-			success: true,
-			value: {
-				amount_max: order.max_amount.BTC,
-				amount_min: order.min_amount.BTC,
-				bitcoindeId: order.order_id,
-				price: order.price.EUR,
-				time: new Date(),
-				type: "buy",
-			} as BitcoindeOffer,
-		};
+		return await modifyPromise(
+			API.Orders.showOrderbook(this.client, { type: "buy", only_express_orders: 1, amount: volume }),
+			result => {
+				if (result.orders.length === 0)
+					return {
+						success: false,
+						error: {
+							canRetry: true,
+							message: "No buy offers were found. API returned empty list.",
+							origin: `BitcoindeClient/getCheapestOfferToBuy (volume: ${volume})`,
+							raw: result,
+						},
+					};
+				const order = result.orders.reduce(minBy(order => order.price));
+				return {
+					success: true,
+					value: {
+						amount_max: order.max_amount.BTC,
+						amount_min: order.min_amount.BTC,
+						bitcoindeId: order.order_id,
+						price: order.price.EUR,
+						time: new Date(),
+						type: "buy",
+					} as BitcoindeOffer,
+				};
+			},
+		);
+	}
+	async getHighestOfferToSell(volume?: BTC | undefined): CheckedPromise<BitcoindeOffer> {
+		return await modifyPromise(
+			API.Orders.showOrderbook(this.client, { type: "sell", only_express_orders: 1, amount: volume }),
+			result => {
+				if (result.orders.length === 0)
+					return {
+						success: false,
+						error: {
+							canRetry: true,
+							message: "No sell offers were found. API returned empty list.",
+							origin: `BitcoindeClient/getHighestOfferToSell (volume: ${volume})`,
+							raw: result,
+						},
+					};
+				const order = result.orders.reduce(minBy(order => -order.price));
+				return {
+					success: true,
+					value: {
+						amount_max: order.max_amount.BTC,
+						amount_min: order.min_amount.BTC,
+						bitcoindeId: order.order_id,
+						price: order.price.EUR,
+						time: new Date(),
+						type: "sell",
+					} as BitcoindeOffer,
+				};
+			},
+		);
 	}
 
 	async getTradeAmountsForBuyVolume(buyVolume: BTC): CheckedPromise<{ costs: EUR; receivedVolume: BTC }> {
@@ -116,37 +109,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	async getRefundForSellVolume(sellVolume: BTC): CheckedPromise<EUR> {
 		throw new Error("Method not implemented.");
 	}
-	async getHighestOfferToSell(volume?: BTC | undefined): CheckedPromise<BitcoindeOffer> {
-		const res = await API.Orders.showOrderbook(this.client, {
-			type: "sell",
-			only_express_orders: 1,
-			amount: volume,
-		});
-		if (!res.success) return res;
 
-		if (res.value.orders.length === 0)
-			return {
-				success: false,
-				error: {
-					canRetry: true,
-					message: "No sell offers were found. API returned empty list.",
-					origin: `BitcoindeClient/getHighestOfferToSell (volume: ${volume})`,
-					raw: res.value,
-				},
-			};
-		const order = res.value.orders.reduce(minBy(order => -order.price));
-		return {
-			success: true,
-			value: {
-				amount_max: order.max_amount.BTC,
-				amount_min: order.min_amount.BTC,
-				bitcoindeId: order.order_id,
-				price: order.price.EUR,
-				time: new Date(),
-				type: "sell",
-			} as BitcoindeOffer,
-		};
-	}
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
 		throw new Error("Method not implemented.");
 	}
@@ -162,42 +125,29 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		*/
 	}
 	async executePendingTradeOffer(offer: BitcoindeOffer, amount: BTC): CheckedPromise<null> {
-		try {
-			/**await API.Trades.executeTrade(this.client, {
-				order_id: offer.bitcoindeId,
-				type: offer.type, //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
-				amount,
-			});*/
-			console.warn("WOULD EXECUTE", offer.type, amount, offer.bitcoindeId);
-			return { success: true, value: null };
-		} catch (error) {
-			return {
-				success: false,
-				error: {
-					canRetry: false,
-					message: "Unknown error occured while executing pending trade offer.",
-					origin: "BitcoindeClient/executePendingTradeOffer",
-					raw: error,
-				},
-			};
-		}
+		/*
+		return await checkPromise(API.Trades.executeTrade(this.client, {
+			order_id: offer.bitcoindeId,
+			type: offer.type, //{ sell: literal("buy"), buy: literal("sell") }[order.order_type as "buy" | "sell"] as "buy" | "sell",
+			amount,
+		}), result => null);
+		*/
+		// TODO Use above checkPromise here when execution should actually happen
+		console.warn("WOULD EXECUTE", offer.type, amount, offer.bitcoindeId);
+		return { success: true, value: null };
 	}
 	async getAccountInfo(): CheckedPromise<API.Sonstiges.showAccountInfo.Response.Data> {
-		const res = await API.Sonstiges.showAccountInfo(this.client);
-		if (!res.success) return res;
-		return { success: true, value: res.value.data };
+		return await checkPromise(API.Sonstiges.showAccountInfo(this.client), res => res.data);
 	}
 	async getAvailableTradingCurrency(): CheckedPromise<BTC> {
-		const res = await this.getAccountInfo();
-		if (!res.success) return res;
-		return { success: true, value: (+res.value.btc_balance.available_amount).BTC };
+		return await checkPromise(this.getAccountInfo(), info => (+info.btc_balance.available_amount).BTC);
 	}
 	async getAvailableBaseCurrency(): CheckedPromise<EUR> {
-		const res = await this.getAccountInfo();
-		if (!res.success) return res;
-		if (!res.value.fidor_reservation) return { success: true, value: (0).EUR };
-		const { valid_until, available_amount } = res.value.fidor_reservation;
-		if (new Date(valid_until).getTime() < Date.now() + 5 * 60 * 1000) return { success: true, value: (0).EUR };
-		return { success: true, value: (+available_amount).EUR };
+		return await checkPromise(this.getAccountInfo(), info => {
+			if (!info.fidor_reservation) return (0).EUR;
+			const { valid_until, available_amount } = info.fidor_reservation;
+			if (new Date(valid_until).getTime() < Date.now() + 5 * 60 * 1000) return (0).EUR;
+			return (+available_amount).EUR;
+		});
 	}
 }
