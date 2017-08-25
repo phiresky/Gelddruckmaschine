@@ -144,9 +144,7 @@ async function init() {
 		} else {
 			arg = arg.trim();
 			const cmd = commands[cmdName];
-			console.log("running", cmd, arg);
 			let result = await cmd(arg);
-			console.log("result", result);
 			if (typeof result === "string") {
 				if (result.length > 0) await bot.sendMessage(msg.chat.id, result);
 			} else {

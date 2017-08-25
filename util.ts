@@ -110,6 +110,7 @@ export function formatBTC(inp: number) {
 }
 
 export function rateProfitMargin(margin: number) {
+	if (isNaN(margin)) return "(?)";
 	return config.general.emoji.reverse().find(p => margin * 100 >= p[1])![0];
 }
 
@@ -127,7 +128,7 @@ export function unwrap<T>(res: CheckedPromiseReturn<T>): T {
 	if (res.success) return res.value;
 	else {
 		console.error(res.error);
-		throw Error("CheckedPromise fail");
+		throw Error("CheckedPromise fail: " + res.error.message);
 	}
 }
 
