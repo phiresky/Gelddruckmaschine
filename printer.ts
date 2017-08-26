@@ -7,7 +7,7 @@ import { BitcoindeClient } from "./markets/btcde-client";
 import { KrakenClient } from "./markets/kraken-client";
 import { literal } from "./util";
 import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
-import { sleep, significantDigits, asyncSwap } from "./util";
+import { sleep, significantDigits, asyncSwap, formatBTC, unwrap } from "./util";
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
 
@@ -22,11 +22,8 @@ export async function getProfitMarginBasic<tradingCurrency extends currency, bas
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 ) {
-	const buyPrice = await startClient.getEffCurrBuyPrice();
-	const sellPrice = await endClient.getEffCurrSellPrice();
-	if (buyPrice === null || sellPrice === null) {
-		return null;
-	}
+	const buyPrice = unwrap(await startClient.getEffCurrBuyPrice());
+	const sellPrice = unwrap(await endClient.getEffCurrSellPrice());
 	return (sellPrice.n - buyPrice.n) / buyPrice.n;
 }
 
@@ -116,7 +113,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	}
 
 	debug(
-		`Risky offer (type: ${risky.offer.type}, amount: ${significantDigits(tradeAmount, 3)},
+		`Risky offer (type: ${risky.offer.type}, amount: ${formatBTC(tradeAmount)} ${risky.client.tradingCurrency},
 		price: ${risky.effPrice}) from ${risky.client.name} successfull.`,
 	);
 

@@ -11,6 +11,7 @@ import {
 	asyncIteratorDebounce,
 	testAsyncIteratorDebounce,
 	unwrap,
+	formatBTC,
 } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
 import { clients } from "./printer";
@@ -69,10 +70,10 @@ const commands: { [cmd: string]: (arg?: string) => string | WaitingMessage } = {
 	"/balance": () => {
 		return Procedural`
 			kraken:
-			${clients.kraken.getAvailableTradingCurrency().then(x => significantDigits(x, 3))} BTC
-			${clients.kraken.getAvailableBaseCurrency().then(currency)} EUR
+			${clients.kraken.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
+			${clients.kraken.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
 			bitcoin.de:
-			${clients.bde.getAvailableTradingCurrency().then(unwrap).then(x => significantDigits(x, 3))} BTC
+			${clients.bde.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
 			${clients.bde.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
 		`;
 	},
