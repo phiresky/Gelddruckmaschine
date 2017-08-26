@@ -1,5 +1,6 @@
 import localConfig from "./config.local";
 import { mergeDeep } from "./util";
+import * as fs from "fs";
 const defaultConfig = {
 	bitcoinde: {
 		/**
@@ -55,8 +56,17 @@ const defaultConfig = {
 	},
 	telegram: {
 		token: "",
+		admin: null as null | number,
+		users: [] as number[],
 	},
 };
-const res: typeof defaultConfig = mergeDeep({}, defaultConfig, localConfig);
+
+try {
+	var autoConfigString = fs.readFileSync("./config.auto.json", "utf8");
+} catch (e) {
+	autoConfigString = "{}";
+}
+var autoConfig = JSON.parse(autoConfigString);
+const res: typeof defaultConfig = mergeDeep({}, defaultConfig, autoConfig, localConfig);
 
 export default res;

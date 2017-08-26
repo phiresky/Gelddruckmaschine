@@ -242,3 +242,22 @@ export async function modifyPromise<T, NewT>(
 	if (!res.success) return res;
 	return modifyFct(res.value);
 }
+
+const AutoProxy = <T>(ele: T | any): T =>
+	new Proxy(ele, {
+		get(ele, k) {
+			if (typeof ele[k] === "undefined") ele[k] = {};
+			if (typeof ele[k] === "object" && ele[k] !== null) return AutoProxy(ele[k]);
+			return ele[k];
+		},
+	});
+/** set a config variable, and persist the change to config.auto.json */
+export async function setConfigVariable(setter: (c: typeof config) => void) {
+	let autoConfig = {};
+	try {
+		autoConfig = JSON.parse(await fs.readFile("./config.auto.json", "utf8"));
+	} catch (e) {}
+	setter(AutoProxy(autoConfig));
+	await fs.writeFile("./config.auto.json", JSON.stringify(autoConfig, null, "\t"));
+	setter(config);
+}

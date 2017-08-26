@@ -12,6 +12,7 @@ import {
 	testAsyncIteratorDebounce,
 	unwrap,
 	formatBTC,
+	setConfigVariable,
 } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
 import { clients } from "./printer";
@@ -21,7 +22,16 @@ import * as parseDuration from "parse-duration";
 
 const unresolved = Symbol("unresolved");
 
-const commands: { [cmd: string]: (arg?: string) => string | WaitingMessage } = {
+type TelegramUser = { id: number };
+type TelegramChat = any;
+type TelegramMessage = {
+	message_id: number;
+	from: TelegramUser;
+	chat: TelegramChat;
+	text: string;
+};
+let allowUserAdd = false;
+const commands: { [cmd: string]: (arg?: string, msg: TelegramMessage) => string | WaitingMessage } = {
 	"/help": () => {
 		return "Available commands: " + Object.keys(commands).join(", ");
 	},
@@ -91,6 +101,26 @@ const commands: { [cmd: string]: (arg?: string) => string | WaitingMessage } = {
 			15s: ${sleep(15000).then(x => "yep")}
 		`;
 	},
+	"/setadmin": (_, msg: TelegramMessage) => {
+		if (config.telegram.admin) return "Error: Admin already set.";
+		return Procedural`
+			${setConfigVariable(config => (config.telegram.admin = msg.from.id)).then(
+				() => `Success. You (${msg.from.id}) are now the admin.`,
+			)}`;
+	},
+	"/allowUserAdd": (_, msg: TelegramMessage) => {
+		if (msg.from.id === config.telegram.admin) {
+			allowUserAdd = true;
+			return "Ok. One user can add themselves by writing /access";
+		} else return "Access denied.";
+	},
+	"/access": async (_, msg: TelegramMessage) => {
+		if (allowUserAdd) {
+			await setConfigVariable(c => (c.telegram.users = [...config.telegram.users, msg.from.id]));
+			allowUserAdd = false;
+			return "User added.";
+		} else return "Access denied.";
+	},
 };
 
 export type WaitingMessage = () => AsyncIterableIterator<string>;
@@ -130,7 +160,15 @@ async function sendDelayed(bot: TelegramBot, chat_id: string, msg: WaitingMessag
 }
 async function init() {
 	const bot = new TelegramBot(config.telegram.token, { polling: true });
-	bot.on("message", async msg => {
+	bot.on("message", async (msg: TelegramMessage) => {
+		if (
+			!config.telegram.users.includes(msg.from.id) &&
+			msg.from.id !== config.telegram.admin &&
+			msg.text !== "/setadmin"
+		) {
+			await bot.sendMessage(msg.chat.id, "I don't know you ಠ_ಠ.");
+			return;
+		}
 		let cmdName;
 		let arg;
 		for (const command in commands) {
@@ -145,11 +183,14 @@ async function init() {
 		} else {
 			arg = arg.trim();
 			const cmd = commands[cmdName];
-			let result = await cmd(arg);
+			let result = await cmd(arg, msg);
 			if (typeof result === "string") {
 				if (result.length > 0) await bot.sendMessage(msg.chat.id, result);
-			} else {
+			} else if (typeof result === "function") {
 				sendDelayed(bot, msg.chat.id, result);
+			} else {
+				console.error("result", result);
+				throw "Unknown result type";
 			}
 		}
 	});
