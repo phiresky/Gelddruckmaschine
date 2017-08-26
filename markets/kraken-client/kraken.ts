@@ -248,7 +248,7 @@ export class KrakenClient {
 		params = params || {};
 		var url = `${this.config.url}/${this.config.version}/public/${method}`;
 
-		return this.rawRequest(url, {}, params);
+		return this.rawRequest("GET", url, {}, params);
 	}
 
 	private privateMethod(method: string, params: object = {}) {
@@ -264,7 +264,7 @@ export class KrakenClient {
 			"API-Sign": signature,
 		};
 
-		return this.rawRequest(url, headers, params);
+		return this.rawRequest("POST", url, headers, params);
 	}
 
 	private getMessageSignature(path: string, request: object, nonce: number) {
@@ -280,21 +280,26 @@ export class KrakenClient {
 	}
 
 	@synchronized()
-	private async rawRequest(url: string, headers: object, params: object): CheckedPromise<any> {
-		const errorOrigin = `[POST] ${url} with headers: ${headers} and params: ${params}`;
+	private async rawRequest(
+		method: "POST" | "GET",
+		url: string,
+		headers: object,
+		params: object,
+	): CheckedPromise<any> {
+		const errorOrigin = `[${method}] ${url} with headers: ${headers} and params: ${params}`;
 		// Set custom User-Agent string
 		(headers as any)["User-Agent"] = "Kraken Typescript API Client";
 
 		var options = {
 			url: url,
-			method: "POST",
+			method,
 			headers,
 			form: params,
 			timeout: this.config.timeout,
 		};
-		debug("POST", options);
+		debug(method, options);
 		try {
-			var body = await request.post(options);
+			var body = await request(options);
 		} catch (e) {
 			return {
 				success: false,
