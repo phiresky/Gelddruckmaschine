@@ -105,10 +105,10 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 		return (await this.api.getBalance()) as CheckedPromiseReturn<returnTypes["getBalance"]>;
 	}
 	async getAvailableTradingCurrency(): CheckedPromise<BTC> {
-		return checkPromise(this.getBalance(), balance => (+balance.XXBT).BTC);
+		return checkPromise(this.getBalance(), balance => (+balance.XXBT || 0).BTC);
 	}
 	async getAvailableBaseCurrency(): CheckedPromise<EUR> {
-		return checkPromise(this.getBalance(), balance => (+balance.ZEUR).EUR);
+		return checkPromise(this.getBalance(), balance => (+balance.ZEUR || 0).EUR);
 	}
 }
 

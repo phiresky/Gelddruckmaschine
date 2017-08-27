@@ -61,13 +61,14 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 ) {
 	const isBuyMoreRisky = buyClient.risk >= sellClient.risk;
 
-	const availableMoney = Math.min(
-		unwrap(await buyClient.getAvailableBaseCurrency(), 0 as baseCurrency),
-		config.general.maxStake,
-	) as baseCurrency;
-
+	const remoteBilanceRet = await buyClient.getAvailableBaseCurrency();
+	if (!remoteBilanceRet.success) {
+		debug(`Could not fetch balance of ${buyClient.baseCurrency} from ${buyClient.name}.`);
+		return;
+	}
+	const availableMoney = Math.min(remoteBilanceRet.value, config.general.maxStake) as baseCurrency;
 	if (availableMoney === (0 as baseCurrency)) {
-		debug("No money available to trade with or could not fetch balance. Abort.");
+		debug(`No money in ${buyClient.baseCurrency} available on ${buyClient.name} to trade with.`);
 		return;
 	}
 
