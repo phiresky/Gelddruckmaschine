@@ -248,7 +248,7 @@ export class KrakenClient {
 		params = params || {};
 		var url = `${this.config.url}/${this.config.version}/public/${method}`;
 
-		return this.rawRequest("GET", url, {}, params);
+		return this.rawRequest("POST", url, {}, params);
 	}
 
 	private privateMethod(method: string, params: object = {}) {
