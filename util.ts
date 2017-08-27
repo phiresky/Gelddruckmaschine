@@ -124,11 +124,12 @@ export async function asyncSwap<T>(swap: boolean, { a, b }: { a: () => Promise<T
 	return swap ? { b: await b(), a: await a() } : { a: await a(), b: await b() };
 }
 
-export function unwrap<T>(res: CheckedPromiseReturn<T>): T {
+export function unwrap<T>(res: CheckedPromiseReturn<T>, fallback?: T): T {
 	if (res.success) return res.value;
 	else {
 		console.error(res.error);
-		throw Error("CheckedPromise fail: " + res.error.message);
+		if (fallback === undefined) throw Error("CheckedPromise fail: " + res.error.message);
+		else return fallback;
 	}
 }
 

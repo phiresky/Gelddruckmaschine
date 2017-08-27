@@ -59,46 +59,51 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	buyClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	sellClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 ) {
-	const availableMoney = Math.min(
-		await buyClient.getAvailableBaseCurrency(),
-		config.general.maxStake,
-	) as baseCurrency;
 	const isBuyMoreRisky = buyClient.risk >= sellClient.risk;
 
+	const availableMoney = Math.min(
+		unwrap(await buyClient.getAvailableBaseCurrency(), 0 as baseCurrency),
+		config.general.maxStake,
+	) as baseCurrency;
+
+	if (availableMoney === (0 as baseCurrency)) {
+		debug("No money available to trade with or could not fetch balance. Abort.");
+		return;
+	}
+
 	// Depending on which trade is more risky change order (risky one at the end)
-	const { a: buyOffer, b: sellOffer } = await asyncSwap(isBuyMoreRisky, {
+	const { a: buyOfferRet, b: sellOfferRet } = await asyncSwap(isBuyMoreRisky, {
 		a: () => buyClient.getCheapestOfferToBuy(availableMoney),
 		b: () => sellClient.getHighestOfferToSell(),
 	});
 
-	if (buyOffer === null) {
-		debug(`No offer was found for ${buyClient.name}`);
+	if (!buyOfferRet.success) {
+		debug(`No buy offer was found for ${buyClient.name}`);
+		debug(`Error was: ${JSON.stringify(buyOfferRet.error)}`);
 		return;
 	}
-	const buyPriceEffective = buyClient.getEffectiveBuyPrice(buyOffer.price);
-
-	if (sellOffer === null) {
+	if (!sellOfferRet.success) {
 		debug(`No sell offers found for ${sellClient.name}.`);
+		debug(`Error was: ${JSON.stringify(sellOfferRet.error)}`);
 		return;
 	}
-	const sellPriceEffective = sellClient.getEffectiveSellPrice(sellOffer.price);
 
 	const buy = {
-		offer: buyOffer,
+		offer: buyOfferRet.value,
 		client: buyClient,
-		effPrice: buyPriceEffective,
+		effPrice: buyClient.getEffectiveBuyPrice(buyOfferRet.value.price),
 	};
 	const sell = {
-		offer: sellOffer,
+		offer: sellOfferRet.value,
 		client: sellClient,
-		effPrice: sellPriceEffective,
+		effPrice: sellClient.getEffectiveSellPrice(sellOfferRet.value.price),
 	};
 
 	// calculate how many tradingCurrency we can buy with this
-	const tradeAmount = Math.min(availableMoney.n / buyPriceEffective.n, buyOffer.amount_max) as tradingCurrency;
+	const tradeAmount = Math.min(availableMoney.n / buy.effPrice.n, buy.offer.amount_max) as tradingCurrency;
 
 	// check if gap condition is still satisfied
-	const margin = (sellPriceEffective.n - buyPriceEffective.n) / buyPriceEffective.n;
+	const margin = (sell.effPrice.n - buy.effPrice.n) / buy.effPrice.n;
 	const marginStr = significantDigits(margin * 100, 2);
 	if (margin <= config.general.minProfit) {
 		debug(`Actual margin of ${marginStr}% unfortunately is too low now.. Sorry bro.`);
@@ -108,8 +113,10 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	// Accept start offer
 	const [risky, safer] = isBuyMoreRisky ? [buy, sell] : [sell, buy];
 
-	if (!await risky.client.executePendingTradeOffer(risky.offer, tradeAmount)) {
-		throw new Error(`ERROR while accepting order on ${risky.client.name}!!`);
+	const riskyTradeRet = await risky.client.executePendingTradeOffer(risky.offer, tradeAmount);
+	if (!riskyTradeRet.success) {
+		debug(`Error was: ${JSON.stringify(riskyTradeRet.error)}`);
+		throw new Error(`ERROR while accepting risky order on ${risky.client.name}!!`);
 	}
 
 	debug(
@@ -119,7 +126,9 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	// Insert market order to endMarket:
 	// TODO Check if btc.de client takes care of higher tradeamount necessary
-	if (!await safer.client.setMarketOrder(safer.offer.type, tradeAmount)) {
+	const saferTradeRet = await safer.client.setMarketOrder(safer.offer.type, tradeAmount);
+	if (!saferTradeRet.success) {
+		debug(`Error was: ${JSON.stringify(saferTradeRet.error)}`);
 		throw new Error(`ERROR while creating market order on ${safer.client.name}!!`);
 	}
 
