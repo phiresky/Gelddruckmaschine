@@ -286,7 +286,9 @@ export class KrakenClient {
 		headers: object,
 		params: object,
 	): CheckedPromise<any> {
-		const errorOrigin = `[${method}] ${url} with headers: ${headers} and params: ${params}`;
+		const errorOrigin = `[${method}] ${url} with headers: ${JSON.stringify(headers)} and params: ${JSON.stringify(
+			params,
+		)}`;
 		// Set custom User-Agent string
 		(headers as any)["User-Agent"] = "Kraken Typescript API Client";
 
