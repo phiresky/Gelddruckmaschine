@@ -12,7 +12,7 @@ import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
 import { TelegramInteractiveLogger } from "./telegram";
 import * as clients from "./clients";
-import { getProfitMargin } from "./printerUtil";
+import { getProfitMargin, formatRequest } from "./printerUtil";
 import { TerminalLogger, InteractiveLogger } from "./InteractiveLogger";
 
 const _io = { telegram: () => new TelegramInteractiveLogger(), terminal: () => new TerminalLogger() }[
@@ -122,11 +122,12 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	if (
 		config.general.confirmBeforeRiskyOrder &&
 		!await io.decide(
-			`I'm going to ${swapOrderType(risky.offer.type)}
-			${formatBTC(tradeAmount)} ${tradingCurrency}
-			for ${formatCurrency(risky.offer.price)} ${baseCurrency} per ${tradingCurrency}
-			via ${risky.client.name}.
-				Continue?`,
+			formatRequest(
+				risky.client.name,
+				`${formatBTC(tradeAmount)} ${tradingCurrency}`,
+				`${formatCurrency(risky.offer.price)} ${baseCurrency}/${tradingCurrency}`,
+				`${swapOrderType(risky.offer.type)} existing offer?`,
+			),
 		)
 	) {
 		await io.info("Aborting because of io decision");
@@ -150,13 +151,12 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	if (
 		config.general.confirmBeforeSafeOrder &&
 		!await io.decide(
-			`I'm going to create a market ${swapOrderType(safer.offer.type)} order of
-			${formatBTC(tradeAmount)} ${tradingCurrency}
-			via ${safer.client.name}.
-			The last known ${swapOrderType(safer.offer.type)} price was ${formatCurrency(
-				safer.offer.price,
-			)} ${baseCurrency} per ${tradingCurrency}.
-				Continue?`,
+			formatRequest(
+				safer.client.name,
+				`${formatBTC(tradeAmount)} ${tradingCurrency}`,
+				`${formatCurrency(safer.offer.price)} ${baseCurrency}/${tradingCurrency}`,
+				`${swapOrderType(safer.offer.type)} market?`,
+			),
 		)
 	) {
 		await io.info("Aborting because of io decision");
