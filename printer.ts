@@ -42,22 +42,22 @@ export async function moneyPrinterLoop() {
 
 				const possibleMargin = await getProfitMargin(client1, client2);
 				if (!possibleMargin.success) {
-					io.debug(
+					await io.debug(
 						`Could not retrieve margin for: ${client1.name} --> ${client2.name}: ${possibleMargin.error
 							.message}. Skipping.`,
 					);
-					io.debug(`Error was: ${JSON.stringify(possibleMargin.error)}`);
+					await io.debug(`Error was: ${JSON.stringify(possibleMargin.error)}`);
 					continue;
 				}
 				const possibleMarginStr = significantDigits(possibleMargin.value * 100, 2);
-				io.debug(`${client1.name} -> ${client2.name}: Margin of ${possibleMarginStr}% possible.`);
+				await io.debug(`${client1.name} -> ${client2.name}: Margin of ${possibleMarginStr}% possible.`);
 				if (possibleMargin.value > config.general.minProfit) {
-					io.debug(`Noice! Possible margin of ${possibleMarginStr}% found :O`);
+					await io.debug(`Noice! Possible margin of ${possibleMarginStr}% found :O`);
 					try {
 						await tryPrintMoney(client1, client2);
 					} catch (e) {
 						console.warn("tryPrintMoney", e);
-						io.warning("uncaught error while printing money: " + e);
+						await io.warning("uncaught error while printing money: " + e);
 					}
 				}
 			}
@@ -74,12 +74,12 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	const remoteBilanceRet = await buyClient.getAvailableBaseCurrency();
 	if (!remoteBilanceRet.success) {
-		io.debug(`Could not fetch balance of ${buyClient.baseCurrency} from ${buyClient.name}.`);
+		await io.debug(`Could not fetch balance of ${buyClient.baseCurrency} from ${buyClient.name}.`);
 		return;
 	}
 	const availableMoney = Math.min(remoteBilanceRet.value, config.general.maxStake) as baseCurrency;
 	if (availableMoney === (0 as baseCurrency)) {
-		io.debug(`No money in ${buyClient.baseCurrency} available on ${buyClient.name} to trade with.`);
+		await io.debug(`No money in ${buyClient.baseCurrency} available on ${buyClient.name} to trade with.`);
 		return;
 	}
 
@@ -90,13 +90,13 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	});
 
 	if (!buyOfferRet.success) {
-		io.debug(`No buy offer was found for ${buyClient.name}`);
-		io.debug(`Error was: ${JSON.stringify(buyOfferRet.error)}`);
+		await io.debug(`No buy offer was found for ${buyClient.name}`);
+		await io.debug(`Error was: ${JSON.stringify(buyOfferRet.error)}`);
 		return;
 	}
 	if (!sellOfferRet.success) {
-		io.debug(`No sell offers found for ${sellClient.name}.`);
-		io.debug(`Error was: ${JSON.stringify(sellOfferRet.error)}`);
+		await io.debug(`No sell offers found for ${sellClient.name}.`);
+		await io.debug(`Error was: ${JSON.stringify(sellOfferRet.error)}`);
 		return;
 	}
 
@@ -140,7 +140,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	const riskyTradeRet = await risky.client.executePendingTradeOffer(risky.offer, tradeAmount);
 	if (!riskyTradeRet.success) {
-		io.debug(`Error was: ${JSON.stringify(riskyTradeRet.error)}`);
+		await io.debug(`Error was: ${JSON.stringify(riskyTradeRet.error)}`);
 		throw new Error(`ERROR while accepting risky order on ${risky.client.name}!!`);
 	}
 
@@ -153,16 +153,16 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	// TODO Check if btc.de client takes care of higher tradeamount necessary
 	const saferTradeRet = await safer.client.setMarketOrder(swapOrderType(safer.offer.type), tradeAmount);
 	if (!saferTradeRet.success) {
-		io.debug(`Error was: ${JSON.stringify(saferTradeRet.error)}`);
+		await io.debug(`Error was: ${JSON.stringify(saferTradeRet.error)}`);
 		throw new Error(`ERROR while creating market order on ${safer.client.name}!!`);
 	}
 
 	await promiseIO; // Await msg only _after_ second trade was executed to avoid unnecessary delays increasing risk
 
-	io.debug(`Market order (type: ${safer.offer.type}) on ${safer.client.name} created.`);
+	await io.debug(`Market order (type: ${safer.offer.type}) on ${safer.client.name} created.`);
 }
 
 console.log("running");
 if (require.main === module) {
-	moneyPrinterLoop();
+	const never = moneyPrinterLoop();
 }

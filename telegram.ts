@@ -258,11 +258,14 @@ class AdvancedTelegramBot {
 		}
 		if (!cmdName) {
 			console.log("Unknown command", msg.text);
-			this.bot.sendMessage(msg.chat.id, `Unknown command '${msg.text}', call /help for a list of commands.`);
+			await this.bot.sendMessage(
+				msg.chat.id,
+				`Unknown command '${msg.text}', call /help for a list of commands.`,
+			);
 		} else {
 			arg = arg.trim();
 			const cmd = commands[cmdName];
-			this.sendMessage(msg.chat.id, await cmd(arg, msg));
+			await this.sendMessage(msg.chat.id, await cmd(arg, msg));
 		}
 	};
 
@@ -280,13 +283,13 @@ class AdvancedTelegramBot {
 	async sendDelayed(chat_id: number, msg: WaitingMessage) {
 		let message_id: string | null = null;
 		for await (const text of msg()) {
-			if (message_id) this.bot.editMessageText(text, { message_id, chat_id, parse_mode: "markdown" });
+			if (message_id) await this.bot.editMessageText(text, { message_id, chat_id, parse_mode: "markdown" });
 			else ({ message_id } = await this.bot.sendMessage(chat_id, text, { parse_mode: "markdown" }));
 		}
 	}
 }
 if (require.main === module) {
-	(async () => {
+	const _ = (async () => {
 		//const bot = new AdvancedTelegramBot();
 		const test = new TelegramInteractiveLogger();
 	})();

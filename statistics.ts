@@ -53,8 +53,8 @@ async function queryKrakenTrades(last_ns: string) {
 		const queryResult: KrakenResult<KrakenTradeResult[]> = await loopUntilSuccess(
 			kraken.getTrades({
 				pair: "XXBTZEUR",
-				since: date_ns
-			})
+				since: date_ns,
+			}),
 		);
 		if (queryResult === null) {
 			debug(`Could not fetch more trades. Abort.`);
@@ -63,7 +63,7 @@ async function queryKrakenTrades(last_ns: string) {
 
 		var newTrades = queryResult.XXBTZEUR.map(
 			([price, vol, time, type, ordertype, misc]) =>
-				({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade)
+				({ time_s: time, price_EURperBTC: parseFloat(price) } as Trade),
 		);
 		tradeList.push(...newTrades);
 		debug(`Fetched ${newTrades.length} trades.`);
@@ -93,9 +93,9 @@ async function getKrakenTrades() {
 	debug(`Have in total ${krakenTradeList.length} trades including ${newKrakenTradeList.length} new ones.`);
 
 	// write trades to file so we only need to get them once.
-	writeObjectToFileAsync(krakenTradesFile, {
+	await writeObjectToFileAsync(krakenTradesFile, {
 		last: lastTimeFetched,
-		tradeList: krakenTradeList
+		tradeList: krakenTradeList,
 	});
 
 	return krakenTradeList;
@@ -110,7 +110,7 @@ function getTradesBinned(tradeList: Trade[]) {
 				count: 0,
 				max_EURperBTC: price_EURperBTC,
 				min_EURperBTC: price_EURperBTC,
-				mean_EURperBTC: 0
+				mean_EURperBTC: 0,
 			};
 		}
 		const bin = result[time_min];
@@ -134,7 +134,7 @@ async function main() {
 	debug(krakenTradesBinned);
 }
 
-main();
+const _ = main();
 
 async function loopUntilSuccess<T>(promise: Promise<T>) {
 	let retry = false;
