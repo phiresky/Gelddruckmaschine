@@ -59,6 +59,7 @@ const defaultConfig = {
 		admin: null as null | number,
 		users: [] as number[],
 		logChatId: null as null | number,
+		logLevel: 0,
 	},
 };
 

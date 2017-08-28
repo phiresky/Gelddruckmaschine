@@ -36,7 +36,7 @@ type Message = string | WaitingMessage;
 export type Priority = "debug" | "info" | "warning" | "error" | "fatal";
 const priorities: Priority[] = ["debug", "info", "warning", "error", "fatal"];
 
-let logLevel = priorities.indexOf("debug");
+let logLevel = priorities.indexOf(config.telegram.logLevel as any);
 
 const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<Message> | Message } = {
 	"/help": () => {
@@ -56,14 +56,14 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 		}));
 		return Procedural`
 		bitcoin.de -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €
-		bitcoin.de -> kraken: ${getProfitMarginBasic(apis[0], apis[1]).then(
-			x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`,
-		)}
+		bitcoin.de -> kraken: ${getProfitMarginBasic(apis[0], apis[1])
+			.then(unwrap)
+			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
 
 		kraken -> bitcoin.de: buy @ ${api2.buy} € -> sell @ ${api1.sell} €
-		kraken -> bitcoin.de: ${getProfitMarginBasic(apis[1], apis[0]).then(
-			x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`,
-		)}
+		kraken -> bitcoin.de: ${getProfitMarginBasic(apis[1], apis[0])
+			.then(unwrap)
+			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
 
 		`;
 	},
@@ -160,6 +160,7 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 		const inx = priorities.indexOf(arg as any);
 		if (inx < 0) return "Invalid log level. Must be one of " + priorities.join(", ");
 		logLevel = inx;
+		await setConfigVariable(c => (c.telegram.logLevel = arg as any));
 		return "Log level set to " + arg;
 	},
 };
@@ -228,9 +229,9 @@ export abstract class InteractiveLogger {
 		await this.log("info", question);
 		while (true) {
 			const response = (await this.input()).toLowerCase();
-			if (response === "yes") return true;
-			if (response === "no") return false;
-			await this.log("warning", "please respond with yes or no");
+			if (response === "/yes") return true;
+			if (response === "/no") return false;
+			await this.log("warning", "please respond with /yes or /no");
 		}
 	}
 }
@@ -251,7 +252,7 @@ export class TelegramInteractiveLogger extends InteractiveLogger {
 	}
 	async input() {
 		return new Promise<string>((res, rej) => {
-			this.bot.bot.on("message", (msg: TelegramMessage) => {
+			this.bot.bot.once("message", (msg: TelegramMessage) => {
 				msg.handled = true;
 				res(msg.text);
 			});

@@ -31,7 +31,7 @@ export async function moneyPrinterLoop() {
 				if (!possibleMargin.success) {
 					io.debug(
 						`Could not retrieve margin for: ${client1.name} --> ${client2.name}: ${possibleMargin.error
-							.message}. Continue`,
+							.message}. Skipping.`,
 					);
 					continue;
 				}
@@ -120,7 +120,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 				Continue?`,
 		)
 	) {
-		io.debug("Aborting because of io decision");
+		io.info("Aborting because of io decision");
 		return;
 	}
 
@@ -130,7 +130,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 		throw new Error(`ERROR while accepting risky order on ${risky.client.name}!!`);
 	}
 
-	io.debug(
+	io.info(
 		`Risky offer (type: ${risky.offer.type}, amount: ${formatBTC(tradeAmount)} ${risky.client.tradingCurrency},
 		price: ${risky.effPrice}) from ${risky.client.name} successfull.`,
 	);
