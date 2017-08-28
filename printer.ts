@@ -10,13 +10,47 @@ import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
 import { sleep, currency as formatCurrency, significantDigits, asyncSwap, formatBTC, unwrap } from "./util";
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
+<<<<<<< HEAD
 import { InteractiveLogger, TelegramInteractiveLogger } from "./telegram";
 import * as clients from "./clients";
 import { getProfitMarginBasic } from "./printerUtil";
+=======
+import { CheckedPromise, CheckedPromiseReturn } from "./definitions/promises";
+>>>>>>> Implemented CheckedPromise in profit margin calculation
 
 const io = new TelegramInteractiveLogger() as InteractiveLogger;
 
+<<<<<<< HEAD
 export async function moneyPrinterLoop() {
+=======
+export const clients = {
+	bde: new BitcoindeClient(),
+	kraken: new KrakenClient(),
+};
+
+export async function getProfitMarginBasic<tradingCurrency extends currency, baseCurrency extends currency>(
+	buyClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+	sellClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+) {
+	return unwrap(await getProfitMargin(buyClient, sellClient));
+}
+export async function getProfitMargin<tradingCurrency extends currency, baseCurrency extends currency>(
+	buyClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+	sellClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
+): CheckedPromise<number> {
+	const buyPriceRet = await buyClient.getEffCurrBuyPrice();
+	if (!buyPriceRet.success) return buyPriceRet;
+	const buyPrice = buyPriceRet.value;
+
+	const sellPriceRet = await sellClient.getEffCurrSellPrice();
+	if (!sellPriceRet.success) return sellPriceRet;
+	const sellPrice = sellPriceRet.value;
+
+	return { success: true, value: (sellPrice.n - buyPrice.n) / buyPrice.n };
+}
+
+export async function printMoney() {
+>>>>>>> Implemented CheckedPromise in profit margin calculation
 	while (true) {
 		for (const [_, client1] of Object.entries(clients)) {
 			for (const [_, client2] of Object.entries(clients)) {
@@ -27,12 +61,25 @@ export async function moneyPrinterLoop() {
 				)
 					continue; // Exclude same clients
 
+<<<<<<< HEAD
 				const possibleMargin = await getProfitMarginBasic(client1, client2);
 				if (!possibleMargin.success) {
 					io.debug(
 						`Could not retrieve margin for: ${client1.name} --> ${client2.name}: ${possibleMargin.error
 							.message}. Skipping.`,
 					);
+=======
+				const possibleMarginRet = await getProfitMargin(client1, client2);
+				if (!possibleMarginRet.success) {
+					debug(`Could not get possible margin for direction: ${client1.name} -> ${client2.name}.`);
+					debug(`Error was: ${JSON.stringify(possibleMarginRet.error)}`);
+					continue;
+				}
+				const possibleMargin = possibleMarginRet.value;
+
+				if (possibleMargin === null) {
+					debug(`Could not retrieve margin for: ${client1.name} --> ${client2.name}. Continue`);
+>>>>>>> Implemented CheckedPromise in profit margin calculation
 					continue;
 				}
 				const possibleMarginStr = significantDigits(possibleMargin.value * 100, 2);
