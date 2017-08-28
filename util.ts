@@ -198,15 +198,24 @@ process.on("unhandledRejection", (...e: any[]) => {
 });
 
 class AsyncLock {
-	private unlockPromise: Promise<void> | null = null;
+	constructor(private name: string) {}
+	private unlockPromises: Promise<void>[] = [];
 	/**
 	 * wait and lock this lock. run the returned function to unlock
 	 */
 	async lock() {
-		if (this.unlockPromise) await this.unlockPromise;
+		const previous = this.unlockPromises[this.unlockPromises.length - 1];
 		let resolveFn: () => void;
-		this.unlockPromise = new Promise(resolve => (resolveFn = resolve));
-		return resolveFn!;
+		const mine = new Promise<void>(resolve => (resolveFn = resolve));
+		this.unlockPromises.push(mine);
+		await previous;
+		// console.log("LOCK", this.name);
+		return () => {
+			// console.log("UNLOCK", this.name);
+			if (this.unlockPromises[0] !== mine) throw Error("WHAT IS HAPPENING");
+			this.unlockPromises.shift();
+			resolveFn();
+		};
 	}
 }
 /**
@@ -216,7 +225,7 @@ export function synchronized() {
 	return (target: any, key: string, descriptor: PropertyDescriptor) => {
 		const original = descriptor.value;
 		descriptor.value = async function(this: any, ...args: any[]) {
-			if (!this[key + "Lock"]) this[key + "Lock"] = new AsyncLock();
+			if (!this[key + "Lock"]) this[key + "Lock"] = new AsyncLock(target.constructor.name + "." + key);
 			const methodLock = this[key + "Lock"] as AsyncLock;
 			const unlock = await methodLock.lock();
 			try {
