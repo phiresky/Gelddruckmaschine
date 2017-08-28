@@ -130,7 +130,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 		throw new Error(`ERROR while accepting risky order on ${risky.client.name}!!`);
 	}
 
-	await io.info(
+	io.info(
 		`Risky offer (type: ${risky.offer.type}, amount: ${formatBTC(tradeAmount)} ${risky.client.tradingCurrency},
 		price: ${risky.effPrice}) from ${risky.client.name} successfull.`,
 	);
