@@ -9,7 +9,7 @@ export abstract class InteractiveLogger {
 		return priorities.indexOf(config.general.logLevel as any);
 	}
 	async log(priority: Priority, message: string) {
-		console.log(priority, message);
+		console.log(priority + ": " + message);
 		if (this.logLevel <= priorities.indexOf(priority)) await this.send(`${priority}: ${message}`);
 	}
 	debug(message: string) {
