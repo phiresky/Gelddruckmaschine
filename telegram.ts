@@ -34,8 +34,6 @@ type TelegramMessage = {
 };
 let allowUserAdd = false;
 type Message = string | WaitingMessage;
-export type Priority = "debug" | "info" | "warning" | "error" | "fatal";
-const priorities: Priority[] = ["debug", "info", "warning", "error", "fatal"];
 
 const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<Message> | Message } = {
 	"/help": () => {
@@ -209,43 +207,6 @@ export function Procedural(
 	};
 }
 
-export abstract class InteractiveLogger {
-	get logLevel() {
-		return priorities.indexOf(config.telegram.logLevel as any);
-	}
-	async log(priority: Priority, message: string) {
-		console.log(priority, message);
-		if (this.logLevel <= priorities.indexOf(priority)) this.send(`${priority}: ${message}`);
-	}
-	debug(message: string) {
-		return this.log("debug", message);
-	}
-	info(message: string) {
-		return this.log("info", message);
-	}
-	warning(message: string) {
-		return this.log("warning", message);
-	}
-	error(message: string) {
-		return this.log("error", message);
-	}
-	fatal(message: string) {
-		return this.log("fatal", message);
-	}
-	abstract send(message: string): Promise<void>;
-	abstract input(): Promise<string>;
-	async decide(question: string) {
-		await this.info(question);
-		while (true) {
-			const response = (await this.input()).toLowerCase();
-			if (response === "/yes") return true;
-			if (response === "/no") return false;
-			await this.log("warning", "please respond with /yes or /no");
-		}
-	}
-}
-
-var xyz;
 export class TelegramInteractiveLogger extends InteractiveLogger {
 	bot = new AdvancedTelegramBot();
 	async send(message: string) {

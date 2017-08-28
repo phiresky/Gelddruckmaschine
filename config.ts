@@ -53,13 +53,14 @@ const defaultConfig = {
 		 * How much the printer will invest to print money
 		 */
 		maxStake: (2000).EUR, // baseCurrency (EUR)
+		ioInterface: "telegram" as "telegram" | "terminal",
+		logLevel: 0,
 	},
 	telegram: {
 		token: "",
 		admin: null as null | number,
 		users: [] as number[],
 		logChatId: null as null | number,
-		logLevel: 0,
 	},
 };
 

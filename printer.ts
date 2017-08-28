@@ -18,11 +18,14 @@ import {
 } from "./util";
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
-import { InteractiveLogger, TelegramInteractiveLogger } from "./telegram";
+import { TelegramInteractiveLogger } from "./telegram";
 import * as clients from "./clients";
 import { getProfitMargin } from "./printerUtil";
+import { TerminalLogger, InteractiveLogger } from "./InteractiveLogger";
 
-const io = new TelegramInteractiveLogger() as InteractiveLogger;
+const io = { telegram: () => new TelegramInteractiveLogger(), terminal: () => new TerminalLogger() }[
+	config.general.ioInterface
+]() as InteractiveLogger;
 
 export async function moneyPrinterLoop() {
 	while (true) {
