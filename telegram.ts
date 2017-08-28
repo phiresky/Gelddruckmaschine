@@ -164,7 +164,7 @@ async function init() {
 		if (
 			!config.telegram.users.includes(msg.from.id) &&
 			msg.from.id !== config.telegram.admin &&
-			msg.text !== "/setadmin"
+			!["/setadmin", "/access"].includes(msg.text)
 		) {
 			await bot.sendMessage(msg.chat.id, "I don't know you ಠ_ಠ.");
 			return;

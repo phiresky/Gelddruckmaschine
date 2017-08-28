@@ -82,11 +82,13 @@ export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient, from
 	const allbc = bitcoinres.then(unwrap).then(res => res.trades.map(parseBitcoinDeTrade));
 	const totalbc = allbc.then(trades => trades.reduce(sumAll, emptyTrade));
 
-	const krakenres = kraken.getTradesHistory({
-		pair: "XXBTZEUR",
-		start: krakenDate(from),
-		end: krakenDate(to),
-	});
+	const krakenres = kraken
+		.getTradesHistory({
+			pair: "XXBTZEUR",
+			start: krakenDate(from),
+			end: krakenDate(to),
+		})
+		.then(unwrap);
 	const allkraken = krakenres.then(res => Object.values(res.trades).map(parseKrakenTrade));
 	const totalkraken = allkraken.then(trades => trades.reduce(sumAll, emptyTrade));
 	const allTrades = Promise.all([allbc, allkraken]).then(([allbc, allkraken]) => [...allbc, ...allkraken]);
