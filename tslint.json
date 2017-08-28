@@ -8,5 +8,6 @@
 		"triple-equals": true,
 		"await-promise": true,
 		"no-floating-promises": true
-	}
+	},
+	"defaultSeverity": "warning"
 }
