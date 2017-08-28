@@ -18,5 +18,5 @@ export async function getProfitMargin<tradingCurrency extends currency, baseCurr
 }
 
 export function formatRequest(client: string, tradeAmount: string, price: string, question: string) {
-	return `🌐${client} 💰${tradeAmount}  🛒${price} ❓${question}`;
+	return `❓${question} 🌐${client} 💰${tradeAmount}  🛒${price}`;
 }
