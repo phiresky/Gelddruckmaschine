@@ -142,7 +142,9 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	const promiseIO = io.info(
 		`Accepted trade offer on ${risky.client.name} (type ${risky.offer.type}, amount ${formatBTC(
 			tradeAmount,
-		)} ${risky.client.tradingCurrency}, price ${risky.effPrice}, total money ${risky.effPrice.n * tradeAmount.n})`,
+		)} ${risky.client.tradingCurrency}, price ${formatCurrency(risky.effPrice)} ${risky.client
+			.baseCurrency}, total money ${formatCurrency(risky.effPrice.n * tradeAmount.n)}  ${risky.client
+			.baseCurrency})`,
 	);
 
 	if (
@@ -169,10 +171,11 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	await promiseIO; // Await msg only _after_ second trade was executed to avoid unnecessary delays increasing risk
 
 	await io.info(
-		`Created market order on ${safer.client.name} (type ${swapOrderType(
-			safer.offer.type,
-		)}), amount ${tradeAmount} ${safer.client.tradingCurrency}, estimated total money ${safer.effPrice.n *
-			tradeAmount.n})`,
+		`Created market order on ${safer.client.name} (type ${swapOrderType(safer.offer.type)}, amount ${formatBTC(
+			tradeAmount,
+		)} ${safer.client.tradingCurrency}, estimated total money ${formatCurrency(
+			safer.effPrice.n * tradeAmount.n,
+		)}  ${safer.client.baseCurrency})`,
 	);
 }
 
