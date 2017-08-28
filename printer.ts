@@ -145,7 +145,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	// Insert market order to endMarket:
 	// TODO Check if btc.de client takes care of higher tradeamount necessary
-	const saferTradeRet = await safer.client.setMarketOrder(safer.offer.type, tradeAmount);
+	const saferTradeRet = await safer.client.setMarketOrder(swapOrderType(safer.offer.type), tradeAmount);
 	if (!saferTradeRet.success) {
 		io.debug(`Error was: ${JSON.stringify(saferTradeRet.error)}`);
 		throw new Error(`ERROR while creating market order on ${safer.client.name}!!`);
