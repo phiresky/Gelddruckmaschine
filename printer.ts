@@ -68,12 +68,12 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	const remoteBilanceRet = await buyClient.getAvailableBaseCurrency();
 	if (!remoteBilanceRet.success) {
-		await io.debug(`Could not fetch balance of ${buyClient.baseCurrency} from ${buyClient.name}.`);
+		await io.debug(`Could not fetch balance of ${baseCurrency} from ${buyClient.name}.`);
 		return;
 	}
 	const availableMoney = Math.min(remoteBilanceRet.value, config.general.maxStake) as baseCurrency;
 	if (availableMoney === (0 as baseCurrency)) {
-		await io.debug(`No money in ${buyClient.baseCurrency} available on ${buyClient.name} to trade with.`);
+		await io.debug(`No money in ${baseCurrency} available on ${buyClient.name} to trade with.`);
 		return;
 	}
 
@@ -124,7 +124,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 		!await io.decide(
 			`I'm going to ${swapOrderType(risky.offer.type)}
 			${formatBTC(tradeAmount)} ${tradingCurrency}
-			for ${formatCurrency(risky.offer.price)} ${baseCurrency}/${tradingCurrency}
+			for ${formatCurrency(risky.offer.price)} ${baseCurrency} per ${tradingCurrency}
 			via ${risky.client.name}.
 				Continue?`,
 		)
@@ -142,9 +142,9 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	const promiseIO = io.info(
 		`Accepted trade offer on ${risky.client.name} (type ${risky.offer.type}, amount ${formatBTC(
 			tradeAmount,
-		)} ${risky.client.tradingCurrency}, price ${formatCurrency(risky.effPrice)} ${risky.client
-			.baseCurrency}, total money ${formatCurrency(risky.effPrice.n * tradeAmount.n)}  ${risky.client
-			.baseCurrency})`,
+		)} ${tradingCurrency}, price ${formatCurrency(risky.effPrice)} ${baseCurrency}, total money ${formatCurrency(
+			risky.effPrice.n * tradeAmount.n,
+		)}  ${baseCurrency})`,
 	);
 
 	if (
@@ -175,9 +175,9 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	await io.info(
 		`Created market order on ${safer.client.name} (type ${swapOrderType(safer.offer.type)}, amount ${formatBTC(
 			tradeAmount,
-		)} ${safer.client.tradingCurrency}, estimated total money ${formatCurrency(
+		)} ${tradingCurrency}, estimated total money ${formatCurrency(
 			safer.effPrice.n * tradeAmount.n,
-		)}  ${safer.client.baseCurrency})`,
+		)}  ${baseCurrency})`,
 	);
 }
 
