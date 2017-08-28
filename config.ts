@@ -64,6 +64,9 @@ const defaultConfig = {
 		maxStake: (2000).EUR, // baseCurrency (EUR)
 		ioInterface: "telegram" as "telegram" | "terminal",
 		logLevel: 0,
+
+		confirmBeforeRiskyOrder: true,
+		confirmBeforeSafeOrder: true,
 	},
 	telegram: {
 		admin: null as null | number,

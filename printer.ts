@@ -70,6 +70,8 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	buyClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	sellClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 ) {
+	const tradingCurrency = buyClient.tradingCurrency;
+	const baseCurrency = buyClient.baseCurrency;
 	const isBuyMoreRisky = buyClient.risk >= sellClient.risk;
 
 	const remoteBilanceRet = await buyClient.getAvailableBaseCurrency();
@@ -126,10 +128,11 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	const [risky, safer] = isBuyMoreRisky ? [buy, sell] : [sell, buy];
 
 	if (
+		config.general.confirmBeforeRiskyOrder &&
 		!await io.decide(
 			`I'm going to ${swapOrderType(risky.offer.type)}
-			${formatBTC(tradeAmount)} ${risky.client.tradingCurrency}
-			for ${formatCurrency(risky.offer.price)} ${risky.client.baseCurrency}/${risky.client.tradingCurrency}
+			${formatBTC(tradeAmount)} ${tradingCurrency}
+			for ${formatCurrency(risky.offer.price)} ${baseCurrency}/${tradingCurrency}
 			via ${risky.client.name}.
 				Continue?`,
 		)
@@ -150,6 +153,19 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 		)} ${risky.client.tradingCurrency}, price ${risky.effPrice}, total money ${risky.effPrice.n * tradeAmount.n})`,
 	);
 
+	if (
+		config.general.confirmBeforeSafeOrder &&
+		!await io.decide(
+			`I'm going to create a market ${swapOrderType(safer.offer.type)} order of
+			${formatBTC(tradeAmount)} ${tradingCurrency}
+			via ${safer.client.name}.
+			The last known ${swapOrderType(safer.offer.type)} price was ${safer.offer.price} ${baseCurrency}/${tradingCurrency}.
+				Continue?`,
+		)
+	) {
+		await io.info("Aborting because of io decision");
+		return;
+	}
 	// Insert market order to endMarket:
 	// TODO Check if btc.de client takes care of higher tradeamount necessary
 	const saferTradeRet = await safer.client.setMarketOrder(swapOrderType(safer.offer.type), tradeAmount);
