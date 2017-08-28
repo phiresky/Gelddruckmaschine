@@ -113,7 +113,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	if (
 		!await io.decide(
-			`I'm going to ${risky.offer.type === "buy" ? "sell" : "buy"}
+			`I'm going to ${risky.offer.type}
 			${formatBTC(tradeAmount)} ${risky.client.tradingCurrency}
 			for ${formatCurrency(risky.offer.price)} ${risky.client.baseCurrency}/${risky.client.tradingCurrency}
 			via ${risky.client.name}.
