@@ -27,7 +27,7 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	readonly tradingCurrency = "BTC";
 	readonly baseCurrency = "EUR";
 
-	api = new APIClient(config.krakencom.key, config.krakencom.secret);
+	api = new APIClient(config.secrets.krakencom.key, config.secrets.krakencom.secret);
 	constructor() {
 		super();
 	}
@@ -126,7 +126,7 @@ interface MarketPrice {
 	price_EUR: number;
 }
 interface GetSpreadResult {
-	"XXBTZEUR": SpreadResult[];
+	XXBTZEUR: SpreadResult[];
 }
 
 let krakenPrice_EUR: number | "unknown" = "unknown";

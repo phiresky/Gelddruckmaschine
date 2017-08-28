@@ -165,6 +165,7 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 		const x = arg.trim().split(" ");
 		if ((x.length !== 1 && x.length !== 2) || !x[0]) return "Syntax: /config key [value]";
 		const [key, val] = x;
+		if (key.startsWith("secrets")) return "Cannot access secrets via io";
 		const { getter, setter } = accessorFromDotted(key);
 		const current = getter(config);
 		if (typeof val !== "undefined") {
