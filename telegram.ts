@@ -37,8 +37,6 @@ type Message = string | WaitingMessage;
 export type Priority = "debug" | "info" | "warning" | "error" | "fatal";
 const priorities: Priority[] = ["debug", "info", "warning", "error", "fatal"];
 
-let logLevel = priorities.indexOf(config.telegram.logLevel as any);
-
 const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<Message> | Message } = {
 	"/help": () => {
 		return "Available commands: " + Object.keys(commands).join(", ");
@@ -160,23 +158,25 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 	"/setLogLevel": async (arg: string) => {
 		const inx = priorities.indexOf(arg as any);
 		if (inx < 0) return "Invalid log level. Must be one of " + priorities.join(", ");
-		logLevel = inx;
 		await setConfigVariable(c => (c.telegram.logLevel = arg as any));
 		return "Log level set to " + arg;
 	},
-	"/config": async (arg: string) => {
-		const x = arg.split(" ");
-		if (x.length !== 1 && x.length !== 2) return "Syntax: /config key [value]";
+	"/config": async (arg: string, msg: TelegramMessage) => {
+		if (msg.from.id !== config.telegram.admin) return "Access denied";
+		const x = arg.trim().split(" ");
+		if ((x.length !== 1 && x.length !== 2) || !x[0]) return "Syntax: /config key [value]";
 		const [key, val] = x;
 		const { getter, setter } = accessorFromDotted(key);
-		if (typeof val !== undefined) {
-			const current = getter(config);
+		const current = getter(config);
+		if (typeof val !== "undefined") {
 			let parsedValue: any;
 			if (typeof current === "number") parsedValue = +val;
 			else if (typeof current === "string") parsedValue = val;
 			else return "Could not set config variable: unsupported type " + typeof current;
 			await setConfigVariable(c => setter(c, parsedValue));
-			return `${key} successfully set to ${parsedValue}`;
+			return `${key}: ${JSON.stringify(current)} → ${JSON.stringify(parsedValue)}`;
+		} else {
+			return `${key}: ${JSON.stringify(current)}`;
 		}
 	},
 };
@@ -211,18 +211,11 @@ export function Procedural(
 
 export abstract class InteractiveLogger {
 	get logLevel() {
-		// todo move this here
-		return logLevel;
-	}
-	set logLevel(value: number) {
-		logLevel = value;
+		return priorities.indexOf(config.telegram.logLevel as any);
 	}
 	async log(priority: Priority, message: string) {
 		console.log(priority, message);
 		if (this.logLevel <= priorities.indexOf(priority)) this.send(`${priority}: ${message}`);
-	}
-	setLogLevel(level: Priority) {
-		this.logLevel = priorities.indexOf(level);
 	}
 	debug(message: string) {
 		return this.log("debug", message);
