@@ -104,10 +104,10 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	const margin = (sell.effPrice.n - buy.effPrice.n) / buy.effPrice.n;
 	const marginStr = significantDigits(margin * 100, 2);
 	if (margin <= config.general.minProfit) {
-		io.debug(`Actual margin of ${marginStr}% unfortunately is too low now.. Sorry bro.`);
+		await io.debug(`Actual margin of ${marginStr}% unfortunately is too low now.. Sorry bro.`);
 		return;
 	}
-	io.info(`Noice! Found trades with margin ${marginStr}%. EXECUUUUTEEE!`);
+	await io.info(`Noice! Found trades with margin ${marginStr}%. EXECUUUUTEEE!`);
 	// Accept start offer
 	const [risky, safer] = isBuyMoreRisky ? [buy, sell] : [sell, buy];
 
@@ -120,7 +120,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 				Continue?`,
 		)
 	) {
-		io.info("Aborting because of io decision");
+		await io.info("Aborting because of io decision");
 		return;
 	}
 
@@ -130,7 +130,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 		throw new Error(`ERROR while accepting risky order on ${risky.client.name}!!`);
 	}
 
-	io.info(
+	await io.info(
 		`Risky offer (type: ${risky.offer.type}, amount: ${formatBTC(tradeAmount)} ${risky.client.tradingCurrency},
 		price: ${risky.effPrice}) from ${risky.client.name} successfull.`,
 	);

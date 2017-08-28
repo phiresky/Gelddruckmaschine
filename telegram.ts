@@ -226,7 +226,7 @@ export abstract class InteractiveLogger {
 	abstract send(message: string): Promise<void>;
 	abstract input(): Promise<string>;
 	async decide(question: string) {
-		await this.log("info", question);
+		await this.info(question);
 		while (true) {
 			const response = (await this.input()).toLowerCase();
 			if (response === "/yes") return true;
@@ -239,16 +239,12 @@ export abstract class InteractiveLogger {
 var xyz;
 export class TelegramInteractiveLogger extends InteractiveLogger {
 	bot = new AdvancedTelegramBot();
-
-	get logChat() {
-		return config.telegram.admin;
-	}
 	async send(message: string) {
 		if (!config.telegram.logChatId) {
 			console.warn("cannot log to telegram without set logChatId", message);
 			return;
 		}
-		this.bot.bot.sendMessage(config.telegram.logChatId, message);
+		await this.bot.bot.sendMessage(config.telegram.logChatId, message);
 	}
 	async input() {
 		return new Promise<string>((res, rej) => {
