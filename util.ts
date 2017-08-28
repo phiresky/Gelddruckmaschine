@@ -266,3 +266,26 @@ export async function setConfigVariable(setter: (c: typeof config) => void) {
 export function swapOrderType(type: "sell" | "buy") {
 	return type === "sell" ? "buy" : "sell";
 }
+
+/**
+ * convert something like "test.foo.bar" to
+ * {
+ *    getter: c => c.test.foo.bar,
+ *    setter: (c, v) => c.test.foo.bar = v
+ * }
+ * 
+ */
+export function accessorFromDotted(key: string) {
+	const x = key.split(".");
+	const getter = (c: any) => {
+		let target = c;
+		for (const k of x) {
+			target = target[k];
+		}
+		return target;
+	};
+	const path = x.slice();
+	const innerkey = path.pop()!;
+	const setter = (c: any, v: any) => (accessorFromDotted(path.join(".")).getter(c)[innerkey] = v);
+	return { setter, getter };
+}

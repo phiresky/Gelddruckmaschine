@@ -13,6 +13,7 @@ import {
 	unwrap,
 	formatBTC,
 	setConfigVariable,
+	accessorFromDotted,
 } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
 import * as clients from "./clients";
@@ -45,8 +46,14 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 	"/gap": () => {
 		const apis = [clients.bde, clients.kraken];
 		const [api1, api2] = apis.map(api => ({
-			buy: api.getCurrentBuyPrice().then(unwrap).then(currency),
-			sell: api.getCurrentSellPrice().then(unwrap).then(currency),
+			buy: api
+				.getCurrentBuyPrice()
+				.then(unwrap)
+				.then(currency),
+			sell: api
+				.getCurrentSellPrice()
+				.then(unwrap)
+				.then(currency),
 		}));
 		return Procedural`
 		bitcoin.de -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €
@@ -80,18 +87,36 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 		if (!apiname2) return `Invalid backend ${apiname}. Available backends: ${Object.keys(apis).join(", ")}`;
 		const api = clients[apiname2];
 		return Procedural`
-			Buy: ${api.getCurrentBuyPrice().then(unwrap).then(currency)} €
-			Sell: ${api.getCurrentSellPrice().then(unwrap).then(currency)} €
+			Buy: ${api
+				.getCurrentBuyPrice()
+				.then(unwrap)
+				.then(currency)} €
+			Sell: ${api
+				.getCurrentSellPrice()
+				.then(unwrap)
+				.then(currency)} €
 		`;
 	},
 	"/balance": () => {
 		return Procedural`
 			kraken:
-			${clients.kraken.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
-			${clients.kraken.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
+			${clients.kraken
+				.getAvailableTradingCurrency()
+				.then(unwrap)
+				.then(formatBTC)} BTC
+			${clients.kraken
+				.getAvailableBaseCurrency()
+				.then(unwrap)
+				.then(currency)} EUR
 			bitcoin.de:
-			${clients.bde.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
-			${clients.bde.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
+			${clients.bde
+				.getAvailableTradingCurrency()
+				.then(unwrap)
+				.then(formatBTC)} BTC
+			${clients.bde
+				.getAvailableBaseCurrency()
+				.then(unwrap)
+				.then(currency)} EUR
 		`;
 	},
 	/*"/getMargin": () => {
@@ -138,6 +163,21 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 		logLevel = inx;
 		await setConfigVariable(c => (c.telegram.logLevel = arg as any));
 		return "Log level set to " + arg;
+	},
+	"/config": async (arg: string) => {
+		const x = arg.split(" ");
+		if (x.length !== 1 && x.length !== 2) return "Syntax: /config key [value]";
+		const [key, val] = x;
+		const { getter, setter } = accessorFromDotted(key);
+		if (typeof val !== undefined) {
+			const current = getter(config);
+			let parsedValue: any;
+			if (typeof current === "number") parsedValue = +val;
+			else if (typeof current === "string") parsedValue = val;
+			else return "Could not set config variable: unsupported type " + typeof current;
+			await setConfigVariable(c => setter(c, parsedValue));
+			return `${key} successfully set to ${parsedValue}`;
+		}
 	},
 };
 
