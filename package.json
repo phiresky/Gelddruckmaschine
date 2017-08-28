@@ -20,6 +20,8 @@
 		"request-promise-native": "^1.0.4",
 		"socket.io-client": "0.9.*",
 		"ts-node": "^3.3.0",
+		"tslint": "^5.7.0",
+		"tslint-language-service": "^0.9.6",
 		"typescript": "^2.5.0-dev.20170815"
 	},
 	"devDependencies": {

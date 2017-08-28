@@ -4,5 +4,6 @@
 	"prettier.printWidth": 120,
 	"editor.formatOnType": true,
 	"editor.formatOnSave": true,
-	"prettier.trailingComma": "all"
+	"prettier.trailingComma": "all",
+	"typescript.tsdk": "node_modules/typescript/lib"
 }
