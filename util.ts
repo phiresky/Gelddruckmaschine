@@ -262,3 +262,7 @@ export async function setConfigVariable(setter: (c: typeof config) => void) {
 	await fs.writeFile("./config.auto.json", JSON.stringify(autoConfig, null, "\t"));
 	setter(config);
 }
+
+export function swapOrderType(type: "sell" | "buy") {
+	return type === "sell" ? "buy" : "sell";
+}

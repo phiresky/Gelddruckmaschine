@@ -7,7 +7,15 @@ import { BitcoindeClient } from "./markets/btcde-client";
 import { KrakenClient } from "./markets/kraken-client";
 import { literal } from "./util";
 import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
-import { sleep, currency as formatCurrency, significantDigits, asyncSwap, formatBTC, unwrap } from "./util";
+import {
+	sleep,
+	currency as formatCurrency,
+	significantDigits,
+	asyncSwap,
+	formatBTC,
+	unwrap,
+	swapOrderType,
+} from "./util";
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
 import { InteractiveLogger, TelegramInteractiveLogger } from "./telegram";
@@ -113,7 +121,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	if (
 		!await io.decide(
-			`I'm going to ${risky.offer.type}
+			`I'm going to ${swapOrderType(risky.offer.type)}
 			${formatBTC(tradeAmount)} ${risky.client.tradingCurrency}
 			for ${formatCurrency(risky.offer.price)} ${risky.client.baseCurrency}/${risky.client.tradingCurrency}
 			via ${risky.client.name}.
