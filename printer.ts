@@ -41,6 +41,7 @@ export async function moneyPrinterLoop() {
 						`Could not retrieve margin for: ${client1.name} --> ${client2.name}: ${possibleMargin.error
 							.message}. Skipping.`,
 					);
+					io.debug(`Error was: ${JSON.stringify(possibleMargin.error)}`);
 					continue;
 				}
 				const possibleMarginStr = significantDigits(possibleMargin.value * 100, 2);
