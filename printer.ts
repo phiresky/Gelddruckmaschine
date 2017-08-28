@@ -54,7 +54,7 @@ export async function moneyPrinterLoop() {
 				}
 			}
 		}
-		await sleep(10000);
+		await sleep(config.general.printerLoopDelay_ms);
 	}
 }
 

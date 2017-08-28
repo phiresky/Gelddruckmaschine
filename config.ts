@@ -67,6 +67,7 @@ const defaultConfig = {
 
 		confirmBeforeRiskyOrder: true,
 		confirmBeforeSafeOrder: true,
+		printerLoopDelay_ms: 20000,
 	},
 	telegram: {
 		admin: null as null | number,
