@@ -28,11 +28,10 @@ export abstract class InteractiveLogger {
 		return this.log("fatal", message);
 	}
 	abstract send(message: string): Promise<void>;
-	abstract input(): Promise<string>;
+	abstract input(question: string): Promise<string>;
 	async decide(question: string) {
-		await this.info(question);
 		while (true) {
-			const response = (await this.input()).toLowerCase();
+			const response = (await this.input(question)).toLowerCase();
 			if (response === "/yes") return true;
 			if (response === "/no") return false;
 			await this.log("warning", "please respond with /yes or /no");
@@ -48,7 +47,8 @@ export class TerminalLogger extends InteractiveLogger {
 	async send(message: string): Promise<void> {
 		console.log(message);
 	}
-	async input(): Promise<string> {
+	async input(question: string): Promise<string> {
+		await this.send(question);
 		return new Promise<string>(resolve => this.rl.question("", answer => resolve(answer)));
 	}
 }

@@ -218,14 +218,31 @@ export class TelegramInteractiveLogger extends InteractiveLogger {
 		}
 		await this.bot.bot.sendMessage(config.telegram.logChatId, message);
 	}
-	async input() {
-		return new Promise<string>((res, rej) => {
+	async input(query: string) {
+		if (!config.telegram.logChatId) {
+			console.warn("cannot log to telegram without set logChatId", query);
+			throw "cannot connect";
+		}
+		await this.bot.bot.sendMessage(config.telegram.logChatId, query, {
+			reply_markup: {
+				keyboard: [[{ text: "/yes" }, { text: "/no" }]],
+				resize_keyboard: true,
+				one_time_keyboard: true,
+			},
+		});
+		const res = await new Promise<string>((res, rej) => {
 			this.bot.bot.once("message", (msg: TelegramMessage) => {
 				msg.handled = true;
 				res(msg.text);
 			});
 			this.bot.readdMessageListener();
 		});
+		/*await this.bot.bot.sendMessage(config.telegram.logChatId, `got ${res}`, {
+			reply_markup: {
+				remove_keyboard: true,
+			},
+		});*/
+		return res;
 	}
 }
 
