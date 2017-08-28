@@ -130,7 +130,7 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 		throw new Error(`ERROR while accepting risky order on ${risky.client.name}!!`);
 	}
 
-	io.info(
+	const promiseIO = io.info(
 		`Risky offer (type: ${risky.offer.type}, amount: ${formatBTC(tradeAmount)} ${risky.client.tradingCurrency},
 		price: ${risky.effPrice}) from ${risky.client.name} successfull.`,
 	);
@@ -142,6 +142,8 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 		io.debug(`Error was: ${JSON.stringify(saferTradeRet.error)}`);
 		throw new Error(`ERROR while creating market order on ${safer.client.name}!!`);
 	}
+
+	await promiseIO; // Await msg only _after_ second trade was executed to avoid unnecessary delays increasing risk
 
 	io.debug(`Market order (type: ${safer.offer.type}) on ${safer.client.name} created.`);
 }
