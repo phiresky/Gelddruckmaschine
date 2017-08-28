@@ -48,7 +48,6 @@ export class TerminalLogger extends InteractiveLogger {
 		console.log(message);
 	}
 	async input(question: string): Promise<string> {
-		await this.send(question);
-		return new Promise<string>(resolve => this.rl.question("", answer => resolve(answer)));
+		return new Promise<string>(resolve => this.rl.question(question, answer => resolve(answer)));
 	}
 }
