@@ -104,8 +104,7 @@ export function formatBTC(inp: number) {
 	if (Math.abs(inp) < 0.000001) inp = 0;
 	return inp.toLocaleString(undefined, {
 		minimumSignificantDigits: 3,
-		maximumSignificantDigits: 3,
-		maximumFractionDigits: 6,
+		maximumSignificantDigits: 5,
 	});
 }
 
@@ -115,7 +114,11 @@ export function rateProfitMargin(margin: number) {
 }
 
 export function lineTrim(string: string) {
-	return string.trim().split("\n").map(l => l.trim()).join("\n");
+	return string
+		.trim()
+		.split("\n")
+		.map(l => l.trim())
+		.join("\n");
 }
 
 export function cache(...stuff: any[]) {}
