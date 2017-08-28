@@ -15,42 +15,55 @@ import {
 	setConfigVariable,
 } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
-import { clients } from "./printer";
-import * as printer from "./printer";
+import * as clients from "./clients";
 import { sumTrades } from "./bilance";
 import * as parseDuration from "parse-duration";
+import { getProfitMarginBasic } from "./printerUtil";
 
 const unresolved = Symbol("unresolved");
 
 type TelegramUser = { id: number };
-type TelegramChat = any;
+type TelegramChat = { id: number };
 type TelegramMessage = {
+	handled?: boolean;
 	message_id: number;
 	from: TelegramUser;
 	chat: TelegramChat;
 	text: string;
 };
 let allowUserAdd = false;
-const commands: { [cmd: string]: (arg?: string, msg: TelegramMessage) => string | WaitingMessage } = {
+type Message = string | WaitingMessage;
+export type Priority = "debug" | "info" | "warning" | "error" | "fatal";
+const priorities: Priority[] = ["debug", "info", "warning", "error", "fatal"];
+
+let logLevel = priorities.indexOf("debug");
+
+const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<Message> | Message } = {
 	"/help": () => {
 		return "Available commands: " + Object.keys(commands).join(", ");
 	},
 	"/gap": () => {
 		const apis = [clients.bde, clients.kraken];
 		const [api1, api2] = apis.map(api => ({
-			buy: api.getCurrentBuyPrice().then(unwrap).then(currency),
-			sell: api.getCurrentSellPrice().then(unwrap).then(currency),
+			buy: api
+				.getCurrentBuyPrice()
+				.then(unwrap)
+				.then(currency),
+			sell: api
+				.getCurrentSellPrice()
+				.then(unwrap)
+				.then(currency),
 		}));
 		return Procedural`
 		bitcoin.de -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €
-		bitcoin.de -> kraken: ${printer
-			.getProfitMarginBasic(apis[0], apis[1])
-			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
+		bitcoin.de -> kraken: ${getProfitMarginBasic(apis[0], apis[1]).then(
+			x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`,
+		)}
 
 		kraken -> bitcoin.de: buy @ ${api2.buy} € -> sell @ ${api1.sell} €
-		kraken -> bitcoin.de: ${printer
-			.getProfitMarginBasic(apis[1], apis[0])
-			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
+		kraken -> bitcoin.de: ${getProfitMarginBasic(apis[1], apis[0]).then(
+			x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`,
+		)}
 
 		`;
 	},
@@ -73,18 +86,36 @@ const commands: { [cmd: string]: (arg?: string, msg: TelegramMessage) => string 
 		if (!apiname2) return `Invalid backend ${apiname}. Available backends: ${Object.keys(apis).join(", ")}`;
 		const api = clients[apiname2];
 		return Procedural`
-			Buy: ${api.getCurrentBuyPrice().then(unwrap).then(currency)} €
-			Sell: ${api.getCurrentSellPrice().then(unwrap).then(currency)} €
+			Buy: ${api
+				.getCurrentBuyPrice()
+				.then(unwrap)
+				.then(currency)} €
+			Sell: ${api
+				.getCurrentSellPrice()
+				.then(unwrap)
+				.then(currency)} €
 		`;
 	},
 	"/balance": () => {
 		return Procedural`
 			kraken:
-			${clients.kraken.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
-			${clients.kraken.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
+			${clients.kraken
+				.getAvailableTradingCurrency()
+				.then(unwrap)
+				.then(formatBTC)} BTC
+			${clients.kraken
+				.getAvailableBaseCurrency()
+				.then(unwrap)
+				.then(currency)} EUR
 			bitcoin.de:
-			${clients.bde.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
-			${clients.bde.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
+			${clients.bde
+				.getAvailableTradingCurrency()
+				.then(unwrap)
+				.then(formatBTC)} BTC
+			${clients.bde
+				.getAvailableBaseCurrency()
+				.then(unwrap)
+				.then(currency)} EUR
 		`;
 	},
 	/*"/getMargin": () => {
@@ -121,6 +152,16 @@ const commands: { [cmd: string]: (arg?: string, msg: TelegramMessage) => string 
 			return "User added.";
 		} else return "Access denied.";
 	},
+	"/setLogChat": async (_, msg: TelegramMessage) => {
+		await setConfigVariable(c => (c.telegram.logChatId = msg.chat.id));
+		return `Set log chat to ${msg.chat.id}`;
+	},
+	"/setLogLevel": async (arg: string) => {
+		const inx = priorities.indexOf(arg as any);
+		if (inx < 0) return "Invalid log level. Must be one of " + priorities.join(", ");
+		logLevel = inx;
+		return "Log level set to " + arg;
+	},
 };
 
 export type WaitingMessage = () => AsyncIterableIterator<string>;
@@ -151,26 +192,96 @@ export function Procedural(
 	};
 }
 
-async function sendDelayed(bot: TelegramBot, chat_id: string, msg: WaitingMessage) {
-	let message_id: string | null = null;
-	for await (const text of msg()) {
-		if (message_id) bot.editMessageText(text, { message_id, chat_id, parse_mode: "markdown" });
-		else ({ message_id } = await bot.sendMessage(chat_id, text, { parse_mode: "markdown" }));
+export abstract class InteractiveLogger {
+	get logLevel() {
+		// todo move this here
+		return logLevel;
+	}
+	set logLevel(value: number) {
+		logLevel = value;
+	}
+	async log(priority: Priority, message: string) {
+		console.log(priority, message);
+		if (this.logLevel <= priorities.indexOf(priority)) this.send(`${priority}: ${message}`);
+	}
+	setLogLevel(level: Priority) {
+		this.logLevel = priorities.indexOf(level);
+	}
+	debug(message: string) {
+		return this.log("debug", message);
+	}
+	info(message: string) {
+		return this.log("info", message);
+	}
+	warning(message: string) {
+		return this.log("warning", message);
+	}
+	error(message: string) {
+		return this.log("error", message);
+	}
+	fatal(message: string) {
+		return this.log("fatal", message);
+	}
+	abstract send(message: string): Promise<void>;
+	abstract input(): Promise<string>;
+	async decide(question: string) {
+		await this.log("info", question);
+		while (true) {
+			const response = (await this.input()).toLowerCase();
+			if (response === "yes") return true;
+			if (response === "no") return false;
+			await this.log("warning", "please respond with yes or no");
+		}
 	}
 }
-async function init() {
-	const bot = new TelegramBot(config.telegram.token, { polling: true });
-	bot.on("message", async (msg: TelegramMessage) => {
+
+var xyz;
+export class TelegramInteractiveLogger extends InteractiveLogger {
+	bot = new AdvancedTelegramBot();
+
+	get logChat() {
+		return config.telegram.admin;
+	}
+	async send(message: string) {
+		if (!config.telegram.logChatId) {
+			console.warn("cannot log to telegram without set logChatId", message);
+			return;
+		}
+		this.bot.bot.sendMessage(config.telegram.logChatId, message);
+	}
+	async input() {
+		return new Promise<string>((res, rej) => {
+			this.bot.bot.on("message", (msg: TelegramMessage) => {
+				msg.handled = true;
+				res(msg.text);
+			});
+			this.bot.readdMessageListener();
+		});
+	}
+}
+
+class AdvancedTelegramBot {
+	public bot = new TelegramBot(config.telegram.token, { polling: true });
+	constructor() {
+		this.bot.on("message", this.handleIncomingMessage);
+	}
+	/** use this to prepend events because eventemitter3 doesn't have the prependEvent function -.- */
+	readdMessageListener() {
+		this.bot.removeListener("message", this.handleIncomingMessage);
+		this.bot.on("message", this.handleIncomingMessage);
+	}
+	handleIncomingMessage = async (msg: TelegramMessage) => {
+		if (msg.handled) return;
 		if (
 			!config.telegram.users.includes(msg.from.id) &&
 			msg.from.id !== config.telegram.admin &&
 			!["/setadmin", "/access"].includes(msg.text)
 		) {
-			await bot.sendMessage(msg.chat.id, "I don't know you ಠ_ಠ.");
+			await this.bot.sendMessage(msg.chat.id, "I don't know you ಠ_ಠ.");
 			return;
 		}
 		let cmdName;
-		let arg;
+		let arg = "";
 		for (const command in commands) {
 			if (msg.text.startsWith(command)) {
 				cmdName = command;
@@ -179,23 +290,36 @@ async function init() {
 		}
 		if (!cmdName) {
 			console.log("Unknown command", msg.text);
-			bot.sendMessage(msg.chat.id, `Unknown command '${msg.text}', call /help for a list of commands.`);
+			this.bot.sendMessage(msg.chat.id, `Unknown command '${msg.text}', call /help for a list of commands.`);
 		} else {
 			arg = arg.trim();
 			const cmd = commands[cmdName];
-			let result = await cmd(arg, msg);
-			if (typeof result === "string") {
-				if (result.length > 0) await bot.sendMessage(msg.chat.id, result);
-			} else if (typeof result === "function") {
-				sendDelayed(bot, msg.chat.id, result);
-			} else {
-				console.error("result", result);
-				throw "Unknown result type";
-			}
+			this.sendMessage(msg.chat.id, await cmd(arg, msg));
 		}
-	});
-}
+	};
 
+	async sendMessage(to: number, result: Message) {
+		if (typeof result === "string") {
+			if (result.length > 0) await this.bot.sendMessage(to, result);
+		} else if (typeof result === "function") {
+			await this.sendDelayed(to, result);
+		} else {
+			console.error("result", result);
+			throw "Unknown result type";
+		}
+	}
+
+	async sendDelayed(chat_id: number, msg: WaitingMessage) {
+		let message_id: string | null = null;
+		for await (const text of msg()) {
+			if (message_id) this.bot.editMessageText(text, { message_id, chat_id, parse_mode: "markdown" });
+			else ({ message_id } = await this.bot.sendMessage(chat_id, text, { parse_mode: "markdown" }));
+		}
+	}
+}
 if (require.main === module) {
-	init();
+	(async () => {
+		//const bot = new AdvancedTelegramBot();
+		const test = new TelegramInteractiveLogger();
+	})();
 }

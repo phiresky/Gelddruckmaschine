@@ -7,30 +7,19 @@ import { BitcoindeClient } from "./markets/btcde-client";
 import { KrakenClient } from "./markets/kraken-client";
 import { literal } from "./util";
 import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
-import { sleep, significantDigits, asyncSwap, formatBTC, unwrap } from "./util";
+import { sleep, currency as formatCurrency, significantDigits, asyncSwap, formatBTC, unwrap } from "./util";
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
+import { InteractiveLogger, TelegramInteractiveLogger } from "./telegram";
+import * as clients from "./clients";
+import { getProfitMarginBasic } from "./printerUtil";
 
-const debug = _debug("printer");
+const io = new TelegramInteractiveLogger() as InteractiveLogger;
 
-export const clients = {
-	bde: new BitcoindeClient(),
-	kraken: new KrakenClient(),
-};
-
-export async function getProfitMarginBasic<tradingCurrency extends currency, baseCurrency extends currency>(
-	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
-	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
-) {
-	const buyPrice = unwrap(await startClient.getEffCurrBuyPrice());
-	const sellPrice = unwrap(await endClient.getEffCurrSellPrice());
-	return (sellPrice.n - buyPrice.n) / buyPrice.n;
-}
-
-export async function printMoney() {
+export async function moneyPrinterLoop() {
 	while (true) {
-		for (const [clientName1, client1] of Object.entries(clients)) {
-			for (const [clientName2, client2] of Object.entries(clients)) {
+		for (const [_, client1] of Object.entries(clients)) {
+			for (const [_, client2] of Object.entries(clients)) {
 				if (
 					client1 === client2 ||
 					client1.tradingCurrency !== client2.tradingCurrency ||
@@ -39,15 +28,23 @@ export async function printMoney() {
 					continue; // Exclude same clients
 
 				const possibleMargin = await getProfitMarginBasic(client1, client2);
-				if (possibleMargin === null) {
-					debug(`Could not retrieve margin for: ${client1.name} --> ${client2.name}. Continue`);
+				if (!possibleMargin.success) {
+					io.debug(
+						`Could not retrieve margin for: ${client1.name} --> ${client2.name}: ${possibleMargin.error
+							.message}. Continue`,
+					);
 					continue;
 				}
-				const possibleMarginStr = significantDigits(possibleMargin * 100, 2);
-				debug(`${clientName1} -> ${clientName2}: Margin of ${possibleMarginStr}% possible.`);
-				if (possibleMargin > config.general.minProfit) {
-					debug(`Noice! Possible margin of ${possibleMarginStr}% found :O`);
-					await tryPrintMoney(client1, client2);
+				const possibleMarginStr = significantDigits(possibleMargin.value * 100, 2);
+				io.debug(`${client1.name} -> ${client2.name}: Margin of ${possibleMarginStr}% possible.`);
+				if (possibleMargin.value > config.general.minProfit) {
+					io.debug(`Noice! Possible margin of ${possibleMarginStr}% found :O`);
+					try {
+						await tryPrintMoney(client1, client2);
+					} catch (e) {
+						console.warn("tryPrintMoney", e);
+						io.warning("uncaught error while printing money: " + e);
+					}
 				}
 			}
 		}
@@ -63,12 +60,12 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 
 	const remoteBilanceRet = await buyClient.getAvailableBaseCurrency();
 	if (!remoteBilanceRet.success) {
-		debug(`Could not fetch balance of ${buyClient.baseCurrency} from ${buyClient.name}.`);
+		io.debug(`Could not fetch balance of ${buyClient.baseCurrency} from ${buyClient.name}.`);
 		return;
 	}
 	const availableMoney = Math.min(remoteBilanceRet.value, config.general.maxStake) as baseCurrency;
 	if (availableMoney === (0 as baseCurrency)) {
-		debug(`No money in ${buyClient.baseCurrency} available on ${buyClient.name} to trade with.`);
+		io.debug(`No money in ${buyClient.baseCurrency} available on ${buyClient.name} to trade with.`);
 		return;
 	}
 
@@ -79,13 +76,13 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	});
 
 	if (!buyOfferRet.success) {
-		debug(`No buy offer was found for ${buyClient.name}`);
-		debug(`Error was: ${JSON.stringify(buyOfferRet.error)}`);
+		io.debug(`No buy offer was found for ${buyClient.name}`);
+		io.debug(`Error was: ${JSON.stringify(buyOfferRet.error)}`);
 		return;
 	}
 	if (!sellOfferRet.success) {
-		debug(`No sell offers found for ${sellClient.name}.`);
-		debug(`Error was: ${JSON.stringify(sellOfferRet.error)}`);
+		io.debug(`No sell offers found for ${sellClient.name}.`);
+		io.debug(`Error was: ${JSON.stringify(sellOfferRet.error)}`);
 		return;
 	}
 
@@ -107,20 +104,33 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	const margin = (sell.effPrice.n - buy.effPrice.n) / buy.effPrice.n;
 	const marginStr = significantDigits(margin * 100, 2);
 	if (margin <= config.general.minProfit) {
-		debug(`Actual margin of ${marginStr}% unfortunately is too low now.. Sorry bro.`);
+		io.debug(`Actual margin of ${marginStr}% unfortunately is too low now.. Sorry bro.`);
 		return;
 	}
-	debug(`Noice! Found trades with margin ${marginStr}%. EXECUUUUTEEE!`);
+	io.info(`Noice! Found trades with margin ${marginStr}%. EXECUUUUTEEE!`);
 	// Accept start offer
 	const [risky, safer] = isBuyMoreRisky ? [buy, sell] : [sell, buy];
 
+	if (
+		!await io.decide(
+			`I'm going to ${risky.offer.type === "buy" ? "sell" : "buy"}
+			${formatBTC(tradeAmount)} ${risky.client.tradingCurrency}
+			for ${formatCurrency(risky.offer.price)} ${risky.client.baseCurrency}/${risky.client.tradingCurrency}
+			via ${risky.client.name}.
+				Continue?`,
+		)
+	) {
+		io.debug("Aborting because of io decision");
+		return;
+	}
+
 	const riskyTradeRet = await risky.client.executePendingTradeOffer(risky.offer, tradeAmount);
 	if (!riskyTradeRet.success) {
-		debug(`Error was: ${JSON.stringify(riskyTradeRet.error)}`);
+		io.debug(`Error was: ${JSON.stringify(riskyTradeRet.error)}`);
 		throw new Error(`ERROR while accepting risky order on ${risky.client.name}!!`);
 	}
 
-	debug(
+	io.debug(
 		`Risky offer (type: ${risky.offer.type}, amount: ${formatBTC(tradeAmount)} ${risky.client.tradingCurrency},
 		price: ${risky.effPrice}) from ${risky.client.name} successfull.`,
 	);
@@ -129,22 +139,14 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	// TODO Check if btc.de client takes care of higher tradeamount necessary
 	const saferTradeRet = await safer.client.setMarketOrder(safer.offer.type, tradeAmount);
 	if (!saferTradeRet.success) {
-		debug(`Error was: ${JSON.stringify(saferTradeRet.error)}`);
+		io.debug(`Error was: ${JSON.stringify(saferTradeRet.error)}`);
 		throw new Error(`ERROR while creating market order on ${safer.client.name}!!`);
 	}
 
-	debug(`Market order (type: ${safer.offer.type}) on ${safer.client.name} created.`);
+	io.debug(`Market order (type: ${safer.offer.type}) on ${safer.client.name} created.`);
 }
 
-async function run() {
-	console.log(await clients.kraken.getCurrentSellPrice());
-	console.log("kraken -> bde");
-	console.log(await getProfitMarginBasic(clients.kraken, clients.bde));
-	console.log("bde -> kraken");
-	console.log(await getProfitMarginBasic(clients.bde, clients.kraken));
-}
 console.log("running");
 if (require.main === module) {
-	//run();
-	printMoney();
+	moneyPrinterLoop();
 }

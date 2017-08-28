@@ -43,7 +43,7 @@ const defaultConfig = {
 		 * 
 		 * Example: if minProfit is 0.01, then you make 10€ profit for a trade with 1000€ value
 		 */
-		minProfit: 0.001, // TODO change back to 0.01
+		minProfit: -0.01, // TODO change back to 0.01
 
 		emoji: [["😡", -Infinity], ["💩", -2], ["😢", -1], ["😔", -0.5], ["😋", 0.2], ["😁", 0.4], ["🔥", 0.8]] as [
 			string,
@@ -58,6 +58,7 @@ const defaultConfig = {
 		token: "",
 		admin: null as null | number,
 		users: [] as number[],
+		logChatId: null as null | number,
 	},
 };
 
