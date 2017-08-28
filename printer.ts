@@ -153,7 +153,9 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 			`I'm going to create a market ${swapOrderType(safer.offer.type)} order of
 			${formatBTC(tradeAmount)} ${tradingCurrency}
 			via ${safer.client.name}.
-			The last known ${swapOrderType(safer.offer.type)} price was ${safer.offer.price} ${baseCurrency}/${tradingCurrency}.
+			The last known ${swapOrderType(safer.offer.type)} price was ${formatCurrency(
+				safer.offer.price,
+			)} ${baseCurrency} per ${tradingCurrency}.
 				Continue?`,
 		)
 	) {
