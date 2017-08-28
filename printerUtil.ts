@@ -3,7 +3,7 @@ import { TradeOffer, MarketClient } from "./markets/market-client";
 import { unwrap } from "./util";
 import { CheckedPromise } from "./definitions/promises";
 
-export async function getProfitMarginBasic<tradingCurrency extends currency, baseCurrency extends currency>(
+export async function getProfitMargin<tradingCurrency extends currency, baseCurrency extends currency>(
 	startClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 	endClient: MarketClient<tradingCurrency, baseCurrency, TradeOffer<tradingCurrency, baseCurrency>>,
 ): CheckedPromise<number> {

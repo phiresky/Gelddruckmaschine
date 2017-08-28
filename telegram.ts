@@ -18,7 +18,7 @@ import { KrakenClient } from "./markets/kraken-client";
 import * as clients from "./clients";
 import { sumTrades } from "./bilance";
 import * as parseDuration from "parse-duration";
-import { getProfitMarginBasic } from "./printerUtil";
+import { getProfitMargin } from "./printerUtil";
 
 const unresolved = Symbol("unresolved");
 
@@ -45,23 +45,17 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 	"/gap": () => {
 		const apis = [clients.bde, clients.kraken];
 		const [api1, api2] = apis.map(api => ({
-			buy: api
-				.getCurrentBuyPrice()
-				.then(unwrap)
-				.then(currency),
-			sell: api
-				.getCurrentSellPrice()
-				.then(unwrap)
-				.then(currency),
+			buy: api.getCurrentBuyPrice().then(unwrap).then(currency),
+			sell: api.getCurrentSellPrice().then(unwrap).then(currency),
 		}));
 		return Procedural`
 		bitcoin.de -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €
-		bitcoin.de -> kraken: ${getProfitMarginBasic(apis[0], apis[1])
+		bitcoin.de -> kraken: ${getProfitMargin(apis[0], apis[1])
 			.then(unwrap)
 			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
 
 		kraken -> bitcoin.de: buy @ ${api2.buy} € -> sell @ ${api1.sell} €
-		kraken -> bitcoin.de: ${getProfitMarginBasic(apis[1], apis[0])
+		kraken -> bitcoin.de: ${getProfitMargin(apis[1], apis[0])
 			.then(unwrap)
 			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
 
@@ -86,36 +80,18 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 		if (!apiname2) return `Invalid backend ${apiname}. Available backends: ${Object.keys(apis).join(", ")}`;
 		const api = clients[apiname2];
 		return Procedural`
-			Buy: ${api
-				.getCurrentBuyPrice()
-				.then(unwrap)
-				.then(currency)} €
-			Sell: ${api
-				.getCurrentSellPrice()
-				.then(unwrap)
-				.then(currency)} €
+			Buy: ${api.getCurrentBuyPrice().then(unwrap).then(currency)} €
+			Sell: ${api.getCurrentSellPrice().then(unwrap).then(currency)} €
 		`;
 	},
 	"/balance": () => {
 		return Procedural`
 			kraken:
-			${clients.kraken
-				.getAvailableTradingCurrency()
-				.then(unwrap)
-				.then(formatBTC)} BTC
-			${clients.kraken
-				.getAvailableBaseCurrency()
-				.then(unwrap)
-				.then(currency)} EUR
+			${clients.kraken.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
+			${clients.kraken.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
 			bitcoin.de:
-			${clients.bde
-				.getAvailableTradingCurrency()
-				.then(unwrap)
-				.then(formatBTC)} BTC
-			${clients.bde
-				.getAvailableBaseCurrency()
-				.then(unwrap)
-				.then(currency)} EUR
+			${clients.bde.getAvailableTradingCurrency().then(unwrap).then(formatBTC)} BTC
+			${clients.bde.getAvailableBaseCurrency().then(unwrap).then(currency)} EUR
 		`;
 	},
 	/*"/getMargin": () => {
