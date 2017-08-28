@@ -3,7 +3,7 @@ import { BitcoindeClient } from "./markets/btcde-client/bitcoin-de";
 import config from "./config";
 import { KrakenClient } from "./markets/kraken-client/kraken";
 import { Procedural, WaitingMessage } from "./telegram";
-import { currency, significantDigits, formatBTC, unwrap } from "./util";
+import { formatCurrency, significantDigits, formatBTC, unwrap } from "./util";
 
 function btcdeDate(d: Date): string {
 	// bitcoin.de apparently handles timezones incorrectly, so the js date format
@@ -69,7 +69,7 @@ function sumAll<K extends string>(ele1: { [k in K]: number }, ele2: { [k in K]: 
 }
 
 function formatTrade(t: UnifiedTrade) {
-	return `${formatBTC(t.btc)} BTC, ${currency(t.eur)} €`;
+	return `${formatBTC(t.btc)} BTC, ${formatCurrency(t.eur)} €`;
 }
 export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient, from: Date): WaitingMessage {
 	const to = new Date();
@@ -103,13 +103,13 @@ export function sumTrades(bitcoinde: BitcoindeClient, kraken: KrakenClient, from
 	delta bitcoin.de: ${totalbc.then(formatTrade)}
 	delta kraken.com: ${totalkraken.then(formatTrade)}
 	delta bitcoin.de + kraken.com: ${total.then(({ all }) => formatTrade(all))}
-	average: bought at ${total.then(x => currency(x.bought.eur / x.bought.btc))}€/BTC, sold at ${total.then(x =>
-		currency(x.sold.eur / x.sold.btc),
+	average: bought at ${total.then(x => formatCurrency(x.bought.eur / x.bought.btc))}€/BTC, sold at ${total.then(x =>
+		formatCurrency(x.sold.eur / x.sold.btc),
 	)}€/BTC.
 
-	profit: ${total.then(async x => currency((await totalbtcineur) + x.all.eur))}€ (${total.then(x =>
-		currency(x.all.eur),
-	)}€ + ${total.then(x => formatBTC(x.all.btc))}BTC≈${totalbtcineur.then(currency)}€)
+	profit: ${total.then(async x => formatCurrency((await totalbtcineur) + x.all.eur))}€ (${total.then(x =>
+		formatCurrency(x.all.eur),
+	)}€ + ${total.then(x => formatBTC(x.all.btc))}BTC≈${totalbtcineur.then(formatCurrency)}€)
 	`;
 }
 if (require.main === module) {

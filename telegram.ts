@@ -5,7 +5,7 @@ import {
 	sleep,
 	normalTemplate,
 	significantDigits,
-	currency,
+	formatCurrency,
 	rateProfitMargin,
 	lineTrim,
 	asyncIteratorDebounce,
@@ -46,11 +46,11 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 			buy: api
 				.getCurrentBuyPrice()
 				.then(unwrap)
-				.then(currency),
+				.then(formatCurrency),
 			sell: api
 				.getCurrentSellPrice()
 				.then(unwrap)
-				.then(currency),
+				.then(formatCurrency),
 		}));
 		return Procedural`
 		bitcoin.de -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €
@@ -87,11 +87,11 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 			Buy: ${api
 				.getCurrentBuyPrice()
 				.then(unwrap)
-				.then(currency)} €
+				.then(formatCurrency)} €
 			Sell: ${api
 				.getCurrentSellPrice()
 				.then(unwrap)
-				.then(currency)} €
+				.then(formatCurrency)} €
 		`;
 	},
 	"/balance": () => {
@@ -104,7 +104,7 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 			${clients.kraken
 				.getAvailableBaseCurrency()
 				.then(unwrap)
-				.then(currency)} EUR
+				.then(formatCurrency)} EUR
 			bitcoin.de:
 			${clients.bde
 				.getAvailableTradingCurrency()
@@ -113,7 +113,7 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 			${clients.bde
 				.getAvailableBaseCurrency()
 				.then(unwrap)
-				.then(currency)} EUR
+				.then(formatCurrency)} EUR
 		`;
 	},
 	/*"/getMargin": () => {

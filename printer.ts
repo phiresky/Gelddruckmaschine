@@ -7,15 +7,7 @@ import { BitcoindeClient } from "./markets/btcde-client";
 import { KrakenClient } from "./markets/kraken-client";
 import { literal } from "./util";
 import { onBitcoindeOrderCreated } from "./markets/btcde-client/bitcoin-de-ws";
-import {
-	sleep,
-	currency as formatCurrency,
-	significantDigits,
-	asyncSwap,
-	formatBTC,
-	unwrap,
-	swapOrderType,
-} from "./util";
+import { sleep, formatCurrency, significantDigits, asyncSwap, formatBTC, unwrap, swapOrderType } from "./util";
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
 import { TelegramInteractiveLogger } from "./telegram";

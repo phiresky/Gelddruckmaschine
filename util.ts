@@ -95,7 +95,7 @@ export function significantDigits(inp: number, digits: number) {
 	return inp.toLocaleString(undefined, { minimumSignificantDigits: digits, maximumSignificantDigits: digits });
 }
 
-export function currency(inp: number | null) {
+export function formatCurrency(inp: number | null) {
 	if (inp === null) return "null";
 	return inp.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
