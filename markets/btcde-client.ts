@@ -46,7 +46,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 
 	async getCheapestOfferToBuy(volume?: EUR): CheckedPromise<BitcoindeOffer> {
 		return await modifyPromise(
-			API.Orders.showOrderbook(this.client, { type: "buy", only_express_orders: 1, amount: volume }),
+			API.Orders.showOrderbook(this.client, { type: "buy", only_express_orders: 1 }),
 			result => {
 				if (result.orders.length === 0)
 					return {
@@ -58,7 +58,19 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 							raw: result,
 						},
 					};
-				const order = result.orders.reduce(minBy(order => order.price));
+				const orders = result.orders.filter(order => volume === undefined || order.min_volume <= volume);
+				if (orders.length === 0)
+					return {
+						success: false,
+						error: {
+							canRetry: true,
+							message: `No buy offers matching requested volume limit of ${volume} EUR found.`,
+							origin: `BitcoindeClient/getCheapestOfferToBuy (volume: ${volume})`,
+							raw: result,
+						},
+					};
+
+				const order = orders.reduce(minBy(order => order.price));
 				return {
 					success: true,
 					value: {
