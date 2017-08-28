@@ -251,6 +251,7 @@ export class KrakenClient {
 		return this.rawRequest("POST", url, {}, params);
 	}
 
+	@synchronized()
 	private privateMethod(method: string, params: object = {}) {
 		var path = `/${this.config.version}/private/${method}`;
 		var url = this.config.url + path;
@@ -279,7 +280,6 @@ export class KrakenClient {
 		return hmacDigest;
 	}
 
-	@synchronized()
 	private async rawRequest(
 		method: "POST" | "GET",
 		url: string,
