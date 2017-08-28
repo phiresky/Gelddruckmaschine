@@ -92,10 +92,13 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 		return await this.getBestOffer("sell");
 	}
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
-		throw new Error("Method setMarketBuyOrder not implemented.");
+		// TODO Implement logic
+		console.warn(`ẀOULD CREATE MARKET ORDER: buy, ${amount} BTC (min: ${amount_min || "not set"})`);
+		return { success: true, value: null };
 	}
 	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
-		throw new Error("Method setMarketSellOrder not implemented.");
+		console.warn(`ẀOULD CREATE MARKET ORDER: sell, ${amount} BTC (min: ${amount_min || "not set"})`);
+		return { success: true, value: null };
 	}
 	async executePendingTradeOffer(offer: KrakenOffer): CheckedPromise<null> {
 		throw new Error("Method executePendingTradeOffer not implemented.");

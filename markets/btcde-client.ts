@@ -145,7 +145,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		}), result => null);
 		*/
 		// TODO Use above checkPromise here when execution should actually happen
-		console.warn("WOULD EXECUTE", offer.type, amount, offer.bitcoindeId);
+		console.warn(`WOULD ACCEPT OFFER: ${offer.type} (_offer_ type), ${amount} BTC, id ${offer.bitcoindeId}`);
 		return { success: true, value: null };
 	}
 	async getAccountInfo(): CheckedPromise<API.Sonstiges.showAccountInfo.Response.Data> {
