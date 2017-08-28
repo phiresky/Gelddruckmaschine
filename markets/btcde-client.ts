@@ -25,7 +25,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	 */
 	constructor() {
 		super();
-		this.client = new APIClient(config.bitcoinde.key, config.bitcoinde.secret);
+		this.client = new APIClient(config.secrets.bitcoinde.key, config.secrets.bitcoinde.secret);
 	}
 
 	async getCurrentSellPrice(): CheckedPromise<EUR> {

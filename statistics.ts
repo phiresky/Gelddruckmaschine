@@ -1,16 +1,16 @@
-import { Websocket_API } from "./generated";
-import * as api from "./generated";
+import { Websocket_API } from "./markets/btcde-client/generated";
+import * as api from "./markets/btcde-client/generated";
 import * as fs from "mz/fs";
 
 import * as _debug from "debug";
 import keyconfig from "./config";
-import { BitcoindeClient } from "./bitcoin-de";
-import { KrakenClient } from "./kraken";
-import { literal, sleep, readFileToObjectAsync, writeObjectToFileAsync } from "./util";
+import { BitcoindeClient } from "./markets/btcde-client/bitcoin-de";
+import { KrakenClient } from "./markets/kraken-client/kraken";
+import { literal, sleep, readFileToObjectAsync, writeObjectToFileAsync, unwrap } from "./util";
 import { RequestError } from "request-promise-native/errors";
 
-const bitcoinde = new BitcoindeClient(keyconfig.bitcoinde.key, keyconfig.bitcoinde.secret);
-const kraken = new KrakenClient(keyconfig.krakencom.key, keyconfig.krakencom.secret);
+const bitcoinde = new BitcoindeClient(keyconfig.secrets.bitcoinde.key, keyconfig.secrets.bitcoinde.secret);
+const kraken = new KrakenClient(keyconfig.secrets.krakencom.key, keyconfig.secrets.krakencom.secret);
 const debug = _debug("statistics");
 
 const krakenTradesFile = "./data/krakenTrades.json";
@@ -41,7 +41,7 @@ type TradeBins = {
 };
 
 async function getBtcdeTrades() {
-	const result = (await api.Sonstiges.showPublicTradeHistory(bitcoinde, {})).trades;
+	const result = (await api.Sonstiges.showPublicTradeHistory(bitcoinde, {}).then(unwrap)).trades;
 	return result.map(({ date, price }) => ({ time_s: date, price_EURperBTC: price } as Trade));
 }
 async function queryKrakenTrades(last_ns: string) {

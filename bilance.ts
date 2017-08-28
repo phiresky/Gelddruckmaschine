@@ -117,7 +117,7 @@ if (require.main === module) {
 	from.setHours(0, 0, 0, 0);
 	from.setDate(from.getDate());
 	const msg = sumTrades(bitcoinde, kraken, from);
-	(async () => {
+	const _ = (async () => {
 		for await (const res of msg()) {
 			console.log(res);
 		}

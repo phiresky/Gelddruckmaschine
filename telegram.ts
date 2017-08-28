@@ -229,7 +229,7 @@ export class TelegramInteractiveLogger extends InteractiveLogger {
 }
 
 class AdvancedTelegramBot {
-	public bot = new TelegramBot(config.telegram.token, { polling: true });
+	public bot = new TelegramBot(config.secrets.telegram.token, { polling: true });
 	constructor() {
 		this.bot.on("message", this.handleIncomingMessage);
 	}

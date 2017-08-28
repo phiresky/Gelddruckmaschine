@@ -2,6 +2,19 @@ import localConfig from "./config.local";
 import { mergeDeep, accessorFromDotted } from "./util";
 import * as fs from "fs";
 const defaultConfig = {
+	secrets: {
+		bitcoinde: {
+			key: "",
+			secret: "",
+		},
+		krakencom: {
+			key: "",
+			secret: "",
+		},
+		telegram: {
+			token: "",
+		},
+	},
 	bitcoinde: {
 		/**
 		 * Bitcoin.de fee (eur -> btc)
@@ -13,8 +26,6 @@ const defaultConfig = {
 		 * you receive 0,8% less bitcoins than ordered
 		 */
 		feeLessBTC: 0.008,
-		key: "",
-		secret: "",
 	},
 	krakencom: {
 		/**
@@ -25,8 +36,6 @@ const defaultConfig = {
 		 * Maximum allowed age of Kraken prices in seconds
 		 */
 		maxPriceAge_SECS: 60,
-		key: "",
-		secret: "",
 	},
 	general: {
 		/**
@@ -57,7 +66,6 @@ const defaultConfig = {
 		logLevel: 0,
 	},
 	telegram: {
-		token: "",
 		admin: null as null | number,
 		users: [] as number[],
 		logChatId: null as null | number,
