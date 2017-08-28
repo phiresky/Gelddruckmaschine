@@ -20,6 +20,7 @@ import * as clients from "./clients";
 import { sumTrades } from "./bilance";
 import * as parseDuration from "parse-duration";
 import { getProfitMargin } from "./printerUtil";
+import { priorities, InteractiveLogger } from "./InteractiveLogger";
 
 const unresolved = Symbol("unresolved");
 
@@ -156,7 +157,7 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 	"/setLogLevel": async (arg: string) => {
 		const inx = priorities.indexOf(arg as any);
 		if (inx < 0) return "Invalid log level. Must be one of " + priorities.join(", ");
-		await setConfigVariable(c => (c.telegram.logLevel = arg as any));
+		await setConfigVariable(c => (c.general.logLevel = arg as any));
 		return "Log level set to " + arg;
 	},
 	"/config": async (arg: string, msg: TelegramMessage) => {

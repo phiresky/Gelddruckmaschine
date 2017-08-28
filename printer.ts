@@ -23,9 +23,11 @@ import * as clients from "./clients";
 import { getProfitMargin } from "./printerUtil";
 import { TerminalLogger, InteractiveLogger } from "./InteractiveLogger";
 
-const io = { telegram: () => new TelegramInteractiveLogger(), terminal: () => new TerminalLogger() }[
+const _io = { telegram: () => new TelegramInteractiveLogger(), terminal: () => new TerminalLogger() }[
 	config.general.ioInterface
-]() as InteractiveLogger;
+] as () => InteractiveLogger;
+if (!_io) throw Error("invalid ioInterface " + config.general.ioInterface);
+const io = _io();
 
 export async function moneyPrinterLoop() {
 	while (true) {

@@ -2,7 +2,7 @@ import config from "./config";
 import * as readline from "readline";
 
 export type Priority = "debug" | "info" | "warning" | "error" | "fatal";
-const priorities: Priority[] = ["debug", "info", "warning", "error", "fatal"];
+export const priorities: Priority[] = ["debug", "info", "warning", "error", "fatal"];
 
 export abstract class InteractiveLogger {
 	get logLevel() {

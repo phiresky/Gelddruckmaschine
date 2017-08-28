@@ -1,5 +1,5 @@
 import localConfig from "./config.local";
-import { mergeDeep } from "./util";
+import { mergeDeep, accessorFromDotted } from "./util";
 import * as fs from "fs";
 const defaultConfig = {
 	bitcoinde: {
@@ -70,6 +70,19 @@ try {
 	autoConfigString = "{}";
 }
 var autoConfig = JSON.parse(autoConfigString);
-const res: typeof defaultConfig = mergeDeep({}, defaultConfig, autoConfig, localConfig);
+let mergedConfig: typeof defaultConfig = mergeDeep({}, defaultConfig, autoConfig, localConfig);
+for (const arg of process.argv.slice(2)) {
+	const [key, value] = arg.split("=");
+	if (!key || !value) throw `Invalid argument: ${arg}`;
+	let parsedValue;
+	const { getter, setter } = accessorFromDotted(key);
+	const current = getter(mergedConfig);
+	if (typeof current === "undefined") throw `Config key ${key} does not exist.`;
+	if (typeof current === "number") parsedValue = +value;
+	else if (typeof current === "string") parsedValue = value;
+	else throw "Could not set config variable: unsupported type " + typeof current;
+	console.log(`set ${key}: ${JSON.stringify(current)} → ${JSON.stringify(parsedValue)}`);
+	setter(mergedConfig, parsedValue);
+}
 
-export default res;
+export default mergedConfig;
