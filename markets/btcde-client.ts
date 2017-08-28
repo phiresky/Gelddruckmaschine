@@ -67,7 +67,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 						bitcoindeId: order.order_id,
 						price: order.price.EUR,
 						time: new Date(),
-						type: "buy",
+						type: "sell", // Person offering sells bitcoin -> we can buy them
 					} as BitcoindeOffer,
 				};
 			},
@@ -96,7 +96,7 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 						bitcoindeId: order.order_id,
 						price: order.price.EUR,
 						time: new Date(),
-						type: "sell",
+						type: "buy",
 					} as BitcoindeOffer,
 				};
 			},
