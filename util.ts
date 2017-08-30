@@ -110,7 +110,10 @@ export function formatBTC(inp: number) {
 
 export function rateProfitMargin(margin: number) {
 	if (isNaN(margin)) return "(?)";
-	return config.general.emoji.reverse().find(p => margin * 100 >= p[1])![0];
+	return config.general.emoji
+		.slice()
+		.reverse()
+		.find(p => margin * 100 >= p[1])![0];
 }
 
 export function lineTrim(string: string) {
