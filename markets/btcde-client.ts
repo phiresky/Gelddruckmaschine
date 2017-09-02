@@ -1,10 +1,10 @@
 import { MarketClient, TradeOffer } from "./market-client";
 import { BTC, EUR } from "../definitions/currency";
-import { As, Simplify, minBy, modifyPromise, checkPromise } from "../util";
+import { As, Simplify, minBy, modifyPromise, checkPromise, dryRunExclude } from "../util";
 import config from "../config";
 import { BitcoindeClient as APIClient } from "./btcde-client/bitcoin-de";
 import * as API from "./btcde-client/generated";
-import { CheckedPromise } from "../definitions/promises";
+import { CheckedPromise, CheckedPromiseReturn } from "../definitions/promises";
 
 export type BitcoindeOffer = Simplify<
 	TradeOffer<BTC, EUR> & {
@@ -122,9 +122,11 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		throw new Error("Method not implemented.");
 	}
 
+	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
 		throw new Error("Method not implemented.");
 	}
+	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
 		throw new Error("Dont do market orders on Bitcoin.de, you fool!");
 		/*
@@ -136,6 +138,8 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 		});
 		*/
 	}
+
+	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async executePendingTradeOffer(offer: BitcoindeOffer, amount: BTC): CheckedPromise<null> {
 		/*
 		return await checkPromise(API.Trades.executeTrade(this.client, {

@@ -119,6 +119,8 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 	// Accept start offer
 	const [risky, safer] = isBuyMoreRisky ? [buy, sell] : [sell, buy];
 
+	// TODO Check here if trade volumes can be satisfied (both risky and safer order)
+
 	if (
 		config.general.confirmBeforeRiskyOrder &&
 		!await io.decide(

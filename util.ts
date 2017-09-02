@@ -304,3 +304,16 @@ export function accessorFromDotted(key: string) {
 	const setter = (c: any, v: any) => (accessorFromDotted(path.join(".")).getter(c)[innerkey] = v);
 	return { setter, getter };
 }
+
+/**
+ * use this as a decorator for functions which should not be executed in a dry run
+ */
+export function dryRunExclude(dryRunDefault: any) {
+	return (target: any, key: string, descriptor: PropertyDescriptor) => {
+		const original = descriptor.value;
+		descriptor.value = async function(this: any, ...args: any[]) {
+			if (config.general.dryRun) return dryRunDefault;
+			return await original.call(this, ...args);
+		};
+	};
+}

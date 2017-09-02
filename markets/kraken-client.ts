@@ -1,6 +1,6 @@
 import { EUR, BTC } from "../definitions/currency";
 import { MarketClient, TradeOffer } from "./market-client";
-import { Simplify, As, cache, checkPromise, modifyPromise } from "../util";
+import { Simplify, As, cache, checkPromise, modifyPromise, dryRunExclude } from "../util";
 import { KrakenClient as APIClient } from "./kraken-client/kraken";
 import config from "../config";
 import { CheckedPromise, CheckedPromiseReturn } from "../definitions/promises";
@@ -91,15 +91,19 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 		// TODO Volume not implemented
 		return await this.getBestOffer("sell");
 	}
+
+	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
 		// TODO Implement logic
 		console.warn(`ẀOULD CREATE MARKET ORDER: buy, ${amount} BTC (min: ${amount_min || "not set"})`);
 		return { success: true, value: null };
 	}
+	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
 		console.warn(`ẀOULD CREATE MARKET ORDER: sell, ${amount} BTC (min: ${amount_min || "not set"})`);
 		return { success: true, value: null };
 	}
+	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async executePendingTradeOffer(offer: KrakenOffer): CheckedPromise<null> {
 		throw new Error("Method executePendingTradeOffer not implemented.");
 	}

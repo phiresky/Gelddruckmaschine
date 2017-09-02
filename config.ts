@@ -68,6 +68,10 @@ const defaultConfig = {
 		confirmBeforeRiskyOrder: true,
 		confirmBeforeSafeOrder: true,
 		printerLoopDelay_ms: 20000,
+		/**
+		 * If dry run is activated no orders will be executed
+		 */
+		dryRun: true,
 	},
 	telegram: {
 		admin: null as null | number,
