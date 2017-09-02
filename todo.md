@@ -1,6 +1,7 @@
 # TODOs
 
-* Telegram Bot to show status, current gap (on demand) [Later version: confirm trade]
-* Implementation if Bitcoin.de client
-* Implementation of Kraken.com client
-* Rewrite of printer file to meet MarketClient class
+* Kraken.com client
+    * Market orders
+* Make info to finished trade more readable
+* Add info on total gap achieved with a trade (later version: check if market order was executed ang get real diff)
+* Check balance of sellClient
