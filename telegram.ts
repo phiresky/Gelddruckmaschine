@@ -224,6 +224,7 @@ export class TelegramInteractiveLogger extends InteractiveLogger {
 			throw "cannot connect";
 		}
 		await this.bot.bot.sendMessage(config.telegram.logChatId, query, {
+			parse_mode: "markdown",
 			reply_markup: {
 				keyboard: [[{ text: "/yes" }, { text: "/no" }]],
 				resize_keyboard: true,

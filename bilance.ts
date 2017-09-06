@@ -31,12 +31,22 @@ type UnifiedTrade = {
 };
 const emptyTrade = { btc: 0, eur: 0, feesEur: 0 } as UnifiedTrade;
 function parseBitcoinDeTrade(trade: api.Trades.showMyTradeDetails.Response.Trade_Details): UnifiedTrade {
-	const mult = trade.type === "buy" ? 1 : -1;
-	return {
-		btc: mult * (Number(trade.amount) - Number(trade.fee_btc)),
-		eur: -mult * (trade.volume - trade.fee_eur),
-		feesEur: trade.fee_eur,
-	};
+	if (trade.type === "buy") {
+		return {
+			// fee_btc is subtracted from amount we get
+			btc: Number(trade.amount) - Number(trade.fee_btc),
+			eur: -(trade.volume - trade.fee_eur),
+			feesEur: trade.fee_eur,
+		};
+	} else if (trade.type === "sell") {
+		console.log(trade.amount, trade.fee_btc);
+		return {
+			// fee_btc is *not* subtracted from amount we give
+			btc: -Number(trade.amount),
+			eur: trade.volume - trade.fee_eur,
+			feesEur: trade.fee_eur,
+		};
+	} else throw Error("unknown trade type " + trade.type);
 }
 
 interface KrakenTrade {
