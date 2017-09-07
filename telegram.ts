@@ -16,11 +16,13 @@ import {
 	accessorFromDotted,
 } from "./util";
 import { KrakenClient } from "./markets/kraken-client";
-import * as clients from "./clients";
+import { clientCombinations, clients } from "./clients";
 import { sumTrades } from "./bilance";
 import * as parseDuration from "parse-duration";
 import { getProfitMargin } from "./printerUtil";
 import { priorities, InteractiveLogger } from "./InteractiveLogger";
+import { MarketClient } from "./markets/market-client";
+import { CheckedPromise } from "./definitions/promises";
 
 const unresolved = Symbol("unresolved");
 
@@ -36,13 +38,20 @@ type TelegramMessage = {
 let allowUserAdd = false;
 type Message = string | WaitingMessage;
 
+function joinWaitingMessages(separator: string, msg1: WaitingMessage, msg2: WaitingMessage): WaitingMessage {
+	const it1 = msg1();
+	return () => it1;
+	// TODO...
+	// const it2 = msg2();
+	// return Procedural()
+}
 const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<Message> | Message } = {
 	"/help": () => {
 		return "Available commands: " + Object.keys(commands).join(", ");
 	},
 	"/gap": () => {
-		const apis = [clients.bde, clients.kraken];
-		const [api1, api2] = apis.map(api => ({
+		const combinations = [...clientCombinations()];
+		const getPrice = (api: MarketClient<any, any, any>) => ({
 			buy: api
 				.getCurrentBuyPrice()
 				.then(unwrap)
@@ -51,19 +60,17 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 				.getCurrentSellPrice()
 				.then(unwrap)
 				.then(formatCurrency),
-		}));
-		return Procedural`
-		bitcoin.de -> kraken: buy @ ${api1.buy} € -> sell @ ${api2.sell} €
-		bitcoin.de -> kraken: ${getProfitMargin(apis[0], apis[1])
+		});
+		const fmt = (p: CheckedPromise<any>) => p.then(unwrap).then(formatCurrency);
+		const makeStr = (api1: MarketClient<any, any, any>, api2: MarketClient<any, any, any>) => Procedural`
+		${api1.name} -> ${api2.name}: buy @ ${fmt(api1.getCurrentBuyPrice())} € -> sell @ ${fmt(api2.getCurrentSellPrice())} €
+		${api1.name} -> ${api2.name}: ${getProfitMargin(api1, api2)
 			.then(unwrap)
 			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
-
-		kraken -> bitcoin.de: buy @ ${api2.buy} € -> sell @ ${api1.sell} €
-		kraken -> bitcoin.de: ${getProfitMargin(apis[1], apis[0])
-			.then(unwrap)
-			.then(x => `${significantDigits(x * 100, 2)}% profit ${rateProfitMargin(x)}`)}
-
 		`;
+		// TODO: better with loop
+		const stuff = combinations.map(([a, b]) => makeStr(a, b)).reduce((a, b) => joinWaitingMessages("", a, b));
+		return stuff;
 	},
 	"/status": () => {
 		return "Not doing anything";
@@ -183,12 +190,11 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 
 export type WaitingMessage = () => AsyncIterableIterator<string>;
 
-export function Procedural(
-	strs: TemplateStringsArray,
-	...args: (Promise<string | number> | string | number)[]
-): WaitingMessage {
+type ProceduralArg = Promise<Message> | Message;
+type AwaitedProceduralArg = Message;
+export function Procedural(strs: TemplateStringsArray, ...args: (ProceduralArg)[]): WaitingMessage {
 	return async function* listener() {
-		const resolved: (string | number | symbol)[] = args.map(p => unresolved);
+		const resolved: (Message | symbol)[] = args.map(p => unresolved);
 		const withIndices = args.map((arg, index) =>
 			Promise.resolve(arg).then(value => ({ value, index }), value => Promise.reject({ value, index })),
 		);
@@ -196,7 +202,7 @@ export function Procedural(
 			yield lineTrim(normalTemplate(strs, ...resolved.map(r => (r === unresolved ? "_[pending...]_" : r))));
 			const pending = withIndices.filter((p, i) => resolved[i] === unresolved);
 			if (pending.length === 0) return;
-			let index: number, value: any;
+			let index: number, value: string | WaitingMessage;
 			try {
 				({ index, value } = await Promise.race(pending));
 			} catch (e) {

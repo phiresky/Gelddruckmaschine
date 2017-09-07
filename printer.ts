@@ -11,7 +11,7 @@ import { sleep, formatCurrency, significantDigits, asyncSwap, formatBTC, unwrap,
 import { MarketClient, TradeOffer } from "./markets/market-client";
 import { currency } from "./definitions/currency";
 import { TelegramInteractiveLogger } from "./telegram";
-import * as clients from "./clients";
+import { clients, clientCombinations } from "./clients";
 import { getProfitMargin, formatRequest } from "./printerUtil";
 import { TerminalLogger, InteractiveLogger } from "./InteractiveLogger";
 
@@ -23,34 +23,25 @@ const io = _io();
 
 export async function moneyPrinterLoop() {
 	while (true) {
-		for (const [_, client1] of Object.entries(clients)) {
-			for (const [_, client2] of Object.entries(clients)) {
-				if (
-					client1 === client2 ||
-					client1.tradingCurrency !== client2.tradingCurrency ||
-					client1.baseCurrency !== client2.baseCurrency
-				)
-					continue; // Exclude same clients
-
-				const possibleMargin = await getProfitMargin(client1, client2);
-				if (!possibleMargin.success) {
-					await io.debug(
-						`Could not retrieve margin for: ${client1.name} --> ${client2.name}: ${possibleMargin.error
-							.message}. Skipping.`,
-					);
-					await io.debug(`Error was: ${JSON.stringify(possibleMargin.error)}`);
-					continue;
-				}
-				const possibleMarginStr = significantDigits(possibleMargin.value * 100, 2);
-				await io.debug(`${client1.name} -> ${client2.name}: Margin of ${possibleMarginStr}% possible.`);
-				if (possibleMargin.value > config.general.minProfit) {
-					await io.debug(`Noice! Possible margin of ${possibleMarginStr}% found :O`);
-					try {
-						await tryPrintMoney(client1, client2);
-					} catch (e) {
-						console.warn("tryPrintMoney", e);
-						await io.warning("uncaught error while printing money: " + e);
-					}
+		for (const [client1, client2] of clientCombinations()) {
+			const possibleMargin = await getProfitMargin(client1, client2);
+			if (!possibleMargin.success) {
+				await io.debug(
+					`Could not retrieve margin for: ${client1.name} --> ${client2.name}: ${possibleMargin.error
+						.message}. Skipping.`,
+				);
+				await io.debug(`Error was: ${JSON.stringify(possibleMargin.error)}`);
+				continue;
+			}
+			const possibleMarginStr = significantDigits(possibleMargin.value * 100, 2);
+			await io.debug(`${client1.name} -> ${client2.name}: Margin of ${possibleMarginStr}% possible.`);
+			if (possibleMargin.value > config.general.minProfit) {
+				await io.debug(`Noice! Possible margin of ${possibleMarginStr}% found :O`);
+				try {
+					await tryPrintMoney(client1, client2);
+				} catch (e) {
+					console.warn("tryPrintMoney", e);
+					await io.warning("uncaught error while printing money: " + e);
 				}
 			}
 		}
@@ -128,7 +119,11 @@ async function tryPrintMoney<tradingCurrency extends currency, baseCurrency exte
 				risky.client.name,
 				`${formatBTC(tradeAmount)} ${tradingCurrency}`,
 				`${formatCurrency(risky.offer.price)} ${baseCurrency}/${tradingCurrency}`,
-				`${swapOrderType(risky.offer.type)} existing offer?`,
+				`${swapOrderType(risky.offer.type)} existing offer? 
+${"```"}
+${JSON.stringify(risky.offer)}
+${"```"}
+`,
 			),
 		)
 	) {

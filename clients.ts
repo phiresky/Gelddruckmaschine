@@ -1,5 +1,23 @@
 import { BitcoindeClient } from "./markets/btcde-client";
 import { KrakenClient } from "./markets/kraken-client";
+import { MarketClient } from "./markets/market-client";
+import { BTC, EUR } from "./definitions/currency";
 
-export const bde = new BitcoindeClient();
-export const kraken = new KrakenClient();
+export const clients = {
+	bde: new BitcoindeClient(),
+	kraken: new KrakenClient(),
+};
+
+export function* clientCombinations(): IterableIterator<[MarketClient<BTC, EUR, any>, MarketClient<BTC, EUR, any>]> {
+	for (const client1 of Object.values(clients)) {
+		for (const client2 of Object.values(clients)) {
+			if (
+				client1 === client2 ||
+				client1.tradingCurrency !== client2.tradingCurrency ||
+				client1.baseCurrency !== client2.baseCurrency
+			)
+				continue; // Exclude same clients
+			yield [client1, client2];
+		}
+	}
+}
