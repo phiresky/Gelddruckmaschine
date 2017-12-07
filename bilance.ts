@@ -8,15 +8,18 @@ import { MarketClient } from "./markets/market-client";
 import { BTC, EUR } from "./definitions/currency";
 
 export type UnifiedTrade = {
-	// how many btc we actually paid / received
+	// how many btc we actually received (or paid if negative)
 	btc: number;
-	// how many eur we actually paid / received
+	// how many eur we actually  received (or paid if negative)
 	eur: number;
-	// how many eur we lost via the trading fees
+	// how many eur we lost via the trading fees (already subtracted from the amounts)
 	feesEur: number;
 };
 const emptyTrade = { btc: 0, eur: 0, feesEur: 0 } as UnifiedTrade;
 
+function halfAbsolutify(t: UnifiedTrade): UnifiedTrade {
+	return { btc: Math.abs(t.btc / 2), eur: Math.abs(t.eur / 2), feesEur: t.feesEur };
+}
 function sumAll<K extends string>(ele1: { [k in K]: number }, ele2: { [k in K]: number }): { [k in K]: number } {
 	const ret = {} as { [k in K]: number };
 	for (const k in ele1) {
@@ -29,6 +32,9 @@ function formatTrade(t: UnifiedTrade) {
 	return `${formatBTC(t.btc)} BTC, ${formatCurrency(t.eur)} €`;
 }
 
+function formatPercent(x: number) {
+	return significantDigits(x * 100, 3) + "%";
+}
 type tradeGetter = (from: Date) => Promise<UnifiedTrade[]>;
 
 export function sumTrades(clients: MarketClient<BTC, EUR, any>[], from: Date): WaitingMessage {
@@ -47,6 +53,7 @@ export function sumTrades(clients: MarketClient<BTC, EUR, any>[], from: Date): W
 		bought: trades.filter(t => t.btc > 0).reduce(sumAll, emptyTrade),
 		sold: trades.filter(t => t.btc < 0).reduce(sumAll, emptyTrade),
 	}));
+	const totalAbsolute = allTrades.then(trades => trades.map(halfAbsolutify)).then(sum);
 	const totalbtcineur = total.then(x => x.all.btc * (x.sold.eur - x.bought.eur) / (x.bought.btc - x.sold.btc));
 	const ind = Promise.all(
 		Array.from(alls).map(
@@ -58,12 +65,21 @@ export function sumTrades(clients: MarketClient<BTC, EUR, any>[], from: Date): W
 
 	${ind}
 	
-	delta all (${clients.map(x => x.name).join(" + ")}): ${total.then(({ all }) => formatTrade(all))}
-	average: bought at ${total.then(x => formatCurrency(x.bought.eur / x.bought.btc))}€/BTC, sold at ${total.then(x =>
-		formatCurrency(x.sold.eur / x.sold.btc),
+	Delta all (${clients.map(x => x.name).join(" + ")}): ${total.then(({ all }) => formatTrade(all))}
+	Average: bought at ${total.then(x => formatCurrency(-x.bought.eur / x.bought.btc))}€/BTC, sold at ${total.then(x =>
+		formatCurrency(x.sold.eur / -x.sold.btc),
 	)}€/BTC.
 
-	profit: ${total.then(async x => formatCurrency((await totalbtcineur) + x.all.eur))}€ (${total.then(x =>
+	Transaction volume: ${totalAbsolute.then(formatTrade)} (Total fees: ${totalAbsolute.then(x =>
+		formatCurrency(x.feesEur),
+	)}€)
+
+	Profit/Volume: ${(async () => {
+		const profit = formatPercent(((await totalbtcineur) + (await total).all.eur) / (await totalAbsolute).eur);
+		return profit;
+	})()}
+
+	Profit (after fees): ${total.then(async x => formatCurrency((await totalbtcineur) + x.all.eur))}€ (${total.then(x =>
 		formatCurrency(x.all.eur),
 	)}€ + ${total.then(x => formatBTC(x.all.btc))}BTC≈${totalbtcineur.then(formatCurrency)}€)
 	`;
