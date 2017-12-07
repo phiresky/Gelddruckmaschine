@@ -1,16 +1,47 @@
 import { MarketClient, TradeOffer } from "./market-client";
 import { BTC, EUR } from "../definitions/currency";
-import { As, Simplify, minBy, modifyPromise, checkPromise, dryRunExclude } from "../util";
+import { As, Simplify, minBy, modifyPromise, checkPromise, dryRunExclude, unwrap } from "../util";
 import config from "../config";
 import { BitcoindeClient as APIClient } from "./btcde-client/bitcoin-de";
 import * as API from "./btcde-client/generated";
 import { CheckedPromise, CheckedPromiseReturn } from "../definitions/promises";
+import { UnifiedTrade } from "../bilance";
 
 export type BitcoindeOffer = Simplify<
 	TradeOffer<BTC, EUR> & {
 		bitcoindeId: string; // optional identifier to know with which order you are dealing
 	} & As<"bitcoindeoffer">
 >;
+
+function btcdeDate(d: Date): string {
+	// bitcoin.de apparently handles timezones incorrectly, so the js date format
+	// 2017-08-16T20:56:15Z (Z = UTC) doesn't work, this converts that to 2017-08-16T20:56:15+02:00
+	const d2 = new Date(d.getTime());
+	const ofs = -d2.getTimezoneOffset();
+	const hrs = (ofs / 60) | 0;
+	const mins = (ofs % 60) | 0;
+	d2.setMinutes(d2.getMinutes() + ofs);
+	return d2.toISOString().slice(0, -5) + ("+" + String(hrs).padStart(2, "0") + ":" + String(mins).padStart(2, "0"));
+}
+
+function parseBitcoinDeTrade(trade: API.Trades.showMyTradeDetails.Response.Trade_Details): UnifiedTrade {
+	if (trade.type === "buy") {
+		return {
+			// fee_btc is subtracted from amount we get
+			btc: Number(trade.amount) - Number(trade.fee_btc),
+			eur: -(trade.volume - trade.fee_eur),
+			feesEur: trade.fee_eur,
+		};
+	} else if (trade.type === "sell") {
+		console.log(trade.amount, trade.fee_btc);
+		return {
+			// fee_btc is *not* subtracted from amount we give
+			btc: -Number(trade.amount),
+			eur: trade.volume - trade.fee_eur,
+			feesEur: trade.fee_eur,
+		};
+	} else throw Error("unknown trade type " + trade.type);
+}
 
 export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	readonly risk = 5;
@@ -165,5 +196,17 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 			if (new Date(valid_until).getTime() < Date.now() + 5 * 60 * 1000) return (0).EUR;
 			return (+available_amount).EUR;
 		});
+	}
+
+	async getTradeHistory(from: Date, to: Date): Promise<UnifiedTrade[]> {
+		//const to = new Date();
+		//to.setDate(to.getDate());
+		const bitcoinres = API.Trades.showMyTrades(this.client, {
+			state: 1,
+			date_start: btcdeDate(from),
+			date_end: btcdeDate(to),
+		});
+		const allbc = bitcoinres.then(unwrap).then(res => res.trades.map(parseBitcoinDeTrade));
+		return allbc;
 	}
 }

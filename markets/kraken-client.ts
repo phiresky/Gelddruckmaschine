@@ -1,6 +1,6 @@
 import { EUR, BTC } from "../definitions/currency";
 import { MarketClient, TradeOffer } from "./market-client";
-import { Simplify, As, cache, checkPromise, modifyPromise, dryRunExclude } from "../util";
+import { Simplify, As, cache, checkPromise, modifyPromise, dryRunExclude, unwrap } from "../util";
 import { KrakenClient as APIClient } from "./kraken-client/kraken";
 import config from "../config";
 import { CheckedPromise, CheckedPromiseReturn } from "../definitions/promises";
@@ -20,6 +20,33 @@ type returnTypes = {
 		BCH: string;
 	};
 };
+
+function parseKrakenTrade(trade: KrakenTrade): UnifiedTrade {
+	const mult = trade.type === "buy" ? 1 : -1;
+	return {
+		btc: mult * Number(trade.vol),
+		eur: -mult * Number(trade.cost) - Number(trade.fee),
+		feesEur: Number(trade.fee),
+	};
+}
+
+interface KrakenTrade {
+	ordertxid: string;
+	fee: string;
+	cost: string;
+	margin: string;
+	misc: string;
+	pair: string;
+	time: number;
+	ordertype: string;
+	price: string;
+	type: string;
+	vol: string;
+}
+
+function krakenDate(d: Date): number {
+	return d.getTime() / 1000;
+}
 
 export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	risk = 1;
@@ -116,6 +143,17 @@ export class KrakenClient extends MarketClient<BTC, EUR, KrakenOffer> {
 	}
 	async getAvailableBaseCurrency(): CheckedPromise<EUR> {
 		return checkPromise(this.getBalance(), balance => (+balance.ZEUR || 0).EUR);
+	}
+	async getTradeHistory(from: Date, to: Date) {
+		const krakenres = this.api
+			.getTradesHistory({
+				pair: "XXBTZEUR",
+				start: krakenDate(from),
+				end: krakenDate(to),
+			})
+			.then(unwrap);
+		const allkraken = krakenres.then(res => Object.values(res.trades).map(parseKrakenTrade));
+		return allkraken;
 	}
 }
 

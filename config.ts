@@ -11,6 +11,11 @@ const defaultConfig = {
 			key: "",
 			secret: "",
 		},
+		bitstampnet: {
+			key: "",
+			secret: "",
+			client_id: "",
+		},
 		telegram: {
 			token: "",
 		},

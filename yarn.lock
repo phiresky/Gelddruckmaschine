@@ -143,6 +143,12 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
+bitstamp@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/bitstamp/-/bitstamp-1.0.4.tgz#91c3078b6cfb16a5c52d4f31e5cb8687bc204f91"
+  dependencies:
+    underscore "1.4.4"
+
 bl@^1.1.2:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/bl/-/bl-1.2.1.tgz#cac328f7bee45730d404b692203fcb590e172d5e"
@@ -1257,6 +1263,10 @@ typescript@^2.5.0-dev.20170815:
 uglify-js@1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-1.2.5.tgz#b542c2c76f78efb34b200b20177634330ff702b6"
+
+underscore@1.4.4:
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.4.4.tgz#61a6a32010622afa07963bf325203cf12239d604"
 
 user-home@^1.1.1:
   version "1.1.1"

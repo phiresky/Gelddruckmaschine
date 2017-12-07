@@ -1,5 +1,6 @@
 import { currency } from "../definitions/currency";
 import { CheckedPromise } from "../definitions/promises";
+import { UnifiedTrade } from "../bilance";
 // TODO Think if some of these methods may need to by Async?
 
 /**
@@ -123,6 +124,8 @@ export abstract class MarketClient<
 	abstract getAvailableTradingCurrency(): CheckedPromise<tradingCurrency>;
 
 	abstract getAvailableBaseCurrency(): CheckedPromise<baseCurrency>;
+
+	abstract getTradeHistory(from: Date, to: Date): Promise<UnifiedTrade[]>;
 }
 
 export interface TradeOffer<tradingCurrency, baseCurrency> {

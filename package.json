@@ -11,6 +11,7 @@
 		"@types/node-telegram-bot-api": "^0.28.0",
 		"@types/request-promise-native": "^1.0.6",
 		"@types/socket.io-client": "^1.4.29",
+		"bitstamp": "^1.0.4",
 		"debug": "^3.0.0",
 		"mz": "^2.6.0",
 		"node-telegram-bot-api": "^0.28.0",

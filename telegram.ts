@@ -80,7 +80,8 @@ const commands: { [cmd: string]: (arg: string, msg: TelegramMessage) => Promise<
 		let duration = parseDuration(durationString);
 		if (duration === 0) return "Could not parse duration. Try `/bilance 24h` or `/bilance 60 minutes`";
 		const since = new Date(Date.now() - duration);
-		return () => asyncIteratorDebounce(sumTrades(clients.bde.client, clients.kraken.api, since)());
+		const clients2 = Object.values(clients);
+		return () => asyncIteratorDebounce(sumTrades(clients2, since)());
 	},
 	"/price": (apiname = "") => {
 		apiname = apiname.trim().toLowerCase();
