@@ -3,8 +3,8 @@ import { BTC, EUR } from "../definitions/currency";
 import * as Bitstamp from "bitstamp";
 import config from "../config";
 import { promisify } from "util";
-import { As } from "../util";
-import { TypedError } from "../definitions/promises";
+import { As, notImplemented } from "../util";
+import { TypedError, CheckedPromise } from "../definitions/promises";
 import { UnifiedTrade } from "../bilance";
 
 type BitstampOffer = TradeOffer<BTC, EUR> & {
@@ -52,61 +52,63 @@ export class BitstampClient extends MarketClient<BTC, EUR, BitstampOffer> {
 		console.log(this.bitstamp);
 		//bs.transactions('btceur', (err, trades) => )
 	}
-	getCurrentSellPrice(): Promise<{ success: true; value: EUR } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+	async getCurrentSellPrice(): CheckedPromise<EUR> {
+		return notImplemented;
 	}
-	getCurrentBuyPrice(): Promise<{ success: true; value: EUR } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+	async getCurrentBuyPrice(): Promise<{ success: true; value: EUR } | { success: false; error: TypedError }> {
+		return notImplemented;
 	}
 	getEffectiveSellPrice(price: EUR): EUR {
-		throw new Error("Method not implemented.");
+		throw Error("Methdo not implemented");
 	}
 	getEffectiveBuyPrice(price: EUR): EUR {
-		throw new Error("Method not implemented.");
+		throw Error("Methdo not implemented");
 	}
-	getTradeAmountsForBuyVolume(
+	async getTradeAmountsForBuyVolume(
 		buyVolume: BTC,
 	): Promise<{ success: true; value: { costs: EUR; receivedVolume: BTC } } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
-	getRefundForSellVolume(
+	async getRefundForSellVolume(
 		sellVolume: BTC,
 	): Promise<{ success: true; value: EUR } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
-	getCheapestOfferToBuy(
+	async getCheapestOfferToBuy(
 		volume?: EUR | undefined,
 	): Promise<{ success: true; value: BitstampOffer } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
-	getHighestOfferToSell(
+	async getHighestOfferToSell(
 		volume?: BTC | undefined,
 	): Promise<{ success: true; value: BitstampOffer } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
-	setMarketBuyOrder(
+	async setMarketBuyOrder(
 		amount: BTC,
 		amount_min?: BTC | undefined,
 	): Promise<{ success: true; value: null } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
-	setMarketSellOrder(
+	async setMarketSellOrder(
 		amount: BTC,
 		amount_min?: BTC | undefined,
 	): Promise<{ success: true; value: null } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
-	executePendingTradeOffer(
+	async executePendingTradeOffer(
 		offer: BitstampOffer,
 		amount: BTC,
 	): Promise<{ success: true; value: null } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
-	getAvailableTradingCurrency(): Promise<{ success: true; value: BTC } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+	async getAvailableTradingCurrency(): Promise<
+		{ success: true; value: BTC } | { success: false; error: TypedError }
+	> {
+		return notImplemented;
 	}
-	getAvailableBaseCurrency(): Promise<{ success: true; value: EUR } | { success: false; error: TypedError }> {
-		throw new Error("Method not implemented.");
+	async getAvailableBaseCurrency(): Promise<{ success: true; value: EUR } | { success: false; error: TypedError }> {
+		return notImplemented;
 	}
 
 	async getTradeHistory(from: Date, to: Date): Promise<{ btc: number; eur: number; feesEur: number }[]> {

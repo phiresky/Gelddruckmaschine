@@ -5,7 +5,7 @@ import { KrakenClient } from "./markets/kraken-client";
 import { Procedural, WaitingMessage } from "./telegram";
 import { formatCurrency, significantDigits, formatBTC, unwrap } from "./util";
 import { MarketClient } from "./markets/market-client";
-import { BTC, EUR } from "./definitions/currency";
+import { currency } from "./definitions/currency";
 
 export type UnifiedTrade = {
 	// how many btc we actually received (or paid if negative)
@@ -37,10 +37,13 @@ function formatPercent(x: number) {
 }
 type tradeGetter = (from: Date) => Promise<UnifiedTrade[]>;
 
-export function sumTrades(clients: MarketClient<BTC, EUR, any>[], from: Date): WaitingMessage {
+export function sumTrades<C1 extends currency, C2 extends currency>(
+	clients: MarketClient<C1, C2, any>[],
+	from: Date,
+): WaitingMessage {
 	const to = new Date();
 	to.setDate(to.getDate());
-	const alls: Map<MarketClient<BTC, EUR, any>, Promise<UnifiedTrade[]>> = new Map();
+	const alls: Map<MarketClient<C1, C2, any>, Promise<UnifiedTrade[]>> = new Map();
 	for (const client of clients) {
 		const all = client.getTradeHistory(from, to);
 		alls.set(client, all);
@@ -57,7 +60,7 @@ export function sumTrades(clients: MarketClient<BTC, EUR, any>[], from: Date): W
 	const totalbtcineur = total.then(x => x.all.btc * (x.sold.eur - x.bought.eur) / (x.bought.btc - x.sold.btc));
 	const ind = Promise.all(
 		Array.from(alls).map(
-			async ([client, trades]) => [client, await trades.then(sum)] as [MarketClient<BTC, EUR, any>, UnifiedTrade],
+			async ([client, trades]) => [client, await trades.then(sum)] as [MarketClient<C1, C2, any>, UnifiedTrade],
 		),
 	).then(x => x.map(([client, sum]) => `delta ${client.name}: ${formatTrade(sum)}`).join("\n"));
 	return Procedural`
@@ -70,7 +73,7 @@ export function sumTrades(clients: MarketClient<BTC, EUR, any>[], from: Date): W
 		formatCurrency(x.sold.eur / -x.sold.btc),
 	)}€/BTC.
 
-	Transaction volume: ${totalAbsolute.then(formatTrade)} (Total fees: ${totalAbsolute.then(x =>
+	Transaction volume: ${totalAbsolute.then(formatTrade)} (Total paid fees: ${totalAbsolute.then(x =>
 		formatCurrency(x.feesEur),
 	)}€)
 

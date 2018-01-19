@@ -1,6 +1,6 @@
 import { MarketClient, TradeOffer } from "./market-client";
 import { BTC, EUR } from "../definitions/currency";
-import { As, Simplify, minBy, modifyPromise, checkPromise, dryRunExclude, unwrap } from "../util";
+import { As, Simplify, minBy, modifyPromise, checkPromise, dryRunExclude, unwrap, notImplemented } from "../util";
 import config from "../config";
 import { BitcoindeClient as APIClient } from "./btcde-client/bitcoin-de";
 import * as API from "./btcde-client/generated";
@@ -147,15 +147,15 @@ export class BitcoindeClient extends MarketClient<BTC, EUR, BitcoindeOffer> {
 	}
 
 	async getTradeAmountsForBuyVolume(buyVolume: BTC): CheckedPromise<{ costs: EUR; receivedVolume: BTC }> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
 	async getRefundForSellVolume(sellVolume: BTC): CheckedPromise<EUR> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
 
 	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async setMarketBuyOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {
-		throw new Error("Method not implemented.");
+		return notImplemented;
 	}
 	@dryRunExclude({ success: true, value: null } as CheckedPromiseReturn<null>)
 	async setMarketSellOrder(amount: BTC, amount_min?: BTC | undefined): CheckedPromise<null> {

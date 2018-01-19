@@ -69,10 +69,10 @@ export function isObject(item: any) {
 }
 
 /**
-   * Deep merge two objects.
-   * @param target
-   * @param ...sources
-   */
+ * Deep merge two objects.
+ * @param target
+ * @param ...sources
+ */
 export function mergeDeep(target: any, ...sources: any[]): any {
 	if (!sources.length) return target;
 	const source = sources.shift();
@@ -288,7 +288,7 @@ export function swapOrderType(type: "sell" | "buy") {
  *    getter: c => c.test.foo.bar,
  *    setter: (c, v) => c.test.foo.bar = v
  * }
- * 
+ *
  */
 export function accessorFromDotted(key: string) {
 	const x = key.split(".");
@@ -317,3 +317,8 @@ export function dryRunExclude(dryRunDefault: any) {
 		};
 	};
 }
+
+export const notImplemented: CheckedPromiseReturn<any> = {
+	success: false,
+	error: { message: "Method not implemented", canRetry: false, origin: "internal" },
+};
